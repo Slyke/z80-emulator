@@ -26,7 +26,6 @@ Z80 Specs: http://datasheets.chipdb.org/Mostek/3880.pdf
 
 I tried to keep this code a balance between not repeating myself and in the process creating 18 layers of functions. Pls forgive me and my protension.
 I have modified the assembly OP codes to be easier to understand by those not familiar with the Z80 processor's instruction set for the disassembler.
-In the mnemonics list below, I've added a reference to the original instruction mnemonic, where applicable.
 
 ![UI legend](ui.png)
 
