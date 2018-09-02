@@ -173,6 +173,18 @@ Penren stands for Pending Render updates. This is how many memory cells have cha
       If the F register is set, and the zero flag is set, then get the value from SP and put it into PC. This in effect pops the stack.
       If the F register is set, and the zero flag is NOT set, then do nothing (moves PC forward 2).
 
+    RETP: Return Parity
+      If the F register is set, and the parity flag is set, then get the value from SP and put it into PC. This in effect pops the stack.
+      If the F register is set, and the parity flag is NOT set, then do nothing (moves PC forward 2).
+
+    RETNP: Return Non-Parity
+      If the F register is set, and the parity flag is set, then do nothing (moves PC forward 2).
+      If the F register is set, and the parity flag is NOT set, then get the value from SP and put it into PC. This in effect pops the stack.
+
+    RETP: Return Parity
+      If the F register is set, and the parity flag is set, then get the value from SP and put it into PC. This in effect pops the stack.
+      If the F register is set, and the parity flag is NOT set, then do nothing (moves PC forward 2).
+
     RET: Return
       Gets the SP from memory and sets PC with it.
 
@@ -191,13 +203,21 @@ Penren stands for Pending Render updates. This is how many memory cells have cha
       If the F register is set, and the zero flag is set, then move SP back 2 and store PC into it, then jump to P1 and P2 values.
       If the F register is set, and the zero flag is NOT set, then do nothing (moves PC forward 2).
 
+    CALLP: Push onto the stack with a pointer if parity
+      If the F register is set, and the parity flag is set, then move SP back 2 and store PC into it, then jump to P1 and P2 values.
+      If the F register is set, and the parity flag is NOT set, then do nothing (moves PC forward 2).
+
     CALLC: Push onto the stack with a pointer if carry
-      If the F register is set, and the zero flag is set, then move SP back 2, temporarily store P1 and P2, write SP into P1 and P2 and jump to the original P1 and P2 values.
-      If the F register is set, and the zero flag is NOT set, then do nothing (moves PC forward 2).
+      If the F register is set, and the carry flag is set, then move SP back 2, temporarily store P1 and P2, write SP into P1 and P2 and jump to the original P1 and P2 values.
+      If the F register is set, and the carry flag is NOT set, then do nothing (moves PC forward 2).
 
     CALLNC: Push onto the stack with a pointer if non-carry
       If the F register is set, and the carry flag is set, then do nothing (moves PC forward 2).
       If the F register is set, and the carry flag is NOT set, then move SP back 2, temporarily store P1 and P2, write SP into P1 and P2 and jump to the original P1 and P2 values.
+
+    CALLNP: Push onto the stack with a pointer if non-parity
+      If the F register is set, and the parity flag is set, then do nothing (moves PC forward 2).
+      If the F register is set, and the parity flag is NOT set, then move SP back 2, temporarily store P1 and P2, write SP into P1 and P2 and jump to the original P1 and P2 values.
 
     PUSH: Push onto the stack
       Move both IREGs, or P1 and P2 into SP and move SP back 2.
@@ -217,13 +237,29 @@ Penren stands for Pending Render updates. This is how many memory cells have cha
     JMP: Jump to an address
       Sets PC to P1 and P2, or both IREGs
 
-    JPC: Jump if carry
+    JMPC: Jump if carry
+      If the F register is set, and the carry flag is set, then set PC to P1 and P2
+      If the F register is set, and the carry flag is NOT set, then move PC forward 2, and do a NOP.
+
+    JMPP: Jump if parity
+      If the F register is set, and the parity flag is set, then set PC to P1 and P2
+      If the F register is set, and the parity flag is NOT set, then move PC forward 2, and do a NOP.
+
+    JMPZ: Jump if zero
       If the F register is set, and the zero flag is set, then set PC to P1 and P2
       If the F register is set, and the zero flag is NOT set, then move PC forward 2, and do a NOP.
 
-    JPZ: Jump if zero
-      If the F register is set, and the zero flag is set, then set PC to P1 and P2
-      If the F register is set, and the zero flag is NOT set, then move PC forward 2, and do a NOP.
+    XCHM: Swap register value with memory
+      This swaps the value in a register with the value in a memory location. This can work with bytes and words.
+
+    XCHR: Swap register values with each other
+      This swaps the values stored in 2 registers. This can work with register pairs.
+
+    HWIN: Hardware Input
+      Read data from the hardware. It can be accessed with `cpu.hwIntPorts[0 - 255]`
+
+    HWOUT: Hardware Input
+      Write data to the hardware. It can be accessed with cpu.hwIntPorts[0 - 255]
 
     RST [number]: Reset/Move
       This looks like it resets the machine, or is used to jump to specific points in memory.

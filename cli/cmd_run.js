@@ -95,7 +95,7 @@ function cpuCycle(disassembleShow = false) {
 
 function init() {
 
-  runningCPU.memory = new Array(0x10000);
+  runningCPU.memory = new Array(0x10000).fill(0);
 
   injectBinaryDataIntoMemory(runningCPU.memory, "./rom/invaders/invaders.h");
   injectBinaryDataIntoMemory(runningCPU.memory, "./rom/invaders/invaders.g", 0x800);
