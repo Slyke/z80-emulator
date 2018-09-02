@@ -2,19 +2,25 @@
 
 ## Running:
 
-CLI: `node cmd_run.js`
+First:
 
-Web Browser: Just serve the index.html file with anything. Follow onscreen prompts
+`npm install` To install dependencies
 
-Right now, it just draws up to the title screen for space invaders, because you can't "insert" a coin.
+Then any of:
+
+`npm start` To start a http server that will open your browser and run the cavas version.
+
+`npm run cli` To run the cli version (this only prints disassembler info at the moment)
+
+`npm run decom LIST OF FILES` Runs the disassembler on all given files and outputs to `originalFileName.asm`
+
+Right now on the browser, it just draws up to the title screen for space invaders, because you can't "insert" a coin.
 
 Z80 Specs: http://datasheets.chipdb.org/Mostek/3880.pdf
 
 ## Future Plans:
 * Code interrupts for key events and interactivity.
 * Finish off missed instructions.
-* Make a decompiler for bin to asm.
-* Update the disassembler's mnemonics to Z80 standard codes.
 * Add in correct cycle timing for a browser environment.
 * Add a command line version on this (So it can be used in a CLI environment).
 
@@ -29,6 +35,8 @@ I have modified the assembly OP codes to be easier to understand by those not fa
 
 ![UI legend](ui.png)
 
+Penren stands for Pending Render updates. This is how many memory cells have changed in the game's memory, but haven't yet been drawn by the canvas.
+
 #### Disassembler Instructions:
 
 ##### Registers
@@ -40,7 +48,7 @@ I have modified the assembly OP codes to be easier to understand by those not fa
     F -  F is a special flag. Mainly used for overflows and parity. 2 bytes, grouped with A
     H -  General register, 2 bytes, grouped with L. These are generally used as a buffer, or for calculations.
     L -  General register, 2 bytes, grouped with H. These are generally used as a buffer, or for calculations.
-    sp - Stack pointed, 4 bytes
+    sp - Stack pointer, 4 bytes
     pc - Program counter (Current executing address), 4 bytes
 
 ##### Terms:

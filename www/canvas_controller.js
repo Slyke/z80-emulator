@@ -744,27 +744,27 @@ function setupCPU() {
 
   runningCPU.memory = new Array(0x10000);
 
-  injectBinaryDataIntoMemory(runningCPU.memory, "./rom/invaders/invaders.h", 0, () => {
+  injectBinaryDataIntoMemory(runningCPU.memory, "../rom/invaders/invaders.h", 0, () => {
     romLoaded++;
     if (romLoaded === 4) {
       cpuCanStart = true;
     }
   });
 
-  injectBinaryDataIntoMemory(runningCPU.memory, "./rom/invaders/invaders.g", 0x800, () => {
+  injectBinaryDataIntoMemory(runningCPU.memory, "../rom/invaders/invaders.g", 0x800, () => {
     romLoaded++;
     if (romLoaded === 4) {
       cpuCanStart = true;
     }
   });
-  injectBinaryDataIntoMemory(runningCPU.memory, "./rom/invaders/invaders.f", 0x1000, () => {
+  injectBinaryDataIntoMemory(runningCPU.memory, "../rom/invaders/invaders.f", 0x1000, () => {
     romLoaded++;
     if (romLoaded === 4) {
       cpuCanStart = true;
     }
   });
 
-  injectBinaryDataIntoMemory(runningCPU.memory, "./rom/invaders/invaders.e", 0x1800, () => {
+  injectBinaryDataIntoMemory(runningCPU.memory, "../rom/invaders/invaders.e", 0x1800, () => {
     romLoaded++;
     if (romLoaded === 4) {
       cpuCanStart = true;

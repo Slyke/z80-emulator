@@ -1,0 +1,26 @@
+{
+  "name": "z80_emu",
+  "version": "1.0.0",
+  "description": "## Running:",
+  "main": "canvas_controller.js",
+  "scripts": {
+    "start": "http-server -o http://localhost:8080/www/index.html",
+    "decom": "node ./cli/decompile.js",
+    "cli": "node ./cli/cmd_run.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Slyke/z80-emulator.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Slyke/z80-emulator/issues"
+  },
+  "homepage": "https://github.com/Slyke/z80-emulator#readme",
+  "dependencies": {
+    "http-server": "^0.11.1",
+    "js-ui-engine": "^1.20180114.8"
+  }
+}

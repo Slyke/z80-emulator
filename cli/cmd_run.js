@@ -2,7 +2,7 @@
 const readline = require('readline');
 var fs = require('fs');
 
-var cpu = require('./cpu');
+var cpu = require('../cpu');
 
 readline.emitKeypressEvents(process.stdin);
 process.stdin.setRawMode(true);
@@ -11,15 +11,6 @@ var runningCPU = cpu();
 
 const STEPPER = true;
 const DISASSEMBLER_OUTPUT = true;
-
-runningCPU.cc = {
-  z: 1,
-  s: 1,
-  p: 1,
-  cy: 1,
-  ac: 0,
-  pad: 1
-};
 
 function pad(str, size, withChar = "0") {
   var s = str + "";

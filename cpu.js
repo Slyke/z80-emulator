@@ -205,7 +205,7 @@ var z80CPU = function() {
     f: 0,       // F is a special flag. Mainly used for overflows and parity. 2 bytes, grouped with A
     h: 0,       // General register, 2 bytes, grouped with L. These are generally used as a buffer, or for calculations.
     l: 0,       // General register, 2 bytes, grouped with H. These are generally used as a buffer, or for calculations.
-    sp: 0,      // Stack pointed, 4 bytes
+    sp: 0,      // Stack pointer, 4 bytes
     pc: 0,      // Program counter (Current executing address), 4 bytes
     enabled: 1  // Chip enabled
   });
@@ -241,6 +241,7 @@ var z80CPU = function() {
       execCount: 0,
       programCounter: 0,
       opCode: "",
+      z80OPCode: "", // I added this so the Z80 op codes could be referenced.
       opCodeHex: 0,
       ireg: "", // Input registers
       oreg: "", // Output registers (usually determing a memory location)
@@ -253,282 +254,284 @@ var z80CPU = function() {
     };
 
     output.execCount = state.db.executionCount
-    output.programCounter = pc.toString(16)
-    output.opCodeHex = opCode[0].toString(16)
+    output.programCounter = pc.toString(16);
+    output.opCodeHex = opCode[0].toString(16);
+
     output.opBytes = 1;
 
     switch (opCode[0]) {
-      case 0x00: output.opCode = "NOP"; output.cycles = 4; break;
-      case 0x01: output.opCode = "LD2R"; output.cycles = 10; output.oreg = "BC"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
-      case 0x02: output.opCode = "LD2M"; output.cycles = 7; output.ptr = "#"; output.ireg = "BC"; output.ireg = "A"; break;
-      case 0x03: output.opCode = "INCR"; output.cycles = 6; output.ireg = "BC"; output.oreg = "BC"; break;
-      case 0x04: output.opCode = "INCR"; output.cycles = 5; output.ireg = "B"; output.oreg = "B"; break;
-      case 0x05: output.opCode = "DCRR"; output.cycles = 5; output.oreg = "B"; output.ireg = "B"; break;
-      case 0x06: output.opCode = "LD2R"; output.cycles = 7; output.oreg = "B"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
-      case 0x07: output.opCode = "RLCA"; output.cycles = 4; output.oreg = "B"; output.ireg = "B"; break;
-      case 0x08: output.opCode = "NOP"; output.cycles = 4; break;
-      case 0x09: output.opCode = "INXR"; output.cycles = 11; output.ireg = "BC"; output.oreg = "HL"; break;
-      case 0x0a: output.opCode = "LD2R"; output.cycles = 7; output.ptr = "&"; output.oreg = "A"; output.ireg = "BC"; break;
-      case 0x0b: output.opCode = "DCRR"; output.cycles = 6; output.ireg = "BC"; output.ireg = "BC"; break;
-      case 0x0c: output.opCode = "INCR"; output.cycles = 5; output.ireg = "C"; output.oreg = "C"; break;
-      case 0x0d: output.opCode = "DCRR"; output.cycles = 5; output.ireg = "C"; output.oreg = "C"; break;
-      case 0x0e: output.opCode = "DCRR"; output.cycles = 7; output.oreg = "C"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
-      case 0x0f: output.opCode = "RRCA"; output.cycles = 4; output.oreg = "C"; output.ireg = "C"; break;
+      case 0x00: output.opCode = "NOP"; output.z80OPCode = "NOP"; output.cycles = 4; break;
+      case 0x01: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 10; output.oreg = "BC"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
+      case 0x02: output.opCode = "LD2M"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "#"; output.ireg = "BC"; output.ireg = "A"; break;
+      case 0x03: output.opCode = "INCR"; output.z80OPCode = "INC"; output.cycles = 6; output.ireg = "BC"; output.oreg = "BC"; break;
+      case 0x04: output.opCode = "INCR"; output.z80OPCode = "DEC"; output.cycles = 5; output.ireg = "B"; output.oreg = "B"; break;
+      case 0x05: output.opCode = "DCRR"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "B"; output.ireg = "B"; break;
+      case 0x06: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 7; output.oreg = "B"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
+      case 0x07: output.opCode = "RLCA"; output.z80OPCode = "RCLA"; output.cycles = 4; output.oreg = "B"; output.ireg = "B"; break;
+      case 0x08: output.opCode = "NOP"; output.z80OPCode = "NOP"; output.cycles = 4; break;
+      case 0x09: output.opCode = "INXR"; output.z80OPCode = "ADD"; output.cycles = 11; output.ireg = "BC"; output.oreg = "HL"; break;
+      case 0x0a: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "&"; output.oreg = "A"; output.ireg = "BC"; break;
+      case 0x0b: output.opCode = "DCRR"; output.z80OPCode = "DEC"; output.cycles = 6; output.ireg = "BC"; output.ireg = "BC"; break;
+      case 0x0c: output.opCode = "INCR"; output.z80OPCode = "INC"; output.cycles = 5; output.ireg = "C"; output.oreg = "C"; break;
+      case 0x0d: output.opCode = "DCRR"; output.z80OPCode = "DEC"; output.cycles = 5; output.ireg = "C"; output.oreg = "C"; break;
+      case 0x0e: output.opCode = "DCRR"; output.z80OPCode = "LD"; output.cycles = 7; output.oreg = "C"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
+      case 0x0f: output.opCode = "RRCA"; output.z80OPCode = "RRCA"; output.cycles = 4; output.oreg = "C"; output.ireg = "C"; break;
       
-      case 0x10: output.opCode = "NOP"; output.cycles = 4; break;
-      case 0x11: output.opCode = "LD2R"; output.cycles = 10; output.oreg = "DE"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
-      case 0x12: output.opCode = "LD2M"; output.cycles = 7; output.ptr = "#"; output.ireg = "A"; output.ireg = "DE"; break;
-      case 0x13: output.opCode = "INCR"; output.cycles = 6; output.oreg = "DE"; output.ireg = "DE"; break;
-      case 0x14: output.opCode = "INCR"; output.cycles = 5; output.oreg = "D"; output.ireg = "D"; break;
-      case 0x15: output.opCode = "DCRR"; output.cycles = 5; output.ireg = "D"; break;
-      case 0x16: output.opCode = "LD2R"; output.cycles = 7; output.oreg = "D"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
-      case 0x17: output.opCode = "RLC9"; output.cycles = 4; output.oreg = "A"; break;
-      case 0x18: output.opCode = "NOP"; output.cycles = 4; break;
-      case 0x19: output.opCode = "INXR"; output.cycles = 11; output.oreg = "HL"; output.ireg = "DE"; break;
-      case 0x1a: output.opCode = "LD2R"; output.cycles = 7; output.ptr = "&"; output.ireg = "DE"; output.oreg = "A"; break;
-      case 0x1b: output.opCode = "DCRR"; output.cycles = 6; output.oreg = "DE"; output.ireg = "DE"; break;
-      case 0x1c: output.opCode = "INCR"; output.cycles = 5; output.ireg = "E"; output.oreg = "E"; break;
-      case 0x1d: output.opCode = "DCRR"; output.cycles = 5; output.ireg = "E"; output.oreg = "E"; break;
-      case 0x1e: output.opCode = "UNKOP"; output.cycles = 7; output.ptr = "!"; output.para1 = opCode[1].toString(16); output.para2 = opCode[1].toString(16); output.opBytes = 2; break;
-      case 0x1f: output.opCode = "RRC"; output.cycles = 4; output.oreg = "A"; output.ireg = "A"; break;
+      case 0x10: output.opCode = "NOP"; output.z80OPCode = "NOP"; output.cycles = 4; break;
+      case 0x11: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 10; output.oreg = "DE"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
+      case 0x12: output.opCode = "LD2M"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "#"; output.ireg = "A"; output.ireg = "DE"; break;
+      case 0x13: output.opCode = "INCR"; output.z80OPCode = "INC"; output.cycles = 6; output.oreg = "DE"; output.ireg = "DE"; break;
+      case 0x14: output.opCode = "INCR"; output.z80OPCode = "INC"; output.cycles = 5; output.oreg = "D"; output.ireg = "D"; break;
+      case 0x15: output.opCode = "DCRR"; output.z80OPCode = "DEC"; output.cycles = 5; output.ireg = "D"; break;
+      case 0x16: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 7; output.oreg = "D"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
+      case 0x17: output.opCode = "RLC9"; output.z80OPCode = "RLA"; output.cycles = 4; output.oreg = "A"; break;
+      case 0x18: output.opCode = "NOP"; output.z80OPCode = "NOP"; output.cycles = 4; break;
+      case 0x19: output.opCode = "INXR"; output.z80OPCode = "ADD"; output.cycles = 11; output.oreg = "HL"; output.ireg = "DE"; break;
+      case 0x1a: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "&"; output.ireg = "DE"; output.oreg = "A"; break;
+      case 0x1b: output.opCode = "DCRR"; output.z80OPCode = "DEC"; output.cycles = 6; output.oreg = "DE"; output.ireg = "DE"; break;
+      case 0x1c: output.opCode = "INCR"; output.z80OPCode = "INC"; output.cycles = 5; output.ireg = "E"; output.oreg = "E"; break;
+      case 0x1d: output.opCode = "DCRR"; output.z80OPCode = "DEC"; output.cycles = 5; output.ireg = "E"; output.oreg = "E"; break;
+      case 0x1e: output.opCode = "UNKOP"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "!"; output.para1 = opCode[1].toString(16); output.para2 = opCode[1].toString(16); output.opBytes = 2; break;
+      case 0x1f: output.opCode = "RRC"; output.z80OPCode = "RRA"; output.cycles = 4; output.oreg = "A"; output.ireg = "A"; break;
 
-      case 0x20: output.opCode = "NOP"; output.cycles = 4; break;
-      case 0x21: output.opCode = "LD2R"; output.cycles = 10; output.oreg = "HL"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
-      case 0x22: output.opCode = "LD2M"; output.cycles = 16; output.ireg = "HL"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
-      case 0x23: output.opCode = "INCR"; output.cycles = 6; output.oreg = "HL"; output.ireg = "HL"; break;
-      case 0x24: output.opCode = "INCR"; output.cycles = 5; output.ireg = "H"; output.oreg = "H"; break;
-      case 0x25: output.opCode = "DCRR"; output.cycles = 5; output.ireg = "H"; output.oreg = "H"; break;
-      case 0x26: output.opCode = "LD2R"; output.cycles = 7; output.oreg = "H"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
-      case 0x27: output.opCode = "UNKOP"; output.cycles = 7; output.ptr = "!"; output.para1 = opCode[1].toString(16); output.para2 = opCode[1].toString(16); output.opBytes = 2; break;
-      case 0x28: output.opCode = "NOP"; output.cycles = 4; break;
-      case 0x29: output.opCode = "INXR"; output.cycles = 11; output.oreg = "HL"; output.ireg = "HL"; break;
-      case 0x2a: output.opCode = "LD2R"; output.cycles = 16; output.ptr = "&"; output.oreg = "HL"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
-      case 0x2b: output.opCode = "DCRR"; output.cycles = 6; output.ireg = "HL"; output.oreg = "HL"; break;
-      case 0x2c: output.opCode = "INCR"; output.cycles = 5; output.ireg = "L"; output.oreg = "L"; break;
-      case 0x2d: output.opCode = "DCRR"; output.cycles = 5; output.ireg = "L"; output.oreg = "L"; break;
-      case 0x2e: output.opCode = "LD2R"; output.cycles = 7; output.oreg = "L"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
-      case 0x2f: output.opCode = "CPL"; output.cycles = 4; output.oreg = "A"; break;
+      case 0x20: output.opCode = "NOP"; output.z80OPCode = "NOP"; output.cycles = 4; break;
+      case 0x21: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 10; output.oreg = "HL"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
+      case 0x22: output.opCode = "LD2M"; output.z80OPCode = "LD"; output.cycles = 16; output.ireg = "HL"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
+      case 0x23: output.opCode = "INCR"; output.z80OPCode = "INC"; output.cycles = 6; output.oreg = "HL"; output.ireg = "HL"; break;
+      case 0x24: output.opCode = "INCR"; output.z80OPCode = "INC"; output.cycles = 5; output.ireg = "H"; output.oreg = "H"; break;
+      case 0x25: output.opCode = "DCRR"; output.z80OPCode = "DEC"; output.cycles = 5; output.ireg = "H"; output.oreg = "H"; break;
+      case 0x26: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 7; output.oreg = "H"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
+      case 0x27: output.opCode = "UNKOP"; output.z80OPCode = "DAA"; output.cycles = 7; output.ptr = "!"; output.para1 = opCode[1].toString(16); output.para2 = opCode[1].toString(16); output.opBytes = 2; break;
+      case 0x28: output.opCode = "NOP"; output.z80OPCode = "NOP"; output.cycles = 4; break;
+      case 0x29: output.opCode = "INXR"; output.z80OPCode = "ADD"; output.cycles = 11; output.oreg = "HL"; output.ireg = "HL"; break;
+      case 0x2a: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 16; output.ptr = "&"; output.oreg = "HL"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
+      case 0x2b: output.opCode = "DCRR"; output.z80OPCode = "DEC"; output.cycles = 6; output.ireg = "HL"; output.oreg = "HL"; break;
+      case 0x2c: output.opCode = "INCR"; output.z80OPCode = "INC"; output.cycles = 5; output.ireg = "L"; output.oreg = "L"; break;
+      case 0x2d: output.opCode = "DCRR"; output.z80OPCode = "DEC"; output.cycles = 5; output.ireg = "L"; output.oreg = "L"; break;
+      case 0x2e: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 7; output.oreg = "L"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
+      case 0x2f: output.opCode = "CPL"; output.z80OPCode = "CPL"; output.cycles = 4; output.oreg = "A"; break;
 
-      case 0x30: output.opCode = "NOP"; output.cycles = 4; break;
-      case 0x31: output.opCode = "LD2R"; output.cycles = 10; output.oreg = "SP"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
-      case 0x32: output.opCode = "LD2M"; output.cycles = 13; output.ptr = "#"; output.ireg = "A"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
-      case 0x33: output.opCode = "INCR"; output.cycles = 6; output.oreg = "SP"; output.ireg = "SP"; break;
-      case 0x34: output.opCode = "INCM"; output.cycles = 10; output.ptr = "#"; output.oreg = "HL"; output.ireg = "HL"; break;
-      case 0x35: output.opCode = "DCRM"; output.cycles = 10; output.ptr = "#"; output.oreg = "HL"; output.ireg = "HL"; break;
-      case 0x36: output.opCode = "LD2M"; output.cycles = 10; output.ptr = "#"; output.oreg = "HL"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
-      case 0x37: output.opCode = "SCF"; output.cycles = 4; break;
-      case 0x38: output.opCode = "NOP"; output.cycles = 4; break;
-      case 0x39: output.opCode = "INXR"; output.oreg = "HL"; output.ireg = "SP"; output.cycles = 11; break;
-      case 0x3a: output.opCode = "LD2R"; output.cycles = 13; output.ptr = "$"; output.ireg = "A"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
-      case 0x3b: output.opCode = "DCRR"; output.cycles = 6; output.ireg = "SP"; output.oreg = "SP"; break;
-      case 0x3c: output.opCode = "INCR"; output.cycles = 6; output.ireg = "SP"; output.oreg = "SP"; break;
-      case 0x3d: output.opCode = "DCRR"; output.cycles = 5; output.ireg = "A"; output.oreg = "A"; break;
-      case 0x3e: output.opCode = "LD2R"; output.cycles = 7; output.oreg = "A"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
-      case 0x3f: output.opCode = "CCF"; output.cycles = 4; break;
+      case 0x30: output.opCode = "NOP"; output.z80OPCode = "NOP"; output.cycles = 4; break;
+      case 0x31: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 10; output.oreg = "SP"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
+      case 0x32: output.opCode = "LD2M"; output.z80OPCode = "INC"; output.cycles = 13; output.ptr = "#"; output.ireg = "A"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
+      case 0x33: output.opCode = "INCR"; output.z80OPCode = "INC"; output.cycles = 6; output.oreg = "SP"; output.ireg = "SP"; break;
+      case 0x34: output.opCode = "INCM"; output.z80OPCode = "INC"; output.cycles = 10; output.ptr = "#"; output.oreg = "HL"; output.ireg = "HL"; break;
+      case 0x35: output.opCode = "DCRM"; output.z80OPCode = "DEC"; output.cycles = 10; output.ptr = "#"; output.oreg = "HL"; output.ireg = "HL"; break;
+      case 0x36: output.opCode = "LD2M"; output.z80OPCode = "LD"; output.cycles = 10; output.ptr = "#"; output.oreg = "HL"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
+      case 0x37: output.opCode = "SCF"; output.z80OPCode = "SCF"; output.cycles = 4; break;
+      case 0x38: output.opCode = "NOP"; output.z80OPCode = "NOP"; output.cycles = 4; break;
+      case 0x39: output.opCode = "INXR"; output.z80OPCode = "ADD"; output.oreg = "HL"; output.ireg = "SP"; output.cycles = 11; break;
+      case 0x3a: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 13; output.ptr = "$"; output.ireg = "A"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
+      case 0x3b: output.opCode = "DCRR"; output.z80OPCode = "DEC"; output.cycles = 6; output.ireg = "SP"; output.oreg = "SP"; break;
+      case 0x3c: output.opCode = "INCR"; output.z80OPCode = "INC"; output.cycles = 6; output.ireg = "SP"; output.oreg = "SP"; break;
+      case 0x3d: output.opCode = "DCRR"; output.z80OPCode = "DEC"; output.cycles = 5; output.ireg = "A"; output.oreg = "A"; break;
+      case 0x3e: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 7; output.oreg = "A"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
+      case 0x3f: output.opCode = "CCF"; output.z80OPCode = "CCF"; output.cycles = 4; break;
 
-      case 0x40: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "B"; output.ireg = "B"; break;
-      case 0x41: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "B"; output.ireg = "C"; break;
-      case 0x42: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "B"; output.ireg = "D"; break;
-      case 0x43: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "B"; output.ireg = "E"; break;
-      case 0x44: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "B"; output.ireg = "H"; break;
-      case 0x45: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "B"; output.ireg = "L"; break;
-      case 0x46: output.opCode = "LD2R"; output.cycles = 7; output.ptr = "$"; output.oreg = "B"; output.ireg = "HL"; break;
-      case 0x47: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "B"; output.ireg = "A"; break;
-      case 0x48: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "C"; output.ireg = "B"; break;
-      case 0x49: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "C"; output.ireg = "C"; break;
-      case 0x4a: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "C"; output.ireg = "D"; break;
-      case 0x4b: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "C"; output.ireg = "E"; break;
-      case 0x4c: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "C"; output.ireg = "H"; break;
-      case 0x4d: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "C"; output.ireg = "L"; break;
-      case 0x4e: output.opCode = "LD2R"; output.cycles = 7; output.ptr = "$"; output.oreg = "C"; output.ireg = "HL"; break;
-      case 0x4f: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "C"; output.ireg = "A"; break;
+      case 0x40: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "B"; output.ireg = "B"; break;
+      case 0x41: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "B"; output.ireg = "C"; break;
+      case 0x42: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "B"; output.ireg = "D"; break;
+      case 0x43: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "B"; output.ireg = "E"; break;
+      case 0x44: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "B"; output.ireg = "H"; break;
+      case 0x45: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "B"; output.ireg = "L"; break;
+      case 0x46: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "$"; output.oreg = "B"; output.ireg = "HL"; break;
+      case 0x47: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "B"; output.ireg = "A"; break;
+      case 0x48: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "C"; output.ireg = "B"; break;
+      case 0x49: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "C"; output.ireg = "C"; break;
+      case 0x4a: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "C"; output.ireg = "D"; break;
+      case 0x4b: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "C"; output.ireg = "E"; break;
+      case 0x4c: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "C"; output.ireg = "H"; break;
+      case 0x4d: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "C"; output.ireg = "L"; break;
+      case 0x4e: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "$"; output.oreg = "C"; output.ireg = "HL"; break;
+      case 0x4f: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "C"; output.ireg = "A"; break;
 
-      case 0x50: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "D"; output.ireg = "B"; break;
-      case 0x51: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "D"; output.ireg = "C"; break;
-      case 0x52: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "D"; output.ireg = "D"; break;
-      case 0x53: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "D"; output.ireg = "E"; break;
-      case 0x54: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "D"; output.ireg = "H"; break;
-      case 0x55: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "D"; output.ireg = "L"; break;
-      case 0x56: output.opCode = "LD2R"; output.cycles = 7; output.ptr = "$"; output.oreg = "D"; output.ireg = "HL"; break;
-      case 0x57: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "D"; output.ireg = "A"; break;
-      case 0x58: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "E"; output.ireg = "B"; break;
-      case 0x59: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "E"; output.ireg = "C"; break;
-      case 0x5a: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "E"; output.ireg = "D"; break;
-      case 0x5b: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "E"; output.ireg = "E"; break;
-      case 0x5c: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "E"; output.ireg = "H"; break;
-      case 0x5d: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "E"; output.ireg = "L"; break;
-      case 0x5e: output.opCode = "LD2R"; output.cycles = 7; output.ptr = "$"; output.oreg = "E"; output.ireg = "HL"; break;
-      case 0x5f: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "E"; output.ireg = "A"; break;
+      case 0x50: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "D"; output.ireg = "B"; break;
+      case 0x51: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "D"; output.ireg = "C"; break;
+      case 0x52: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "D"; output.ireg = "D"; break;
+      case 0x53: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "D"; output.ireg = "E"; break;
+      case 0x54: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "D"; output.ireg = "H"; break;
+      case 0x55: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "D"; output.ireg = "L"; break;
+      case 0x56: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "$"; output.oreg = "D"; output.ireg = "HL"; break;
+      case 0x57: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "D"; output.ireg = "A"; break;
+      case 0x58: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "E"; output.ireg = "B"; break;
+      case 0x59: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "E"; output.ireg = "C"; break;
+      case 0x5a: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "E"; output.ireg = "D"; break;
+      case 0x5b: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "E"; output.ireg = "E"; break;
+      case 0x5c: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "E"; output.ireg = "H"; break;
+      case 0x5d: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "E"; output.ireg = "L"; break;
+      case 0x5e: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "$"; output.oreg = "E"; output.ireg = "HL"; break;
+      case 0x5f: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "E"; output.ireg = "A"; break;
   
-      case 0x60: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "H"; output.ireg = "B"; break;
-      case 0x61: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "H"; output.ireg = "C"; break;
-      case 0x62: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "H"; output.ireg = "D"; break;
-      case 0x63: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "H"; output.ireg = "E"; break;
-      case 0x64: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "H"; output.ireg = "H"; break;
-      case 0x65: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "H"; output.ireg = "L"; break;
-      case 0x66: output.opCode = "LD2R"; output.cycles = 7; output.ptr = "$"; output.oreg = "H"; output.ireg = "HL"; break;
-      case 0x67: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "H"; output.ireg = "A"; break;
-      case 0x68: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "L"; output.ireg = "B"; break;
-      case 0x69: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "L"; output.ireg = "C"; break;
-      case 0x6a: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "L"; output.ireg = "D"; break;
-      case 0x6b: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "L"; output.ireg = "E"; break;
-      case 0x6c: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "L"; output.ireg = "H"; break;
-      case 0x6d: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "L"; output.ireg = "L"; break;
-      case 0x6e: output.opCode = "LD2R"; output.cycles = 7; output.ptr = "$"; output.oreg = "L"; output.ireg = "HL"; break;
-      case 0x6f: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "L"; output.ireg = "A"; break;
+      case 0x60: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "H"; output.ireg = "B"; break;
+      case 0x61: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "H"; output.ireg = "C"; break;
+      case 0x62: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "H"; output.ireg = "D"; break;
+      case 0x63: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "H"; output.ireg = "E"; break;
+      case 0x64: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "H"; output.ireg = "H"; break;
+      case 0x65: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "H"; output.ireg = "L"; break;
+      case 0x66: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "$"; output.oreg = "H"; output.ireg = "HL"; break;
+      case 0x67: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "H"; output.ireg = "A"; break;
+      case 0x68: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "L"; output.ireg = "B"; break;
+      case 0x69: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "L"; output.ireg = "C"; break;
+      case 0x6a: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "L"; output.ireg = "D"; break;
+      case 0x6b: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "L"; output.ireg = "E"; break;
+      case 0x6c: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "L"; output.ireg = "H"; break;
+      case 0x6d: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "L"; output.ireg = "L"; break;
+      case 0x6e: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "$"; output.oreg = "L"; output.ireg = "HL"; break;
+      case 0x6f: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "L"; output.ireg = "A"; break;
   
-      case 0x70: output.opCode = "LD2M"; output.cycles = 7; output.ptr = "#"; output.oreg = "HL"; output.ireg = "B"; break;
-      case 0x71: output.opCode = "LD2M"; output.cycles = 7; output.ptr = "#"; output.oreg = "HL"; output.ireg = "C"; break;
-      case 0x72: output.opCode = "LD2M"; output.cycles = 7; output.ptr = "#"; output.oreg = "HL"; output.ireg = "D"; break;
-      case 0x73: output.opCode = "LD2M"; output.cycles = 7; output.ptr = "#"; output.oreg = "HL"; output.ireg = "E"; break;
-      case 0x74: output.opCode = "LD2M"; output.cycles = 7; output.ptr = "#"; output.oreg = "HL"; output.ireg = "H"; break;
-      case 0x75: output.opCode = "LD2M"; output.cycles = 7; output.ptr = "#"; output.oreg = "HL"; output.ireg = "L"; break;
-      case 0x76: output.opCode = "HLT"; output.cycles = 7; break;
-      case 0x77: output.opCode = "LD2R"; output.cycles = 7; output.ptr = "#"; output.oreg = "HL"; output.ireg = "A"; break;
-      case 0x78: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "A"; output.ireg = "B"; break;
-      case 0x79: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "A"; output.ireg = "C"; break;
-      case 0x7a: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "A"; output.ireg = "D"; break;
-      case 0x7b: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "A"; output.ireg = "E"; break;
-      case 0x7c: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "A"; output.ireg = "H"; break;
-      case 0x7d: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "A"; output.ireg = "L"; break;
-      case 0x7e: output.opCode = "LD2R"; output.cycles = 7; output.ptr = "$"; output.ireg = "A"; output.ireg = "HL"; break;
-      case 0x7f: output.opCode = "LD2R"; output.cycles = 5; output.oreg = "A"; output.ireg = "A"; break;
+      case 0x70: output.opCode = "LD2M"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "#"; output.oreg = "HL"; output.ireg = "B"; break;
+      case 0x71: output.opCode = "LD2M"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "#"; output.oreg = "HL"; output.ireg = "C"; break;
+      case 0x72: output.opCode = "LD2M"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "#"; output.oreg = "HL"; output.ireg = "D"; break;
+      case 0x73: output.opCode = "LD2M"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "#"; output.oreg = "HL"; output.ireg = "E"; break;
+      case 0x74: output.opCode = "LD2M"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "#"; output.oreg = "HL"; output.ireg = "H"; break;
+      case 0x75: output.opCode = "LD2M"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "#"; output.oreg = "HL"; output.ireg = "L"; break;
+      case 0x76: output.opCode = "HLT"; output.z80OPCode = "LD"; output.cycles = 7; break;
+      case 0x77: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "#"; output.oreg = "HL"; output.ireg = "A"; break;
+      case 0x78: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "A"; output.ireg = "B"; break;
+      case 0x79: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "A"; output.ireg = "C"; break;
+      case 0x7a: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "A"; output.ireg = "D"; break;
+      case 0x7b: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "A"; output.ireg = "E"; break;
+      case 0x7c: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "A"; output.ireg = "H"; break;
+      case 0x7d: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "A"; output.ireg = "L"; break;
+      case 0x7e: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "$"; output.ireg = "A"; output.ireg = "HL"; break;
+      case 0x7f: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "A"; output.ireg = "A"; break;
   
-      case 0x80: output.opCode = "INXR"; output.cycles = 4; output.oreg = "A"; output.ireg = "B"; break;
-      case 0x81: output.opCode = "INXR"; output.cycles = 4; output.oreg = "A"; output.ireg = "C"; break;
-      case 0x82: output.opCode = "INXR"; output.cycles = 4; output.oreg = "A"; output.ireg = "D"; break;
-      case 0x83: output.opCode = "INXR"; output.cycles = 4; output.oreg = "A"; output.ireg = "E"; break;
-      case 0x84: output.opCode = "INXR"; output.cycles = 4; output.oreg = "A"; output.ireg = "H"; break;
-      case 0x85: output.opCode = "INXR"; output.cycles = 4; output.oreg = "A"; output.ireg = "L"; break;
-      case 0x86: output.opCode = "INXR"; output.cycles = 7; output.ptr = "$"; output.oreg = "A"; output.ireg = "HL"; break;
-      case 0x87: output.opCode = "INXR"; output.cycles = 4; output.oreg = "A"; output.ireg = "A"; break;
-      case 0x88: output.opCode = "ICXR"; output.cycles = 4; output.oreg = "A"; output.ireg = "B"; break;
-      case 0x89: output.opCode = "ICXR"; output.cycles = 4; output.oreg = "A"; output.ireg = "C"; break;
-      case 0x8a: output.opCode = "ICXR"; output.cycles = 4; output.oreg = "A"; output.ireg = "D"; break;
-      case 0x8b: output.opCode = "ICXR"; output.cycles = 4; output.oreg = "A"; output.ireg = "E"; break;
-      case 0x8c: output.opCode = "ICXR"; output.cycles = 4; output.oreg = "A"; output.ireg = "H"; break;
-      case 0x8d: output.opCode = "ICXR"; output.cycles = 4; output.oreg = "A"; output.ireg = "L"; break;
-      case 0x8e: output.opCode = "ICXR"; output.cycles = 7; output.ptr = "$"; output.oreg = "A"; output.ireg = "HL"; break;
-      case 0x8f: output.opCode = "ICXR"; output.cycles = 4; output.oreg = "A"; output.ireg = "A"; break;
+      case 0x80: output.opCode = "INXR"; output.z80OPCode = "ADD"; output.cycles = 4; output.oreg = "A"; output.ireg = "B"; break;
+      case 0x81: output.opCode = "INXR"; output.z80OPCode = "ADD"; output.cycles = 4; output.oreg = "A"; output.ireg = "C"; break;
+      case 0x82: output.opCode = "INXR"; output.z80OPCode = "ADD"; output.cycles = 4; output.oreg = "A"; output.ireg = "D"; break;
+      case 0x83: output.opCode = "INXR"; output.z80OPCode = "ADD"; output.cycles = 4; output.oreg = "A"; output.ireg = "E"; break;
+      case 0x84: output.opCode = "INXR"; output.z80OPCode = "ADD"; output.cycles = 4; output.oreg = "A"; output.ireg = "H"; break;
+      case 0x85: output.opCode = "INXR"; output.z80OPCode = "ADD"; output.cycles = 4; output.oreg = "A"; output.ireg = "L"; break;
+      case 0x86: output.opCode = "INXR"; output.z80OPCode = "ADD"; output.cycles = 7; output.ptr = "$"; output.oreg = "A"; output.ireg = "HL"; break;
+      case 0x87: output.opCode = "INXR"; output.z80OPCode = "ADD"; output.cycles = 4; output.oreg = "A"; output.ireg = "A"; break;
+      case 0x88: output.opCode = "ICXR"; output.z80OPCode = "ADD"; output.cycles = 4; output.oreg = "A"; output.ireg = "B"; break;
+      case 0x89: output.opCode = "ICXR"; output.z80OPCode = "ADD"; output.cycles = 4; output.oreg = "A"; output.ireg = "C"; break;
+      case 0x8a: output.opCode = "ICXR"; output.z80OPCode = "ADD"; output.cycles = 4; output.oreg = "A"; output.ireg = "D"; break;
+      case 0x8b: output.opCode = "ICXR"; output.z80OPCode = "ADD"; output.cycles = 4; output.oreg = "A"; output.ireg = "E"; break;
+      case 0x8c: output.opCode = "ICXR"; output.z80OPCode = "ADD"; output.cycles = 4; output.oreg = "A"; output.ireg = "H"; break;
+      case 0x8d: output.opCode = "ICXR"; output.z80OPCode = "ADD"; output.cycles = 4; output.oreg = "A"; output.ireg = "L"; break;
+      case 0x8e: output.opCode = "ICXR"; output.z80OPCode = "ADD"; output.cycles = 7; output.ptr = "$"; output.oreg = "A"; output.ireg = "HL"; break;
+      case 0x8f: output.opCode = "ICXR"; output.z80OPCode = "ADD"; output.cycles = 4; output.oreg = "A"; output.ireg = "A"; break;
+      case 0x8f: output.opCode = "ICXR"; output.z80OPCode = "ADD"; output.cycles = 4; output.oreg = "A"; output.ireg = "A"; break;
   
-      case 0x90: output.opCode = "DCXR"; output.cycles = 4; output.oreg = "A"; output.ireg = "B"; break;
-      case 0x91: output.opCode = "DCXR"; output.cycles = 4; output.oreg = "A"; output.ireg = "C"; break;
-      case 0x92: output.opCode = "DCXR"; output.cycles = 4; output.oreg = "A"; output.ireg = "D"; break;
-      case 0x93: output.opCode = "DCXR"; output.cycles = 4; output.oreg = "A"; output.ireg = "E"; break;
-      case 0x94: output.opCode = "DCXR"; output.cycles = 4; output.oreg = "A"; output.ireg = "H"; break;
-      case 0x95: output.opCode = "DCXR"; output.cycles = 4; output.oreg = "A"; output.ireg = "L"; break;
-      case 0x96: output.opCode = "DCXR"; output.cycles = 7; output.ptr = "$"; output.oreg = "A"; output.ireg = "HL"; break;
-      case 0x97: output.opCode = "DCXR"; output.cycles = 4; output.oreg = "A"; output.ireg = "A"; break;
-      case 0x98: output.opCode = "DEXR"; output.cycles = 4; output.oreg = "A"; output.ireg = "B"; break;
-      case 0x99: output.opCode = "DEXR"; output.cycles = 4; output.oreg = "A"; output.ireg = "C"; break;
-      case 0x9a: output.opCode = "DEXR"; output.cycles = 4; output.oreg = "A"; output.ireg = "D"; break;
-      case 0x9b: output.opCode = "DEXR"; output.cycles = 4; output.oreg = "A"; output.ireg = "E"; break;
-      case 0x9c: output.opCode = "DEXR"; output.cycles = 4; output.oreg = "A"; output.ireg = "H"; break;
-      case 0x9d: output.opCode = "DEXR"; output.cycles = 4; output.oreg = "A"; output.ireg = "L"; break;
-      case 0x9e: output.opCode = "DEXR"; output.cycles = 7; output.ptr = "$"; output.oreg = "A"; output.ireg = "HL"; break;
-      case 0x9f: output.opCode = "DEXR"; output.cycles = 4; output.oreg = "A"; output.ireg = "A"; break;
+      case 0x90: output.opCode = "DCXR"; output.z80OPCode = "SUB"; output.cycles = 4; output.oreg = "A"; output.ireg = "B"; break;
+      case 0x91: output.opCode = "DCXR"; output.z80OPCode = "SUB"; output.cycles = 4; output.oreg = "A"; output.ireg = "C"; break;
+      case 0x92: output.opCode = "DCXR"; output.z80OPCode = "SUB"; output.cycles = 4; output.oreg = "A"; output.ireg = "D"; break;
+      case 0x93: output.opCode = "DCXR"; output.z80OPCode = "SUB"; output.cycles = 4; output.oreg = "A"; output.ireg = "E"; break;
+      case 0x94: output.opCode = "DCXR"; output.z80OPCode = "SUB"; output.cycles = 4; output.oreg = "A"; output.ireg = "H"; break;
+      case 0x95: output.opCode = "DCXR"; output.z80OPCode = "SUB"; output.cycles = 4; output.oreg = "A"; output.ireg = "L"; break;
+      case 0x96: output.opCode = "DCXR"; output.z80OPCode = "SUB"; output.cycles = 7; output.ptr = "$"; output.oreg = "A"; output.ireg = "HL"; break;
+      case 0x97: output.opCode = "DCXR"; output.z80OPCode = "SUB"; output.cycles = 4; output.oreg = "A"; output.ireg = "A"; break;
+      case 0x98: output.opCode = "DEXR"; output.z80OPCode = "SBC"; output.cycles = 4; output.oreg = "A"; output.ireg = "B"; break;
+      case 0x99: output.opCode = "DEXR"; output.z80OPCode = "SBC"; output.cycles = 4; output.oreg = "A"; output.ireg = "C"; break;
+      case 0x9a: output.opCode = "DEXR"; output.z80OPCode = "SBC"; output.cycles = 4; output.oreg = "A"; output.ireg = "D"; break;
+      case 0x9b: output.opCode = "DEXR"; output.z80OPCode = "SBC"; output.cycles = 4; output.oreg = "A"; output.ireg = "E"; break;
+      case 0x9c: output.opCode = "DEXR"; output.z80OPCode = "SBC"; output.cycles = 4; output.oreg = "A"; output.ireg = "H"; break;
+      case 0x9d: output.opCode = "DEXR"; output.z80OPCode = "SBC"; output.cycles = 4; output.oreg = "A"; output.ireg = "L"; break;
+      case 0x9e: output.opCode = "DEXR"; output.z80OPCode = "SBC"; output.cycles = 7; output.ptr = "$"; output.oreg = "A"; output.ireg = "HL"; break;
+      case 0x9f: output.opCode = "DEXR"; output.z80OPCode = "SBC"; output.cycles = 4; output.oreg = "A"; output.ireg = "A"; break;
   
-      case 0xa0: output.opCode = "ANDR"; output.cycles = 4; output.oreg = "A"; output.ireg = "B"; break;
-      case 0xa1: output.opCode = "ANDR"; output.cycles = 4; output.oreg = "A"; output.ireg = "C"; break;
-      case 0xa2: output.opCode = "ANDR"; output.cycles = 4; output.oreg = "A"; output.ireg = "D"; break;
-      case 0xa3: output.opCode = "ANDR"; output.cycles = 4; output.oreg = "A"; output.ireg = "E"; break;
-      case 0xa4: output.opCode = "ANDR"; output.cycles = 4; output.oreg = "A"; output.ireg = "H"; break;
-      case 0xa5: output.opCode = "ANDR"; output.cycles = 4; output.oreg = "A"; output.ireg = "L"; break;
-      case 0xa6: output.opCode = "ANDR"; output.cycles = 7; output.ptr = "$"; output.oreg = "A"; output.ireg = "HL"; break;
-      case 0xa7: output.opCode = "ANDR"; output.cycles = 4; output.oreg = "A"; output.ireg = "A"; break;
-      case 0xa8: output.opCode = "XORR"; output.cycles = 4; output.oreg = "A"; output.ireg = "B"; break;
-      case 0xa9: output.opCode = "XORR"; output.cycles = 4; output.oreg = "A"; output.ireg = "C"; break;
-      case 0xaa: output.opCode = "XORR"; output.cycles = 4; output.oreg = "A"; output.ireg = "D"; break;
-      case 0xab: output.opCode = "XORR"; output.cycles = 4; output.oreg = "A"; output.ireg = "E"; break;
-      case 0xac: output.opCode = "XORR"; output.cycles = 4; output.oreg = "A"; output.ireg = "H"; break;
-      case 0xad: output.opCode = "XORR"; output.cycles = 4; output.oreg = "A"; output.ireg = "L"; break;
-      case 0xae: output.opCode = "XORR"; output.cycles = 7; output.ptr = "$"; output.oreg = "A"; output.ireg = "HL"; break;
-      case 0xaf: output.opCode = "XORR"; output.cycles = 4; output.oreg = "A"; output.ireg = "A"; break;
+      case 0xa0: output.opCode = "ANDR"; output.z80OPCode = "AND"; output.cycles = 4; output.oreg = "A"; output.ireg = "B"; break;
+      case 0xa1: output.opCode = "ANDR"; output.z80OPCode = "AND"; output.cycles = 4; output.oreg = "A"; output.ireg = "C"; break;
+      case 0xa2: output.opCode = "ANDR"; output.z80OPCode = "AND"; output.cycles = 4; output.oreg = "A"; output.ireg = "D"; break;
+      case 0xa3: output.opCode = "ANDR"; output.z80OPCode = "AND"; output.cycles = 4; output.oreg = "A"; output.ireg = "E"; break;
+      case 0xa4: output.opCode = "ANDR"; output.z80OPCode = "AND"; output.cycles = 4; output.oreg = "A"; output.ireg = "H"; break;
+      case 0xa5: output.opCode = "ANDR"; output.z80OPCode = "AND"; output.cycles = 4; output.oreg = "A"; output.ireg = "L"; break;
+      case 0xa6: output.opCode = "ANDR"; output.z80OPCode = "AND"; output.cycles = 7; output.ptr = "$"; output.oreg = "A"; output.ireg = "HL"; break;
+      case 0xa7: output.opCode = "ANDR"; output.z80OPCode = "AND"; output.cycles = 4; output.oreg = "A"; output.ireg = "A"; break;
+      case 0xa8: output.opCode = "XORR"; output.z80OPCode = "XOR"; output.cycles = 4; output.oreg = "A"; output.ireg = "B"; break;
+      case 0xa9: output.opCode = "XORR"; output.z80OPCode = "XOR"; output.cycles = 4; output.oreg = "A"; output.ireg = "C"; break;
+      case 0xaa: output.opCode = "XORR"; output.z80OPCode = "XOR"; output.cycles = 4; output.oreg = "A"; output.ireg = "D"; break;
+      case 0xab: output.opCode = "XORR"; output.z80OPCode = "XOR"; output.cycles = 4; output.oreg = "A"; output.ireg = "E"; break;
+      case 0xac: output.opCode = "XORR"; output.z80OPCode = "XOR"; output.cycles = 4; output.oreg = "A"; output.ireg = "H"; break;
+      case 0xad: output.opCode = "XORR"; output.z80OPCode = "XOR"; output.cycles = 4; output.oreg = "A"; output.ireg = "L"; break;
+      case 0xae: output.opCode = "XORR"; output.z80OPCode = "XOR"; output.cycles = 7; output.ptr = "$"; output.oreg = "A"; output.ireg = "HL"; break;
+      case 0xaf: output.opCode = "XORR"; output.z80OPCode = "XOR"; output.cycles = 4; output.oreg = "A"; output.ireg = "A"; break;
   
-      case 0xb0: output.opCode = "ORR"; output.cycles = 4; output.oreg = "A"; output.ireg = "B"; break;
-      case 0xb1: output.opCode = "ORR"; output.cycles = 4; output.oreg = "A"; output.ireg = "C"; break;
-      case 0xb2: output.opCode = "ORR"; output.cycles = 4; output.oreg = "A"; output.ireg = "D"; break;
-      case 0xb3: output.opCode = "ORR"; output.cycles = 4; output.oreg = "A"; output.ireg = "E"; break;
-      case 0xb4: output.opCode = "ORR"; output.cycles = 4; output.oreg = "A"; output.ireg = "H"; break;
-      case 0xb5: output.opCode = "ORR"; output.cycles = 4; output.oreg = "A"; output.ireg = "L"; break;
-      case 0xb6: output.opCode = "ORR"; output.cycles = 7; output.ptr = "$"; output.oreg = "A"; output.ireg = "HL"; break;
-      case 0xb7: output.opCode = "ORR"; output.cycles = 4; output.oreg = "A"; output.ireg = "A"; break;
-      case 0xb8: output.opCode = "SUBX"; output.cycles = 4; output.oreg = "A"; output.ireg = "B"; break;
-      case 0xb9: output.opCode = "SUBX"; output.cycles = 4; output.oreg = "A"; output.ireg = "C"; break;
-      case 0xba: output.opCode = "SUBX"; output.cycles = 4; output.oreg = "A"; output.ireg = "D"; break;
-      case 0xbb: output.opCode = "SUBX"; output.cycles = 4; output.oreg = "A"; output.ireg = "E"; break;
-      case 0xbc: output.opCode = "SUBX"; output.cycles = 4; output.oreg = "A"; output.ireg = "H"; break;
-      case 0xbd: output.opCode = "SUBX"; output.cycles = 4; output.oreg = "A"; output.ireg = "L"; break;
-      case 0xbe: output.opCode = "SUBX"; output.cycles = 7; output.ptr = "$"; output.oreg = "A"; output.ireg = "HL"; break;
-      case 0xbf: output.opCode = "SUBX"; output.cycles = 4; output.oreg = "A"; output.ireg = "A"; break;
+      case 0xb0: output.opCode = "ORR"; output.z80OPCode = "OR"; output.cycles = 4; output.oreg = "A"; output.ireg = "B"; break;
+      case 0xb1: output.opCode = "ORR"; output.z80OPCode = "OR"; output.cycles = 4; output.oreg = "A"; output.ireg = "C"; break;
+      case 0xb2: output.opCode = "ORR"; output.z80OPCode = "OR"; output.cycles = 4; output.oreg = "A"; output.ireg = "D"; break;
+      case 0xb3: output.opCode = "ORR"; output.z80OPCode = "OR"; output.cycles = 4; output.oreg = "A"; output.ireg = "E"; break;
+      case 0xb4: output.opCode = "ORR"; output.z80OPCode = "OR"; output.cycles = 4; output.oreg = "A"; output.ireg = "H"; break;
+      case 0xb5: output.opCode = "ORR"; output.z80OPCode = "OR"; output.cycles = 4; output.oreg = "A"; output.ireg = "L"; break;
+      case 0xb6: output.opCode = "ORR"; output.z80OPCode = "OR"; output.cycles = 7; output.ptr = "$"; output.oreg = "A"; output.ireg = "HL"; break;
+      case 0xb7: output.opCode = "ORR"; output.z80OPCode = "OR"; output.cycles = 4; output.oreg = "A"; output.ireg = "A"; break;
+      case 0xb8: output.opCode = "SUBX"; output.z80OPCode = "CP"; output.cycles = 4; output.oreg = "A"; output.ireg = "B"; break;
+      case 0xb9: output.opCode = "SUBX"; output.z80OPCode = "CP"; output.cycles = 4; output.oreg = "A"; output.ireg = "C"; break;
+      case 0xba: output.opCode = "SUBX"; output.z80OPCode = "CP"; output.cycles = 4; output.oreg = "A"; output.ireg = "D"; break;
+      case 0xbb: output.opCode = "SUBX"; output.z80OPCode = "CP"; output.cycles = 4; output.oreg = "A"; output.ireg = "E"; break;
+      case 0xbc: output.opCode = "SUBX"; output.z80OPCode = "CP"; output.cycles = 4; output.oreg = "A"; output.ireg = "H"; break;
+      case 0xbd: output.opCode = "SUBX"; output.z80OPCode = "CP"; output.cycles = 4; output.oreg = "A"; output.ireg = "L"; break;
+      case 0xbe: output.opCode = "SUBX"; output.z80OPCode = "CP"; output.cycles = 7; output.ptr = "$"; output.oreg = "A"; output.ireg = "HL"; break;
+      case 0xbf: output.opCode = "SUBX"; output.z80OPCode = "CP"; output.cycles = 4; output.oreg = "A"; output.ireg = "A"; break;
 
-      case 0xc0: output.opCode = "RETNZ"; (state.flags.f & fFlags.zero) ? output.cycles = 4 : output.cycles = 11; output.cycleConditional = true; break;
-      case 0xc1: output.opCode = "POPR"; output.cycles = 10; output.oreg = "BC"; output.ireg = "SP"; output.ptr = "$"; break;
-      case 0xc2: output.opCode = "JMPNZ"; output.cycles = 15; (state.flags.f & fFlags.zero) ? output.cycles = 10 : output.cycles = 15; output.cycleConditional = true; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
-      case 0xc3: output.opCode = "JMP"; output.cycles = 10; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
-      case 0xc4: output.opCode = "PUSHNZ"; (state.flags.f & fFlags.zero) ? output.cycles = 11 : output.cycles = 18; output.cycleConditional = true; output.ireg = "BC"; output.ptr = "$"; output.oreg = "SP"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
-      case 0xc5: output.opCode = "PUSH"; output.cycles = 11; output.ireg = "BC"; output.oreg = "SP"; output.ptr = "#"; break;
-      case 0xc6: output.opCode = "INXR"; output.cycles = 7; output.oreg = "A"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
-      case 0xc7: output.opCode = "RST0"; output.cycles = 11; output.oreg = "SP"; break;
-      case 0xc8: output.opCode = "RETZ"; (state.flags.f & fFlags.zero) ? output.cycles = 11 : output.cycles = 5; output.ptr = "$"; output.ireg = "SP"; output.cycleConditional = true; break;
-      case 0xc9: output.opCode = "RET"; output.cycles = 10; output.ireg = "SP"; output.ptr = "$"; break;
-      case 0xca: output.opCode = "JPZ"; (state.flags.f & fFlags.zero) ? output.cycles = 15 : output.cycles = 10; output.cycleConditional = true; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
-      case 0xcb: output.opCode = "NOP"; output.cycles = 4; break;
-      case 0xcc: output.opCode = "CALLZ"; (state.flags.f & fFlags.zero) ? output.cycles = 18 : output.cycles = 10; output.cycleConditional = true; output.ptr = "#"; output.oreg = "SP"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
-      case 0xcd: output.opCode = "CALL"; output.cycles = 17; output.para1 = opCode[1].toString(16); output.ptr = "#"; output.oreg = "SP"; output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
-      case 0xce: output.opCode = "ICXR"; output.cycles = 7; output.ireg = "A"; output.oreg = "A"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
-      case 0xcf: output.opCode = "RST1"; output.cycles = 11; output.oreg = "SP"; break;
+      case 0xc0: output.opCode = "RETNZ"; output.z80OPCode = "RET NZ"; (state.flags.f & fFlags.zero) ? output.cycles = 4 : output.cycles = 11; output.cycleConditional = true; break;
+      case 0xc1: output.opCode = "POPR"; output.z80OPCode = "POP"; output.cycles = 10; output.oreg = "BC"; output.ireg = "SP"; output.ptr = "$"; break;
+      case 0xc2: output.opCode = "JMPNZ"; output.z80OPCode = "JP NZ"; output.cycles = 15; (state.flags.f & fFlags.zero) ? output.cycles = 10 : output.cycles = 15; output.cycleConditional = true; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
+      case 0xc3: output.opCode = "JMP"; output.z80OPCode = "JP"; output.cycles = 10; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
+      case 0xc4: output.opCode = "PUSHNZ"; output.z80OPCode = "CALL NZ"; (state.flags.f & fFlags.zero) ? output.cycles = 11 : output.cycles = 18; output.cycleConditional = true; output.ireg = "BC"; output.ptr = "$"; output.oreg = "SP"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
+      case 0xc5: output.opCode = "PUSH"; output.z80OPCode = "PUSH"; output.cycles = 11; output.ireg = "BC"; output.oreg = "SP"; output.ptr = "#"; break;
+      case 0xc6: output.opCode = "INXR"; output.z80OPCode = "ADD"; output.cycles = 7; output.oreg = "A"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
+      case 0xc7: output.opCode = "RST0"; output.z80OPCode = "RST 00"; output.cycles = 11; output.oreg = "SP"; break;
+      case 0xc8: output.opCode = "RETZ"; output.z80OPCode = "RET Z"; (state.flags.f & fFlags.zero) ? output.cycles = 11 : output.cycles = 5; output.ptr = "$"; output.ireg = "SP"; output.cycleConditional = true; break;
+      case 0xc9: output.opCode = "RET"; output.z80OPCode = "RET"; output.cycles = 10; output.ireg = "SP"; output.ptr = "$"; break;
+      case 0xca: output.opCode = "JPZ"; output.z80OPCode = "JP Z"; (state.flags.f & fFlags.zero) ? output.cycles = 15 : output.cycles = 10; output.cycleConditional = true; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
+      case 0xcb: output.opCode = "NOP"; output.z80OPCode = "NOP"; output.cycles = 4; break;
+      case 0xcc: output.opCode = "CALLZ"; output.z80OPCode = "CALL Z"; (state.flags.f & fFlags.zero) ? output.cycles = 18 : output.cycles = 10; output.cycleConditional = true; output.ptr = "#"; output.oreg = "SP"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
+      case 0xcd: output.opCode = "CALL"; output.z80OPCode = "CALL"; output.cycles = 17; output.para1 = opCode[1].toString(16); output.ptr = "#"; output.oreg = "SP"; output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
+      case 0xce: output.opCode = "ICXR"; output.z80OPCode = "ADC"; output.cycles = 7; output.ireg = "A"; output.oreg = "A"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
+      case 0xcf: output.opCode = "RST1"; output.z80OPCode = "RST08"; output.cycles = 11; output.oreg = "SP"; break;
   
-      case 0xd0: output.opCode = "RNC"; (state.flags.f & fFlags.zero) ? output.cycles = 5 : output.cycles = 11; output.cycleConditional = true; break;
-      case 0xd1: output.opCode = "POP"; output.cycles = 10; output.oreg = "DE"; output.ireg = "SP"; output.ptr = "$"; break;
-      case 0xd2: output.opCode = "JMPNC"; (state.flags.f & fFlags.carry) ? output.cycles = 10 : output.cycles = 15; output.cycleConditional = true; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
-      case 0xd3: output.opCode = "OUT"; output.cycles = 10; output.ptr = "!"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
-      case 0xd4: output.opCode = "CALLNZ"; (state.flags.f & fFlags.carry) ? output.cycles = 11 : output.cycles = 18; output.cycleConditional = true; output.oreg = "SP"; output.ptr = "$"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
-      case 0xd5: output.opCode = "PUSH"; output.ireg = "DE"; output.oreg = "SP"; output.ptr = "#"; break;
-      case 0xd6: output.opCode = "DCXR"; output.oreg = "A"; output.ireg = "A"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
-      case 0xd7: output.opCode = "RST10"; output.cycles = 11; output.oreg = "SP"; break;
-      case 0xd8: output.opCode = "RETC"; (state.flags.f & fFlags.carry) ? output.cycles = 11 : output.cycles = 5; output.cycleConditional = true; output.ireg = "SP"; break;
-      case 0xd9: output.opCode = "NOP"; output.cycles = 4; break;
-      case 0xda: output.opCode = "JMPC"; (state.flags.f & fFlags.carry) ? output.cycles = 15 : output.cycles = 10; output.cycleConditional = true; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
-      case 0xdb: output.opCode = "IN"; output.cycles = 10; output.ptr = "!"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
-      case 0xdc: output.opCode = "CALLC"; (state.flags.f & fFlags.carry) ? output.cycles = 18 : output.cycles = 10; output.cycleConditional = true; output.oreg = "SP"; output.ptr = "#"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break; // TODO: Update cycle count with F flag condition
-      case 0xdd: output.opCode = "CALL"; output.cycles = 4; output.ptr = "!"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
-      case 0xde: output.opCode = "DEXR"; output.cycles = 7; output.para1 = opCode[1].toString(16); output.oreg = "A"; output.ireg = "A"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
-      case 0xdf: output.opCode = "RST18"; output.cycles = 11; output.oreg = "SP"; break;
+      case 0xd0: output.opCode = "RNC"; output.z80OPCode = "RET NC"; (state.flags.f & fFlags.zero) ? output.cycles = 5 : output.cycles = 11; output.cycleConditional = true; break;
+      case 0xd1: output.opCode = "POPR"; output.z80OPCode = "POP"; output.cycles = 10; output.oreg = "DE"; output.ireg = "SP"; output.ptr = "$"; break;
+      case 0xd2: output.opCode = "JMPNC"; output.z80OPCode = "JP NC"; (state.flags.f & fFlags.carry) ? output.cycles = 10 : output.cycles = 15; output.cycleConditional = true; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
+      case 0xd3: output.opCode = "OUT"; output.z80OPCode = "OUT"; output.cycles = 10; output.ptr = "!"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
+      case 0xd4: output.opCode = "CALLNZ"; output.z80OPCode = "CALL NC"; (state.flags.f & fFlags.carry) ? output.cycles = 11 : output.cycles = 18; output.cycleConditional = true; output.oreg = "SP"; output.ptr = "$"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
+      case 0xd5: output.opCode = "PUSH"; output.z80OPCode = "PUSH"; output.ireg = "DE"; output.oreg = "SP"; output.ptr = "#"; break;
+      case 0xd6: output.opCode = "DCXR"; output.z80OPCode = "SUB"; output.oreg = "A"; output.ireg = "A"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
+      case 0xd7: output.opCode = "RST10"; output.z80OPCode = "RST 10"; output.cycles = 11; output.oreg = "SP"; break;
+      case 0xd8: output.opCode = "RETC"; output.z80OPCode = "RET"; (state.flags.f & fFlags.carry) ? output.cycles = 11 : output.cycles = 5; output.cycleConditional = true; output.ireg = "SP"; break;
+      case 0xd9: output.opCode = "NOP"; output.z80OPCode = "NOP"; output.cycles = 4; break;
+      case 0xda: output.opCode = "JMPC"; output.z80OPCode = "JP"; (state.flags.f & fFlags.carry) ? output.cycles = 15 : output.cycles = 10; output.cycleConditional = true; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
+      case 0xdb: output.opCode = "IN"; output.z80OPCode = "EXX"; output.cycles = 10; output.ptr = "!"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
+      case 0xdc: output.opCode = "CALLC"; output.z80OPCode = "CP"; (state.flags.f & fFlags.carry) ? output.cycles = 18 : output.cycles = 10; output.cycleConditional = true; output.oreg = "SP"; output.ptr = "#"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break; // TODO: Update cycle count with F flag condition
+      case 0xdd: output.opCode = "CALL"; output.z80OPCode = "CALL"; output.cycles = 4; output.ptr = "!"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
+      case 0xde: output.opCode = "DEXR"; output.z80OPCode = "SBC"; output.cycles = 7; output.para1 = opCode[1].toString(16); output.oreg = "A"; output.ireg = "A"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
+      case 0xdf: output.opCode = "RST18"; output.z80OPCode = "RST 18"; output.cycles = 11; output.oreg = "SP"; break;
   
-      case 0xe0: output.opCode = "UKNOP"; output.ptr = "!"; output.cycles = 11; break; // TODO: Update cycle count with F flag condition
-      case 0xe1: output.opCode = "POPR"; output.cycles = 10; output.oreg = "HL"; output.ireg = "SP"; output.ptr = "$"; break;
-      case 0xe2: output.opCode = "UKNOP"; output.ptr = "!"; output.cycles = 15; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break; // TODO: Update cycle count with F flag condition
-      case 0xe3: output.opCode = "UKNOP"; output.ptr = "!"; output.cycles = 4; break;
-      case 0xe4: output.opCode = "UKNOP"; output.ptr = "!"; output.cycles = 18; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break; // TODO: Update cycle count with F flag condition
-      case 0xe5: output.opCode = "PUSH"; output.cycles = 11; output.ireg = "HL"; output.oreg = "SP"; output.ptr = "#"; break;
-      case 0xe6: output.opCode = "ANDR"; output.cycles = 11; output.ireg = "A"; output.oreg = "A"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
-      case 0xe7: output.opCode = "RST20"; output.cycles = 11; output.oreg = "SP"; break;
-      case 0xe8: output.opCode = "UKNOP"; output.ptr = "!"; output.cycles = 11; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); break; // TODO: Update cycle count with F flag condition
-      case 0xe9: output.opCode = "UKNOP"; output.ptr = "!"; output.cycles = 4; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); break;
-      case 0xea: output.opCode = "UKNOP"; output.ptr = "!"; output.cycles = 15; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); break; // TODO: Update cycle count with F flag condition
-      case 0xeb: output.opCode = "XCHG"; output.cycles = 4; output.ireg = "DE"; output.oreg = "HL"; break; // TODO: Finish this
-      case 0xec: output.opCode = "UKNOP"; output.ptr = "!"; output.cycles = 18; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break; // TODO: Update cycle count with F flag condition
-      case 0xed: output.opCode = "UKNOP"; output.ptr = "!"; output.cycles = 4; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
-      case 0xee: output.opCode = "XORR"; output.cycles = 7; output.para1 = opCode[1].toString(16); output.ireg = "A"; output.oreg = "A"; output.opBytes = 2; break;
-      case 0xef: output.opCode = "RST28"; output.cycles = 11; output.oreg = "SP"; break;
+      case 0xe0: output.opCode = "UKNOP"; output.z80OPCode = "RET"; output.ptr = "!"; output.cycles = 11; break; // TODO: Update cycle count with F flag condition
+      case 0xe1: output.opCode = "POPR"; output.z80OPCode = "POP"; output.cycles = 10; output.oreg = "HL"; output.ireg = "SP"; output.ptr = "$"; break;
+      case 0xe2: output.opCode = "UKNOP"; output.z80OPCode = "JP"; output.ptr = "!"; output.cycles = 15; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break; // TODO: Update cycle count with F flag condition
+      case 0xe3: output.opCode = "UKNOP"; output.z80OPCode = "EX"; output.ptr = "!"; output.cycles = 4; break;
+      case 0xe4: output.opCode = "UKNOP"; output.z80OPCode = "CALL"; output.ptr = "!"; output.cycles = 18; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break; // TODO: Update cycle count with F flag condition
+      case 0xe5: output.opCode = "PUSH"; output.z80OPCode = "PUSH"; output.cycles = 11; output.ireg = "HL"; output.oreg = "SP"; output.ptr = "#"; break;
+      case 0xe6: output.opCode = "ANDR"; output.z80OPCode = "AND"; output.cycles = 11; output.ireg = "A"; output.oreg = "A"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
+      case 0xe7: output.opCode = "RST20"; output.z80OPCode = "RST 20"; output.cycles = 11; output.oreg = "SP"; break;
+      case 0xe8: output.opCode = "UKNOP"; output.z80OPCode = "RET"; output.ptr = "!"; output.cycles = 11; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); break; // TODO: Update cycle count with F flag condition
+      case 0xe9: output.opCode = "UKNOP"; output.z80OPCode = "JP"; output.ptr = "!"; output.cycles = 4; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); break;
+      case 0xea: output.opCode = "UKNOP"; output.z80OPCode = "JP"; output.ptr = "!"; output.cycles = 15; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); break; // TODO: Update cycle count with F flag condition
+      case 0xeb: output.opCode = "XCHG"; output.z80OPCode = "EX"; output.cycles = 4; output.ireg = "DE"; output.oreg = "HL"; break; // TODO: Finish this
+      case 0xec: output.opCode = "UKNOP"; output.z80OPCode = "CALL"; output.ptr = "!"; output.cycles = 18; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break; // TODO: Update cycle count with F flag condition
+      case 0xed: output.opCode = "UKNOP"; output.z80OPCode = "UKNOP"; output.ptr = "!"; output.cycles = 4; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
+      case 0xee: output.opCode = "XORR"; output.z80OPCode = "XOR"; output.cycles = 7; output.para1 = opCode[1].toString(16); output.ireg = "A"; output.oreg = "A"; output.opBytes = 2; break;
+      case 0xef: output.opCode = "RST28"; output.z80OPCode = "RST 28"; output.cycles = 11; output.oreg = "SP"; break;
   
-      case 0xf0: output.opCode = "UKNOP"; output.ptr = "!"; output.cycles = 11; break; // TODO: Update cycle count with F flag condition
-      case 0xf1: output.opCode = "POPR"; output.cycles = 10; output.oreg = "AF"; output.ireg = "SP"; output.ptr = "$"; break;
-      case 0xf2: output.opCode = "UKNOP"; output.ptr = "!"; output.cycles = 15; output.cycles = 11; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break; // TODO: Update cycle count with F flag condition
-      case 0xf3: output.opCode = "UKNOP"; output.ptr = "!"; output.cycles = 4; break;
-      case 0xf4: output.opCode = "UKNOP"; output.ptr = "!"; output.cycles = 18; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break; // TODO: Update cycle count with F flag condition
-      case 0xf5: output.opCode = "PUSH"; output.cycles = 11; output.ireg = "AF"; output.oreg = "SP"; output.ptr = "#"; break;
-      case 0xf6: output.opCode = "ORR"; output.cycles = 7; output.oreg = "A"; output.ireg = "A"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
-      case 0xf7: output.opCode = "RST30"; output.cycles = 11; output.oreg = "SP"; break;
-      case 0xf8: output.opCode = "UKNOP"; output.ptr = "!"; output.cycles = 11; break; // TODO: Update cycle count with F flag condition
-      case 0xf9: output.opCode = "UKNOP"; output.ptr = "!"; output.cycles = 6; break;
-      case 0xfa: output.opCode = "UKNOP"; output.ptr = "!"; output.cycles = 15; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break; // TODO: Update cycle count with F flag condition
-      case 0xfb: output.opCode = "SIF"; output.cycles = 4; break;
-      case 0xfc: output.opCode = "UKNOP"; output.ptr = "!"; output.cycles = 18; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break; // TODO: Update cycle count with F flag condition
-      case 0xfd: output.opCode = "UKNOP"; output.ptr = "!"; output.cycles = 4; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
-      case 0xfe: output.opCode = "DCXR"; output.cycles = 7; output.oreg = "A"; output.ireg = "A"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
-      case 0xff: output.opCode = "RST38"; output.cycles = 7; output.oreg = "SP"; break;
+      case 0xf0: output.opCode = "UKNOP"; output.z80OPCode = "RET"; output.ptr = "!"; output.cycles = 11; break; // TODO: Update cycle count with F flag condition
+      case 0xf1: output.opCode = "POPR"; output.z80OPCode = "POP"; output.cycles = 10; output.oreg = "AF"; output.ireg = "SP"; output.ptr = "$"; break;
+      case 0xf2: output.opCode = "UKNOP"; output.z80OPCode = "JP"; output.ptr = "!"; output.cycles = 15; output.cycles = 11; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break; // TODO: Update cycle count with F flag condition
+      case 0xf3: output.opCode = "UKNOP"; output.z80OPCode = "DI"; output.ptr = "!"; output.cycles = 4; break;
+      case 0xf4: output.opCode = "UKNOP"; output.z80OPCode = "CALL"; output.ptr = "!"; output.cycles = 18; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break; // TODO: Update cycle count with F flag condition
+      case 0xf5: output.opCode = "PUSH"; output.z80OPCode = "PUSH"; output.cycles = 11; output.ireg = "AF"; output.oreg = "SP"; output.ptr = "#"; break;
+      case 0xf6: output.opCode = "ORR"; output.z80OPCode = "OR"; output.cycles = 7; output.oreg = "A"; output.ireg = "A"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
+      case 0xf7: output.opCode = "RST30"; output.z80OPCode = "RST 30"; output.cycles = 11; output.oreg = "SP"; break;
+      case 0xf8: output.opCode = "UKNOP"; output.z80OPCode = "RET"; output.ptr = "!"; output.cycles = 11; break; // TODO: Update cycle count with F flag condition
+      case 0xf9: output.opCode = "UKNOP"; output.z80OPCode = "LD"; output.ptr = "!"; output.cycles = 6; break;
+      case 0xfa: output.opCode = "UKNOP"; output.z80OPCode = "JP"; output.ptr = "!"; output.cycles = 15; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break; // TODO: Update cycle count with F flag condition
+      case 0xfb: output.opCode = "SIF"; output.z80OPCode = "EI"; output.cycles = 4; break;
+      case 0xfc: output.opCode = "UKNOP"; output.z80OPCode = "CALL"; output.ptr = "!"; output.cycles = 18; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break; // TODO: Update cycle count with F flag condition
+      case 0xfd: output.opCode = "UKNOP"; output.z80OPCode = "UKNOP"; output.ptr = "!"; output.cycles = 4; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
+      case 0xfe: output.opCode = "DCXR"; output.z80OPCode = "CP"; output.cycles = 7; output.oreg = "A"; output.ireg = "A"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
+      case 0xff: output.opCode = "RST38"; output.z80OPCode = "RST 38"; output.cycles = 7; output.oreg = "SP"; break;
     }
 
     return output;
