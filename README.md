@@ -30,6 +30,19 @@ I have modified the assembly OP codes to be easier to understand by those not fa
 ![UI legend](ui.png)
 
 #### Disassembler Instructions:
+
+##### Registers
+    A -  Results from the ALU end up here. 2 bytes, grouped with F.
+    B -  General register, 2 bytes, grouped with C
+    C -  General register, 2 bytes, grouped with B
+    D -  General register, 2 bytes, grouped with E
+    E -  General register, 2 bytes, grouped with D
+    F -  F is a special flag. Mainly used for overflows and parity. 2 bytes, grouped with A
+    H -  General register, 2 bytes, grouped with L. These are generally used as a buffer, or for calculations.
+    L -  General register, 2 bytes, grouped with H. These are generally used as a buffer, or for calculations.
+    sp - Stack pointed, 4 bytes
+    pc - Program counter (Current executing address), 4 bytes
+
 ##### Terms:
   * PC      - Program Counter. This is a special register used by the CPU. This is the command that's currently being executed.
             It always increases by at least 1, and no more than 3 after each instruction, some instructions can increase it by 2 or 3.
