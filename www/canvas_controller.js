@@ -28,7 +28,8 @@ var persistantObjects = {
   cc: {},
   memoryInspect: {},
   stackPointer: {},
-  screenBox: {}
+  screenBox: {},
+  portInfo: {}
 };
 
 function setupEventHandlers(objCanvas, objCanvasController) {
@@ -75,6 +76,12 @@ function keyEvents(event, eventType) {
         renderGameScreen(runningCPU, runningCPU.db.videoMemoryUpdated);
       }
     }
+    if (event.key === 'g') { // 10000
+      if (!cpuRunning) {
+        for (var i = 0; i < 10000; i++) { cpuExec(); }
+        renderGameScreen(runningCPU, runningCPU.db.videoMemoryUpdated);
+      }
+    }
     if (event.key === 'p') {
       cpuRunning = !cpuRunning;
       runCPU();
@@ -96,7 +103,7 @@ function animateLoop() {
 
   canvasControl.canvasObjects = [];
 
-  uiPreframeSetup(canvasControl, runningCPU, cpuCanStart, showMemoryInspector);
+  uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanStart, showMemoryInspector);
 
   if (cpuCanStart && cpuRunning && runningCPU.db.videoMemoryUpdated.length > 1 && !screenRedrawing) {
     renderGameScreen(runningCPU, runningCPU.db.videoMemoryUpdated);
@@ -220,8 +227,10 @@ function printMemorySlice(cpuState, pc, lower, upper) {
 function setupCPU() {
   runningCPU = z80CPU();
 
-  // runningCPU.hwIntPorts[0x01] = 0b1010000;
-  // runningCPU.hwIntPorts[0x02] = 0b1110001;
+  runningCPU.hwIntPorts[0x01] = 0b00000001;
+  runningCPU.hwIntPorts[0x02] = 0b00000000;
+  runningCPU.hwIntPorts[0x03] = 0b00000000; // Looks like it communicates to something external with port 3 and 4. Maybe a sound card?
+  runningCPU.hwIntPorts[0x04] = 0b00000000; 
 
   runningCPU.memory = new Array(0x10000).fill(0);
 
@@ -251,6 +260,14 @@ function setupCPU() {
       cpuCanStart = true;
     }
   });
+
+  // Looks like the game is communicating with some external hardware. This function mocks that hardware. Game crashes without it.
+  runningCPU.hwPortHook = function(event, state, portCh, value) {
+    if (event === 'postwrite' && portCh === 0x04) {
+      state.hwIntPorts[0x03] = value;
+      // console.log("Port 3 written   PC: ", state.flags.pc.toString(16), "  Value: ", value);
+    }
+  }
 }
 
 function runCPU () {
@@ -270,7 +287,7 @@ async function cpuLoop() {
       return;
     }
 
-    while (!runningCPU.db.cycleRollover) {
+    while (!runningCPU.db.cycleRollover && cpuRunning) {
       cpuExec();
     }
 
@@ -285,6 +302,7 @@ function cpuExec() {
 
   if (ret > 0) {
     cpuCanStart = false;
+    cpuRunning = false;
     console.error("CPU Halted ");
     console.error("Error: Unimplemented instruction.");
     printMemoryTrace(runningCPU);

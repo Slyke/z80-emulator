@@ -1,5 +1,5 @@
 
-function uiPreframeSetup(canvasControl, runningCPU, cpuCanStart, showMemoryInspector) {
+function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanStart, showMemoryInspector) {
 
   if (!cpuCanStart) {
     return 0;
@@ -11,13 +11,17 @@ function uiPreframeSetup(canvasControl, runningCPU, cpuCanStart, showMemoryInspe
     "     M - Show/Hide memory disassembly",
     "     ",
     "Skip Ahead X instructions:",
-    "                         H - 1000     J - 100    K - 10    L - 1 (Step by step)"
+    "     G - 10, 000",
+    "     H - 1, 000",
+    "     J - 100",
+    "     K - 10",
+    "     L - 1 (Step by step)"
   ];
 
   helpText.forEach(function(helpIndex, i) {
     var objHelpText = {
-      "x": relToAbs(0.4, 0),
-      "y": relToAbs(0.8 + (i * 0.02), 1),
+      "x": relToAbs(0.05, 0),
+      "y": relToAbs(0.6 + (i * 0.02), 1),
       "name":"lblHelpText" + i,
       "text": helpIndex,
       "shape":"text",
@@ -509,4 +513,111 @@ function uiPreframeSetup(canvasControl, runningCPU, cpuCanStart, showMemoryInspe
 
     canvasControl.canvasObjects.push(newMemPrint);
   }
+
+  
+  persistantObjects.portInfo.label = {
+    "x": relToAbs(0.50, 0),
+    "y": relToAbs(0.75, 1),
+    "name":"lblCPUPILabel",
+    "text":"  Port Info: ",
+    "shape":"text",
+    "render":function(self) {
+      canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#99FF00"});
+    },
+    "visible": true
+  };
+
+  persistantObjects.portInfo.port0 = {
+    "x": relToAbs(0.50, 0),
+    "y": relToAbs(0.77, 1),
+    "name":"lblCPUPIPort0",
+    "text":"      Port 0:   " + pad(runningCPU.hwIntPorts[0x00] ? runningCPU.hwIntPorts[0x00].toString(2) : "", 8),
+    "shape":"text",
+    "render":function(self) {
+      canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#00FFFF"});
+    },
+    "visible": true
+  };
+
+  persistantObjects.portInfo.port1 = {
+    "x": relToAbs(0.50, 0),
+    "y": relToAbs(0.79, 1),
+    "name":"lblCPUPIPort1",
+    "text":"      Port 1:   " + pad(runningCPU.hwIntPorts[0x01] ? runningCPU.hwIntPorts[0x01].toString(2) : "", 8),
+    "shape":"text",
+    "render":function(self) {
+      canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#00FFFF"});
+    },
+    "visible": true
+  };
+
+  persistantObjects.portInfo.port2 = {
+    "x": relToAbs(0.50, 0),
+    "y": relToAbs(0.81, 1),
+    "name":"lblCPUPIPort2",
+    "text":"      Port 2:   " + pad(runningCPU.hwIntPorts[0x02] ? runningCPU.hwIntPorts[0x02].toString(2) : "", 8),
+    "shape":"text",
+    "render":function(self) {
+      canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#00FFFF"});
+    },
+    "visible": true
+  };
+
+  persistantObjects.portInfo.port3 = {
+    "x": relToAbs(0.50, 0),
+    "y": relToAbs(0.83, 1),
+    "name":"lblCPUPIPort3",
+    "text":"      Port 3:   " + pad(runningCPU.hwIntPorts[0x03] ? runningCPU.hwIntPorts[0x03].toString(2) : "", 8),
+    "shape":"text",
+    "render":function(self) {
+      canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#00FFFF"});
+    },
+    "visible": true
+  };
+
+  persistantObjects.portInfo.port4 = {
+    "x": relToAbs(0.50, 0),
+    "y": relToAbs(0.85, 1),
+    "name":"lblCPUPIPort4",
+    "text":"      Port 4:   " + pad(runningCPU.hwIntPorts[0x04] ? runningCPU.hwIntPorts[0x04].toString(2) : "", 8),
+    "shape":"text",
+    "render":function(self) {
+      canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#00FFFF"});
+    },
+    "visible": true
+  };
+
+  persistantObjects.portInfo.port5 = {
+    "x": relToAbs(0.50, 0),
+    "y": relToAbs(0.87, 1),
+    "name":"lblCPUPIPort5",
+    "text":"      Port 5:   " + pad(runningCPU.hwIntPorts[0x05] ? runningCPU.hwIntPorts[0x05].toString(2) : "", 8),
+    "shape":"text",
+    "render":function(self) {
+      canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#00FFFF"});
+    },
+    "visible": true
+  };
+
+  persistantObjects.portInfo.port6 = {
+    "x": relToAbs(0.50, 0),
+    "y": relToAbs(0.89, 1),
+    "name":"lblCPUPIPort6",
+    "text":"      Port 6:   " + pad(runningCPU.hwIntPorts[0x06] ? runningCPU.hwIntPorts[0x06].toString(2) : "", 8),
+    "shape":"text",
+    "render":function(self) {
+      canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#00FFFF"});
+    },
+    "visible": true
+  };
+
+  canvasControl.canvasObjects.push(persistantObjects.portInfo.label);
+  canvasControl.canvasObjects.push(persistantObjects.portInfo.port0);
+  canvasControl.canvasObjects.push(persistantObjects.portInfo.port1);
+  canvasControl.canvasObjects.push(persistantObjects.portInfo.port2);
+  canvasControl.canvasObjects.push(persistantObjects.portInfo.port3);
+  canvasControl.canvasObjects.push(persistantObjects.portInfo.port4);
+  canvasControl.canvasObjects.push(persistantObjects.portInfo.port5);
+  canvasControl.canvasObjects.push(persistantObjects.portInfo.port6);
+
 }

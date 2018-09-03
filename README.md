@@ -250,6 +250,10 @@ Penren stands for Pending Render updates. This is how many memory cells have cha
       If the F register is set, and the zero flag is set, then set PC to P1 and P2
       If the F register is set, and the zero flag is NOT set, then move PC forward 2, and do a NOP.
 
+    JMPS: Jump if sign
+      If the F register is set, and the sign flag is set, then set PC to P1 and P2
+      If the F register is set, and the sign flag is NOT set, then move PC forward 2, and do a NOP.
+
     XCHM: Swap register value with memory
       This swaps the value in a register with the value in a memory location. This can work with bytes and words.
 
