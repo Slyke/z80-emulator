@@ -292,7 +292,7 @@ var z80CPU = function() {
       cycleConditional: false
     };
 
-    output.execCount = state.db.executionCount
+    output.execCount = state.db.executionCount;
     output.programCounter = pc.toString(16);
     output.opCodeHex = opCode[0].toString(16);
 

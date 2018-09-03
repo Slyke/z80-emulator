@@ -7,7 +7,7 @@
     "start": "http-server -o http://localhost:8080/www/index.html",
     "decom": "node ./cli/decompile.js",
     "cli": "node ./cli/cmd_run.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node cpu.test.js"
   },
   "repository": {
     "type": "git",

@@ -8,7 +8,7 @@ First:
 
 Then any of:
 
-`npm start` To start a http server that will open your browser and run the cavas version.
+`npm start` To start a http server that will open your browser and run the canvas version.
 
 `npm run cli` To run the cli version (this only prints disassembler info at the moment)
 
@@ -23,6 +23,7 @@ Z80 Specs: http://datasheets.chipdb.org/Mostek/3880.pdf
 * Finish off missed instructions.
 * Add in correct cycle timing for a browser environment.
 * Add a command line version on this (So it can be used in a CLI environment).
+* Configure a proper testing tool, Mocha, to test with (instead of my current hack).
 
 ## Disassembler and Flags
 
