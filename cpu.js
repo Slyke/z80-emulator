@@ -263,6 +263,7 @@ var z80CPU = function() {
     executionCount: 0,
     totalCPUCycles: 0,
     videoMemoryUpdated: [],
+    memoryUpdated: [],
     cycleRollover: false
   });
 
@@ -429,7 +430,7 @@ var z80CPU = function() {
       case 0x74: output.opCode = "LD2M"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "#"; output.oreg = "HL"; output.ireg = "H"; break;
       case 0x75: output.opCode = "LD2M"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "#"; output.oreg = "HL"; output.ireg = "L"; break;
       case 0x76: output.opCode = "HLT"; output.z80OPCode = "LD"; output.cycles = 7; break;
-      case 0x77: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "#"; output.oreg = "HL"; output.ireg = "A"; break;
+      case 0x77: output.opCode = "LD2M"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "#"; output.oreg = "HL"; output.ireg = "A"; break;
       case 0x78: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "A"; output.ireg = "B"; break;
       case 0x79: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "A"; output.ireg = "C"; break;
       case 0x7a: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "A"; output.ireg = "D"; break;
@@ -2299,11 +2300,15 @@ var z80CPU = function() {
   cpu.writeByte = function(state, address, value) {
     cpu.romWriteCheck(state, address);
     if (address >= 0x2400) {
-      state.db.videoMemoryUpdated.push(address);
+      if (state.db.videoMemoryUpdated.indexOf(address) === -1) {
+        state.db.videoMemoryUpdated.push(address);
+      }
     }
-    if (address == 0x23ec && value === 44) {
-      console.log(state.db.executionCount, state.flags.pc.toString(16), address, value);
+
+    if (state.db.memoryUpdated.indexOf(address) === -1) {
+      state.db.memoryUpdated.push(address);
     }
+    
     if (address >= 0xffff) {
       console.warn("You are writing into out of bounds memory. The emulator will allow this, but it generally indicates something is wrong.");
       console.warn("Debug info: ", cpu.disassemble8080OP(state, state.flags.pc));

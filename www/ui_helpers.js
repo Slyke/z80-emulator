@@ -329,7 +329,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
   persistantObjects.stackPointer.label = {
     "x": relToAbs(0.5, 0),
-    "y": relToAbs(0.18, 1),
+    "y": relToAbs(0.16, 1),
     "name":"lblCPUSPHelper",
     "text":"Stack Pointer Values (SP+0 to SP+8)",
     "shape":"text",
@@ -341,7 +341,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
   persistantObjects.stackPointer.labelA = {
     "x": relToAbs(0.495, 0),
-    "y": relToAbs(0.20, 1),
+    "y": relToAbs(0.18, 1),
     "name":"lblCPUSPA",
     "text":"  A",
     "shape":"text",
@@ -353,7 +353,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
   persistantObjects.stackPointer.labelV = {
     "x": relToAbs(0.495, 0),
-    "y": relToAbs(0.22, 1),
+    "y": relToAbs(0.20, 1),
     "name":"lblCPUSPV",
     "text":"  V",
     "shape":"text",
@@ -365,7 +365,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
   persistantObjects.memoryInspect.label = {
     "x": relToAbs(0.5, 0),
-    "y": relToAbs(0.25, 1),
+    "y": relToAbs(0.24, 1),
     "name":"lblCPUMEMInspect",
     "text":"Memory Inspector",
     "shape":"text",
@@ -377,7 +377,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
   persistantObjects.memoryInspect.helper = {
     "x": relToAbs(0.5, 0),
-    "y": relToAbs(0.27, 1),
+    "y": relToAbs(0.26, 1),
     "name":"lblCPUMEMHelper",
     "text":"Address    |   OP Code   |   Mnem    | IREG  | OREG |   P1  |  P2   | PTR ",
     "shape":"text",
@@ -415,7 +415,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
     var newSPPrint = {
       "x": relToAbs(0.53 + (k  * 0.045), 0),
-      "y": relToAbs(0.20),
+      "y": relToAbs(0.18),
       "name":"lblCPUMEMSPADDR" + k,
       "text": "" + pad((runningCPU.flags.sp + k).toString(16), 4) + "-" + pad((runningCPU.flags.sp + k + 1).toString(16), 4),
       "shape":"text",
@@ -427,7 +427,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
     var newSPMemPrint = {
       "x": relToAbs(0.53 + (k * 0.045), 0),
-      "y": relToAbs(0.22),
+      "y": relToAbs(0.20),
       "name":"lblCPUMEMSPADDR" + k,
       "text": "0x" + pad(mem1.toString(16), 2) + " 0x" + pad(mem2.toString(16), 2),
       "shape":"text",
@@ -456,7 +456,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
     
     var newMemPrint = {
       "x": relToAbs(0.5, 0),
-      "y": relToAbs(0.30 + (index * 0.02), 1),
+      "y": relToAbs(0.28 + (index * 0.02), 1),
       "name":"lblCPUMEMPrevPrint" + index,
       "text": textOutput,
       "shape":"text",
@@ -471,7 +471,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
   var commandPCOffset = 0;
 
-  for (var i = 0; i < 10; i++) {
+  for (var i = 0; i < 8; i++) {
     var disObj = runningCPU.disassemble8080OP(runningCPU, (runningCPU.flags.pc + i + commandPCOffset));
     var textOutput = "     ";
     textOutput += pad(disObj.programCounter.toString(16), 4) + "         ";
@@ -486,7 +486,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
     var newMemPrint = {
       "x": relToAbs(0.5, 0),
-      "y": relToAbs(0.30 + ((i + previouslyExecInstructions.length) * 0.02), 1),
+      "y": relToAbs(0.28 + ((i + previouslyExecInstructions.length) * 0.02), 1),
       "name":"lblCPUMEMPrint" + i,
       "text": textOutput,
       "shape":"text",
@@ -499,7 +499,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
     if (i === 0) {
       var currentPos = {
         "x": relToAbs(0.505, 0),
-        "y": relToAbs(0.30 + (previouslyExecInstructions.length * 0.02), 1),
+        "y": relToAbs(0.28 + (previouslyExecInstructions.length * 0.02), 1),
         "name":"lblCPUMEMPointer",
         "text": "==>",
         "shape":"text",
@@ -517,9 +517,9 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
   
   persistantObjects.portInfo.label = {
     "x": relToAbs(0.50, 0),
-    "y": relToAbs(0.75, 1),
+    "y": relToAbs(0.61, 1),
     "name":"lblCPUPILabel",
-    "text":"  Port Info: ",
+    "text":"Port Info: ",
     "shape":"text",
     "render":function(self) {
       canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#99FF00"});
@@ -529,9 +529,9 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
   persistantObjects.portInfo.port0 = {
     "x": relToAbs(0.50, 0),
-    "y": relToAbs(0.77, 1),
+    "y": relToAbs(0.63, 1),
     "name":"lblCPUPIPort0",
-    "text":"      Port 0:   " + pad(runningCPU.hwIntPorts[0x00] ? runningCPU.hwIntPorts[0x00].toString(2) : "", 8),
+    "text":"    Port 0:   " + pad(runningCPU.hwIntPorts[0x00] ? runningCPU.hwIntPorts[0x00].toString(2) : "", 8),
     "shape":"text",
     "render":function(self) {
       canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#00FFFF"});
@@ -541,9 +541,9 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
   persistantObjects.portInfo.port1 = {
     "x": relToAbs(0.50, 0),
-    "y": relToAbs(0.79, 1),
+    "y": relToAbs(0.65, 1),
     "name":"lblCPUPIPort1",
-    "text":"      Port 1:   " + pad(runningCPU.hwIntPorts[0x01] ? runningCPU.hwIntPorts[0x01].toString(2) : "", 8),
+    "text":"    Port 1:   " + pad(runningCPU.hwIntPorts[0x01] ? runningCPU.hwIntPorts[0x01].toString(2) : "", 8),
     "shape":"text",
     "render":function(self) {
       canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#00FFFF"});
@@ -553,9 +553,9 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
   persistantObjects.portInfo.port2 = {
     "x": relToAbs(0.50, 0),
-    "y": relToAbs(0.81, 1),
+    "y": relToAbs(0.67, 1),
     "name":"lblCPUPIPort2",
-    "text":"      Port 2:   " + pad(runningCPU.hwIntPorts[0x02] ? runningCPU.hwIntPorts[0x02].toString(2) : "", 8),
+    "text":"    Port 2:   " + pad(runningCPU.hwIntPorts[0x02] ? runningCPU.hwIntPorts[0x02].toString(2) : "", 8),
     "shape":"text",
     "render":function(self) {
       canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#00FFFF"});
@@ -565,9 +565,9 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
   persistantObjects.portInfo.port3 = {
     "x": relToAbs(0.50, 0),
-    "y": relToAbs(0.83, 1),
+    "y": relToAbs(0.69, 1),
     "name":"lblCPUPIPort3",
-    "text":"      Port 3:   " + pad(runningCPU.hwIntPorts[0x03] ? runningCPU.hwIntPorts[0x03].toString(2) : "", 8),
+    "text":"    Port 3:   " + pad(runningCPU.hwIntPorts[0x03] ? runningCPU.hwIntPorts[0x03].toString(2) : "", 8),
     "shape":"text",
     "render":function(self) {
       canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#00FFFF"});
@@ -577,9 +577,9 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
   persistantObjects.portInfo.port4 = {
     "x": relToAbs(0.50, 0),
-    "y": relToAbs(0.85, 1),
+    "y": relToAbs(0.71, 1),
     "name":"lblCPUPIPort4",
-    "text":"      Port 4:   " + pad(runningCPU.hwIntPorts[0x04] ? runningCPU.hwIntPorts[0x04].toString(2) : "", 8),
+    "text":"    Port 4:   " + pad(runningCPU.hwIntPorts[0x04] ? runningCPU.hwIntPorts[0x04].toString(2) : "", 8),
     "shape":"text",
     "render":function(self) {
       canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#00FFFF"});
@@ -589,9 +589,9 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
   persistantObjects.portInfo.port5 = {
     "x": relToAbs(0.50, 0),
-    "y": relToAbs(0.87, 1),
+    "y": relToAbs(0.73, 1),
     "name":"lblCPUPIPort5",
-    "text":"      Port 5:   " + pad(runningCPU.hwIntPorts[0x05] ? runningCPU.hwIntPorts[0x05].toString(2) : "", 8),
+    "text":"    Port 5:   " + pad(runningCPU.hwIntPorts[0x05] ? runningCPU.hwIntPorts[0x05].toString(2) : "", 8),
     "shape":"text",
     "render":function(self) {
       canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#00FFFF"});
@@ -601,9 +601,9 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
   persistantObjects.portInfo.port6 = {
     "x": relToAbs(0.50, 0),
-    "y": relToAbs(0.89, 1),
+    "y": relToAbs(0.75, 1),
     "name":"lblCPUPIPort6",
-    "text":"      Port 6:   " + pad(runningCPU.hwIntPorts[0x06] ? runningCPU.hwIntPorts[0x06].toString(2) : "", 8),
+    "text":"    Port 6:   " + pad(runningCPU.hwIntPorts[0x06] ? runningCPU.hwIntPorts[0x06].toString(2) : "", 8),
     "shape":"text",
     "render":function(self) {
       canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#00FFFF"});
@@ -620,4 +620,30 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
   canvasControl.canvasObjects.push(persistantObjects.portInfo.port5);
   canvasControl.canvasObjects.push(persistantObjects.portInfo.port6);
 
+  persistantObjects.mm.label = {
+    "x": relToAbs(0.75, 0),
+    "y": relToAbs(0.61, 1),
+    "name":"lblCPUDebugLabel",
+    "text":"Memory Map: ",
+    "shape":"text",
+    "render":function(self) {
+      canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#99FF00"});
+    },
+    "visible": true
+  };
+
+  persistantObjects.mm.box = {
+    "x": relToAbs(0.75, 0),
+    "y": relToAbs(0.63, 1),
+    "w": 256,
+    "h": 256,
+    "shape":"rect",
+    "render":function(self) {
+      canvasControl.drawRect(self.x, self.y, self.w, self.h, self.renderType, canvasControl.canvasContext, {"strokeStyle": "#FFAAAA", "lineWidth":"3"});
+    },
+    "visible": true
+  };
+
+  canvasControl.canvasObjects.push(persistantObjects.mm.box);
+  canvasControl.canvasObjects.push(persistantObjects.mm.label);
 }

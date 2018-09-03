@@ -12,7 +12,9 @@ var gameDimensions = [224, 256];
 var gameTopLeftCoord = [0.05, 0.05]
 var gameScale = 1;
 var gameScreenImageData = [];
+var memoryMapImageData = [];
 var screenRedrawing = false;
+var screenRedrawingMemMap = false;
 
 var frameCount = 0;
 var fpsNumber = 0;
@@ -29,7 +31,8 @@ var persistantObjects = {
   memoryInspect: {},
   stackPointer: {},
   screenBox: {},
-  portInfo: {}
+  portInfo: {},
+  mm: {}
 };
 
 function setupEventHandlers(objCanvas, objCanvasController) {
@@ -56,30 +59,35 @@ function keyEvents(event, eventType) {
       if (!cpuRunning) {
         cpuExec();
         renderGameScreen(runningCPU, runningCPU.db.videoMemoryUpdated);
+        renderMemoryMap(runningCPU, runningCPU.db.memoryUpdated, true);
       }
     }
     if (event.key === 'k') { // 10
       if (!cpuRunning) {
         for (var i = 0; i < 10; i++) { cpuExec(); }
         renderGameScreen(runningCPU, runningCPU.db.videoMemoryUpdated);
+        renderMemoryMap(runningCPU, runningCPU.db.memoryUpdated, true);
       }
     }
     if (event.key === 'j') { // 100
       if (!cpuRunning) {
         for (var i = 0; i < 100; i++) { cpuExec(); }
         renderGameScreen(runningCPU, runningCPU.db.videoMemoryUpdated);
+        renderMemoryMap(runningCPU, runningCPU.db.memoryUpdated, true);
       }
     }
     if (event.key === 'h') { // 1000
       if (!cpuRunning) {
         for (var i = 0; i < 1000; i++) { cpuExec(); }
         renderGameScreen(runningCPU, runningCPU.db.videoMemoryUpdated);
+        renderMemoryMap(runningCPU, runningCPU.db.memoryUpdated, true);
       }
     }
     if (event.key === 'g') { // 10000
       if (!cpuRunning) {
         for (var i = 0; i < 10000; i++) { cpuExec(); }
         renderGameScreen(runningCPU, runningCPU.db.videoMemoryUpdated);
+        renderMemoryMap(runningCPU, runningCPU.db.memoryUpdated, true);
       }
     }
     if (event.key === 'p') {
@@ -88,6 +96,9 @@ function keyEvents(event, eventType) {
     }
     if (event.key === 'm') {
       showMemoryInspector = !showMemoryInspector;
+      if (showMemoryInspector) {
+        renderMemoryMap(runningCPU, runningCPU.db.memoryUpdated, true);
+      }
     }
   }
 }
@@ -107,6 +118,10 @@ function animateLoop() {
 
   if (cpuCanStart && cpuRunning && runningCPU.db.videoMemoryUpdated.length > 1 && !screenRedrawing) {
     renderGameScreen(runningCPU, runningCPU.db.videoMemoryUpdated);
+  }
+
+  if (cpuCanStart && cpuRunning && runningCPU.db.memoryUpdated.length > 1 && !screenRedrawingMemMap) {
+    renderMemoryMap(runningCPU, runningCPU.db.memoryUpdated, true);
   }
   
   if (showFPS) {
@@ -132,9 +147,57 @@ function animateLoop() {
     canvasControl.refreshScreen(false);
 
     canvasControl.canvasContext.putImageData(gameScreenImageData, relToAbs(gameTopLeftCoord[0], 0), relToAbs(gameTopLeftCoord[1], 1));
+    
+    if (showMemoryInspector) {
+      canvasControl.canvasContext.putImageData(memoryMapImageData, relToAbs(0.75, 0), relToAbs(0.63, 1));
+    }
+    
     requestAnimationFrame(() => { animateLoop(); });
   }
 
+}
+
+function renderMemoryMap(cpuState, memoryList, fullRender = false) {
+  screenRedrawingMemMap = true;
+
+  if (fullRender) {
+    for (var i = 0; i < cpuState.memory.length; i++) {
+      var color = 0x00;
+      var colorRAM = 0x00;
+      if ((i * 4) < 0x2000) { // ROM
+        color = 0x22;
+      }
+      if ((i * 4) > 0x2400 && (i * 4) < 0x4000) { // Video
+        color = 0x55;
+      }
+      if ((i * 4) > 0x4000) { // RAM
+        colorRAM = 0x55;
+      }
+      memoryMapImageData.data[(i * 4)] = cpuState.memory[i];
+      memoryMapImageData.data[(i * 4) + 1] = cpuState.memory[i] ? (color | colorRAM) : 0;
+      memoryMapImageData.data[(i * 4) + 2] = cpuState.memory[i] ? color : 0;
+    }
+    memoryMapImageData.data[(cpuState.flags.pc * 4) + 1] = 255;
+    memoryMapImageData.data[(cpuState.flags.sp * 4) + 2] = 255;
+  } else {
+    while((memoryIndex = memoryList.pop()) != null) {
+      var color = 0x00;
+      if ((memoryIndex * 4) < 0x2000) { // ROM
+        color = 0x22;
+      }
+      if ((memoryIndex * 4) > 0x2400) { // Video
+        color = 0x55;
+      }
+      memoryMapImageData.data[memoryIndex * 4] = cpuState.memory[memoryIndex];
+      memoryMapImageData.data[(memoryIndex * 4) + 1] = cpuState.memory[memoryIndex] ? color : 0;
+      memoryMapImageData.data[(memoryIndex * 4) + 2] = cpuState.memory[memoryIndex] ? color : 0;
+      memoryMapImageData.data[(memoryIndex * 4) + 3] = 255;
+      memoryMapImageData.data[(cpuState.flags.pc * 4) + 1] = 255;
+      memoryMapImageData.data[(cpuState.flags.sp * 4) + 2] = 255;
+    }
+  }
+
+  screenRedrawingMemMap = false;
 }
 
 function renderGameScreen(cpuState, memoryList) {
@@ -236,29 +299,21 @@ function setupCPU() {
 
   injectBinaryDataIntoMemory(runningCPU.memory, "../rom/invaders/invaders.h", 0, () => {
     romLoaded++;
-    if (romLoaded === 4) {
-      cpuCanStart = true;
-    }
+    postCPUReady();
   });
 
   injectBinaryDataIntoMemory(runningCPU.memory, "../rom/invaders/invaders.g", 0x800, () => {
     romLoaded++;
-    if (romLoaded === 4) {
-      cpuCanStart = true;
-    }
+    postCPUReady();
   });
   injectBinaryDataIntoMemory(runningCPU.memory, "../rom/invaders/invaders.f", 0x1000, () => {
     romLoaded++;
-    if (romLoaded === 4) {
-      cpuCanStart = true;
-    }
+    postCPUReady();
   });
 
   injectBinaryDataIntoMemory(runningCPU.memory, "../rom/invaders/invaders.e", 0x1800, () => {
     romLoaded++;
-    if (romLoaded === 4) {
-      cpuCanStart = true;
-    }
+    postCPUReady();
   });
 
   // Looks like the game is communicating with some external hardware. This function mocks that hardware. Game crashes without it.
@@ -267,6 +322,18 @@ function setupCPU() {
       state.hwIntPorts[0x03] = value;
       // console.log("Port 3 written   PC: ", state.flags.pc.toString(16), "  Value: ", value);
     }
+  }
+}
+
+function postCPUReady() {
+  if (romLoaded === 4) {
+
+    memoryMapImageData = objContext.createImageData(0xff, 0xff);
+    for (var i = 0; i < memoryMapImageData.data.length; i++) {
+      memoryMapImageData.data[i] = ((i % 4) !== 3 ? 0 : 255);
+    }
+
+    cpuCanStart = true;
   }
 }
 
@@ -308,7 +375,7 @@ function cpuExec() {
     printMemoryTrace(runningCPU);
   } else {
     previouslyExecInstructions.push(disassembleExec);
-    if (previouslyExecInstructions.length > 10) {
+    if (previouslyExecInstructions.length > 8) {
       previouslyExecInstructions.shift();
     }
   }
@@ -327,6 +394,7 @@ function setupCanvas() {
   setupEventHandlers(objCanvas, canvasControl);
   screenDimensions = [objCanvas.width, objCanvas.height];
   gameScreenImageData = objContext.createImageData(gameDimensions[0], gameDimensions[1]);
+  memoryMapImageData = objContext.createImageData(0xff, 0xff);
   animateLoop();
 }
 
