@@ -18,6 +18,8 @@ Right now on the browser, it just draws up to the title screen for space invader
 
 Z80 Specs: http://datasheets.chipdb.org/Mostek/3880.pdf
 
+A copy of this PDF, along with other documentation can be found in the `/docs/` folder.
+
 ## Future Plans:
 * Code interrupts for key events and interactivity.
 * Finish off missed instructions.
