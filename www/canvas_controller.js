@@ -1,5 +1,6 @@
 var showFPS = false;
 var showMemoryInspector = false;
+var consoleOutWarnings = false;
 var fontStyle = "monospace"; // "Megrim";
 
 var romLoaded = 0;
@@ -322,7 +323,18 @@ function setupCPU() {
       state.hwIntPorts[0x03] = value;
       // console.log("Port 3 written   PC: ", state.flags.pc.toString(16), "  Value: ", value);
     }
-  }
+  };
+
+  runningCPU.warningCb = function(event, state, msgWarning) {
+    if (consoleOutWarnings) {
+      console.warn("Warning message asserted from event: ", event);
+      msgWarning.forEach(function(messageItem) {
+        console.log('    ', messageItem);
+      });
+      console.warn('State: ', state);
+      console.log("-------------------------------");
+    }
+  };
 }
 
 function postCPUReady() {

@@ -274,6 +274,7 @@ var z80CPU = function() {
   cpu.cycles = 0;
   cpu.pInterrupt = 0x10;
   cpu.memory = [];
+  cpu.warningCb;
 
   cpu.disassemble8080OP = function(state, pc) {
     var memory = state.memory;
@@ -299,6 +300,10 @@ var z80CPU = function() {
 
     output.execCount = state.db.executionCount;
     output.programCounter = pc.toString(16);
+    if (opCode[0] == null) {
+      if (typeof(state.warningCb) === 'function') { state.warningCb('disassemble8080OP', state, ["Warning: No instruction passed: ", opCode, 'State: ', state, "PC", pc ]); }
+      return output;
+    }
     output.opCodeHex = opCode[0].toString(16);
 
     output.opBytes = 1;
@@ -306,9 +311,9 @@ var z80CPU = function() {
     switch (opCode[0]) {
       case 0x00: output.opCode = "NOP"; output.z80OPCode = "NOP"; output.cycles = 4; break;
       case 0x01: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 10; output.oreg = "BC"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
-      case 0x02: output.opCode = "LD2M"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "#"; output.ireg = "BC"; output.ireg = "A"; break;
+      case 0x02: output.opCode = "LD2M"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "#"; output.oreg = "BC"; output.ireg = "A"; break;
       case 0x03: output.opCode = "INCR"; output.z80OPCode = "INC"; output.cycles = 6; output.ireg = "BC"; output.oreg = "BC"; break;
-      case 0x04: output.opCode = "INCR"; output.z80OPCode = "DEC"; output.cycles = 5; output.ireg = "B"; output.oreg = "B"; break;
+      case 0x04: output.opCode = "INCR"; output.z80OPCode = "INC"; output.cycles = 5; output.ireg = "B"; output.oreg = "B"; break;
       case 0x05: output.opCode = "DCRR"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "B"; output.ireg = "B"; break;
       case 0x06: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 7; output.oreg = "B"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
       case 0x07: output.opCode = "RLCA"; output.z80OPCode = "RCLA"; output.cycles = 4; output.oreg = "B"; output.ireg = "B"; break;
@@ -367,7 +372,7 @@ var z80CPU = function() {
       case 0x39: output.opCode = "INXR"; output.z80OPCode = "ADD"; output.oreg = "HL"; output.ireg = "SP"; output.cycles = 11; break;
       case 0x3a: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 13; output.ptr = "$"; output.oreg = "A"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
       case 0x3b: output.opCode = "DCRR"; output.z80OPCode = "DEC"; output.cycles = 6; output.ireg = "SP"; output.oreg = "SP"; break;
-      case 0x3c: output.opCode = "INCR"; output.z80OPCode = "INC"; output.cycles = 6; output.ireg = "SP"; output.oreg = "SP"; break;
+      case 0x3c: output.opCode = "INCR"; output.z80OPCode = "INC"; output.cycles = 6; output.ireg = "A"; output.oreg = "A"; break;
       case 0x3d: output.opCode = "DCRR"; output.z80OPCode = "DEC"; output.cycles = 5; output.ireg = "A"; output.oreg = "A"; break;
       case 0x3e: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 7; output.oreg = "A"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
       case 0x3f: output.opCode = "CCF"; output.z80OPCode = "CCF"; output.cycles = 4; break;
@@ -2181,7 +2186,7 @@ var z80CPU = function() {
         break;
 
       default:
-        console.log("Warning: Instruction Out Of Bounds: ", opCode[0].toString(16));
+        if (typeof(state.warningCb) === 'function') { state.warningCb('emulate8080OP', state, ["Warning: Instruction Out Of Bounds: ", opCode[0].toString(16)]); }
         cpu.unimplementedInstruction(state);
     }
 
@@ -2258,8 +2263,7 @@ var z80CPU = function() {
   }
 
   cpu.unimplementedInstruction = function(cpuState) {
-    console.warn("Unimplmented instruction.");
-    console.warn("Debug info: ", cpuState.disassemble8080OP(cpuState, cpuState.flags.pc));
+    if (typeof(state.warningCb) === 'function') { state.warningCb('unimplementedInstruction', state, ["Unimplmented instruction.", "Debug info: ", cpuState.disassemble8080OP(cpuState, cpuState.flags.pc - 1)]); }
     // The emulate function returns 1 if the instruction is unimplemented upon execution.
     // We need to rollback the PC so the state can be correctly handled by the function calling emulate8080OP().
     cpuState.flags.pc--;
@@ -2267,8 +2271,11 @@ var z80CPU = function() {
 
   cpu.romWriteCheck = function(state, writeAddr) {
     if (writeAddr < 0x2000 || writeAddr > 0xffff) {
-      console.warn("Warning: Writing to ROM: ", cpu.disassemble8080OP(state, state.flags.pc));
-      console.warn("This emulator allows writing to ROM, but if you are receiving this message it means that the CPU is writing to the ROM. This will in most cases break the process and lead to unknown states. Please check your ASM.");
+      if (typeof(state.warningCb) === 'function') { state.warningCb('romWriteCheck', state, [
+        "This emulator allows writing to ROM, but if you are receiving this message it means that the CPU is writing to the ROM. This will in most cases break the process and lead to unknown states. Please check your ASM.",
+        "Warning: Writing to ROM: ",
+        cpu.disassemble8080OP(state, state.flags.pc - 1)
+      ]); }
     }
   };
 
@@ -2284,10 +2291,13 @@ var z80CPU = function() {
     var res = state.memory[address];
 
     if (res < 0x00 || res > 0xff || res === "" || res == null) {
-      console.warn("Warning: Value is outside of valid range: '" + res + "' This is probably a bug.");
-      console.warn("A valid range will be returned if one can be recovered.");
-      console.warn("Debug info: ", cpu.disassemble8080OP(state, state.flags.pc));
-      console.warn("Value info: Typeof: ", typeof(res), " Length: ", res.length, "   < 0x00: ", res < 0x00, "   > 0xff: ", res > 0xff, "   Empty string: ", res == "", "   null: ", res == null);
+      if (typeof(state.warningCb) === 'function') { state.warningCb('readByte', state, [
+        "Warning: Value is outside of valid range: '" + res + "' This is probably a bug.",
+        "A valid range will be returned if one can be recovered.",
+        "Debug info: ",
+        cpu.disassemble8080OP(state, state.flags.pc - 1),
+        "Value info: Typeof: " + typeof(res) + " Length: " + res.length + "   < 0x00: " + res < 0x00 + "   > 0xff: " + res > 0xff + "   Empty string: " + res == "" + "   null: " + res == null
+      ]); }
     }
 
     return state.memory[address] & 0xff;
@@ -2310,8 +2320,11 @@ var z80CPU = function() {
     }
     
     if (address >= 0xffff) {
-      console.warn("You are writing into out of bounds memory. The emulator will allow this, but it generally indicates something is wrong.");
-      console.warn("Debug info: ", cpu.disassemble8080OP(state, state.flags.pc));
+      if (typeof(state.warningCb) === 'function') { state.warningCb('writeByte', state, [
+        "You are writing into out of bounds memory. The emulator will allow this, but it generally indicates something is wrong.",
+        "Debug info: ",
+        cpu.disassemble8080OP(state, state.flags.pc - 1)
+      ]); }
     }
 
     state.memory[address] = value & 0xff;
@@ -2516,7 +2529,7 @@ var z80CPU = function() {
       return ((state.flags.h << 8) | state.flags.l) & 0xffff;
     }
 
-    console.warn("Invalid flag combo selected: ", flagCombo, " at: ", cpu.disassemble8080OP(state, state.flags.pc));
+    if (typeof(state.warningCb) === 'function') { state.warningCb('getFlags', state, ["Invalid flag combo selected: ", flagCombo, " at: ", cpu.disassemble8080OP(state, state.flags.pc - 1)]); }
     return ;
   }
 

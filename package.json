@@ -7,7 +7,8 @@
     "start": "http-server -o http://localhost:8080/www/index.html",
     "decom": "node ./cli/decompile.js",
     "cli": "node ./cli/cmd_run.js",
-    "test": "node cpu.test.js"
+    "test:watch": "mocha -w",
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -22,5 +23,8 @@
   "dependencies": {
     "http-server": "^0.11.1",
     "js-ui-engine": "^1.20180114.8"
+  },
+  "devDependencies": {
+    "mocha": "^5.2.0"
   }
 }
