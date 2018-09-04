@@ -12,6 +12,8 @@ Then any of:
 
 `npm run cli` To run the cli version (this only prints disassembler info at the moment)
 
+`npm run test` Runs unit tests of CPU.
+
 `npm run decom LIST OF FILES` Runs the disassembler on all given files and outputs to `originalFileName.asm`
 
 Right now on the browser, it just draws up to the title screen for space invaders, because you can't "insert" a coin.
@@ -25,7 +27,7 @@ A copy of this PDF, along with other documentation can be found in the `/docs/` 
 * Finish off missed instructions.
 * Add in correct cycle timing for a browser environment.
 * Add a command line version on this (So it can be used in a CLI environment).
-* Configure a proper testing tool, Mocha, to test with (instead of my current hack).
+* Complete unit tests for CPU.
 
 ## Disassembler and Flags
 

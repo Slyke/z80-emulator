@@ -668,7 +668,7 @@ var z80CPU = function() {
 
       case 0x0b:                                                    // DCRR   BC
         var bc = cpu.getFlags(state, "bc");
-        bc-- & 0xFFFF;
+        bc-- & 0xffff;
         var ret = cpu.splitBytes(bc);
         state.flags.b = ret[1];
         state.flags.c = ret[0];
@@ -2226,21 +2226,20 @@ var z80CPU = function() {
 
       state.flags.pc = state.pInterrupt;
       if (typeof(state.cInterrupt) === "function") {
-        state.cInterrupt(state.pInterrupt);
+        state.cInterrupt(state, state.pInterrupt);
       }
     }
-
   }
 
   cpu.readHWPort = function(state, portCh) {
-    if (typeof(cpu.hwPortHook) === 'function') {
-      cpu.hwPortHook('preread', state, portCh);
+    if (typeof(state.hwPortHook) === 'function') {
+      state.hwPortHook('preread', state, portCh);
     }
 
     var portState = state.hwIntPorts[portCh & 0xff] & 0xff;
 
-    if (typeof(cpu.hwPortHook) === 'function') {
-      var hookResponse = cpu.hwPortHook('postread', state, portCh);
+    if (typeof(state.hwPortHook) === 'function') {
+      var hookResponse = state.hwPortHook('postread', state, portCh);
       portState = (hookResponse != null ? hookResponse : portState);
     }
 
@@ -2248,22 +2247,22 @@ var z80CPU = function() {
   }
 
   cpu.writeHWPort = function(state, portCh, value) {
-    if (typeof(cpu.hwPortHook) === 'function') {
-      cpu.hwPortHook('prewrite', state, portCh, value);
+    if (typeof(state.hwPortHook) === 'function') {
+      state.hwPortHook('prewrite', state, portCh, value);
     }
 
     portState = value & 0xff;
 
-    if (typeof(cpu.hwPortHook) === 'function') {
-      var hookResponse = cpu.hwPortHook('postwrite', state, portCh, value);
+    if (typeof(state.hwPortHook) === 'function') {
+      var hookResponse = state.hwPortHook('postwrite', state, portCh, value);
       portState = (hookResponse != null ? hookResponse : portState);
     }
 
-    cpu.hwIntPorts[portCh & 0xff] = portState;
-  }
+    state.hwIntPorts[portCh & 0xff] = portState;
+  };
 
   cpu.unimplementedInstruction = function(cpuState) {
-    if (typeof(state.warningCb) === 'function') { state.warningCb('unimplementedInstruction', state, ["Unimplmented instruction.", "Debug info: ", cpuState.disassemble8080OP(cpuState, cpuState.flags.pc - 1)]); }
+    if (typeof(cpuState.warningCb) === 'function') { cpuState.warningCb('unimplementedInstruction', cpuState, ["Unimplmented instruction.", "Debug info: ", cpuState.disassemble8080OP(cpuState, cpuState.flags.pc - 1)]); }
     // The emulate function returns 1 if the instruction is unimplemented upon execution.
     // We need to rollback the PC so the state can be correctly handled by the function calling emulate8080OP().
     cpuState.flags.pc--;
@@ -2285,7 +2284,7 @@ var z80CPU = function() {
     ret[0] = value & 0xff;
 
     return ret;
-  }
+  };
 
   cpu.readByte = function(state, address) {
     var res = state.memory[address];
@@ -2296,7 +2295,7 @@ var z80CPU = function() {
         "A valid range will be returned if one can be recovered.",
         "Debug info: ",
         cpu.disassemble8080OP(state, state.flags.pc - 1),
-        "Value info: Typeof: " + typeof(res) + " Length: " + res.length + "   < 0x00: " + res < 0x00 + "   > 0xff: " + res > 0xff + "   Empty string: " + res == "" + "   null: " + res == null
+        "Value info: Typeof: " + typeof(res) + "   < 0x00: " + res < 0x00 + "   > 0xff: " + res > 0xff + "   Empty string: " + res == "" + "   null: " + res == null
       ]); }
     }
 
@@ -2531,18 +2530,17 @@ var z80CPU = function() {
 
     if (typeof(state.warningCb) === 'function') { state.warningCb('getFlags', state, ["Invalid flag combo selected: ", flagCombo, " at: ", cpu.disassemble8080OP(state, state.flags.pc - 1)]); }
     return ;
-  }
+  };
 
   cpu.parity = function(x, size) {
-    var i;
     var p = 0;
     x = (x & ((1 << size) - 1));
-    for (i = 0; i < size; i++) {
+    for (var i = 0; i < size; i++) {
       if (x & 0x1) p++;
       x = x >> 1;
     }
     return (0 == (p & 0x1));
-  }
+  };
 
   cpu.preCalculatedParitySize8 = function(value) {
     // Technically cpu.parity(x, 8) will produce this. I extracted the values so it doesn't have to each time.
