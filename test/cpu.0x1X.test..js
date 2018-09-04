@@ -50,6 +50,24 @@ describe('Z80 CPU Emulator', () => {
       it(`Disassembler should return correct OP code: '${shouldOPCode}'`, () => {
         assert.equal(disassembleOut.opCode, shouldOPCode);
       });
+
+      // Disassembler specific checks
+      it(`Disassembler has not set oreg`, () => {
+        assert.equal(disassembleOut.oreg, "");
+      });
+      it(`Disassembler has not set ireg`, () => {
+        assert.equal(disassembleOut.ireg, "");
+      });
+      it(`Disassembler should not have ptr set`, () => {
+        assert.equal(disassembleOut.ptr, "");
+      });
+      it(`Disassembler should not have conditional cycle checked`, () => {
+        assert.equal(disassembleOut.cycleConditional, false);
+      });
+      it(`Disassembler should not have p1 and p2 set`, () => {
+        assert.equal(disassembleOut.para1, "");
+        assert.equal(disassembleOut.para2, "");
+      });
     });
 
   });

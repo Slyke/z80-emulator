@@ -316,15 +316,15 @@ var z80CPU = function() {
       case 0x04: output.opCode = "INCR"; output.z80OPCode = "INC"; output.cycles = 5; output.ireg = "B"; output.oreg = "B"; break;
       case 0x05: output.opCode = "DCRR"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "B"; output.ireg = "B"; break;
       case 0x06: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 7; output.oreg = "B"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
-      case 0x07: output.opCode = "RLCA"; output.z80OPCode = "RCLA"; output.cycles = 4; output.oreg = "B"; output.ireg = "B"; break;
+      case 0x07: output.opCode = "RLCA"; output.z80OPCode = "RCLA"; output.cycles = 4; output.oreg = "A"; output.ireg = "A"; break;
       case 0x08: output.opCode = "NOP"; output.z80OPCode = "NOP"; output.cycles = 4; break;
       case 0x09: output.opCode = "INXR"; output.z80OPCode = "ADD"; output.cycles = 11; output.ireg = "BC"; output.oreg = "HL"; break;
       case 0x0a: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "&"; output.oreg = "A"; output.ireg = "BC"; break;
       case 0x0b: output.opCode = "DCRR"; output.z80OPCode = "DEC"; output.cycles = 6; output.ireg = "BC"; output.ireg = "BC"; break;
       case 0x0c: output.opCode = "INCR"; output.z80OPCode = "INC"; output.cycles = 5; output.ireg = "C"; output.oreg = "C"; break;
       case 0x0d: output.opCode = "DCRR"; output.z80OPCode = "DEC"; output.cycles = 5; output.ireg = "C"; output.oreg = "C"; break;
-      case 0x0e: output.opCode = "DCRR"; output.z80OPCode = "LD"; output.cycles = 7; output.oreg = "C"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
-      case 0x0f: output.opCode = "RRCA"; output.z80OPCode = "RRCA"; output.cycles = 4; output.oreg = "C"; output.ireg = "C"; break;
+      case 0x0e: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 7; output.oreg = "C"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
+      case 0x0f: output.opCode = "RRCA"; output.z80OPCode = "RRCA"; output.cycles = 4; output.oreg = "A"; output.ireg = "A"; break;
       
       case 0x10: output.opCode = "NOP"; output.z80OPCode = "NOP"; output.cycles = 4; break;
       case 0x11: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 10; output.oreg = "DE"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
@@ -685,7 +685,7 @@ var z80CPU = function() {
         state.cycles += 5;
         break;
 
-      case 0x0e: 							                                      // DCRR C,byte
+      case 0x0e: 							                                      // LD2R C,byte
         state.flags.c = opCode[1] & 0xff;
         state.flags.pc++ & 0xffff;
         state.cycles += 7;
