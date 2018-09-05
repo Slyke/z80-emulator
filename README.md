@@ -193,9 +193,13 @@ Penren stands for Pending Render updates. This is how many memory cells have cha
     RET: Return
       Gets the SP from memory and sets PC with it.
 
-    RETZ: Return Non-Zero
+    RETZ: Return Zero
       If the F register is set, and the zero flag is set, get the value in memory pointed to by SP, and put it into PC.
       If the F register is set, and the zero flag is NOT set, then do nothing (moves PC forward 2).
+
+    RETNS: Return Non-Sign
+      If the F register is set, and the sign flag is set, get the value in memory pointed to by SP, and put it into PC.
+      If the F register is set, and the sign flag is NOT set, then do nothing (moves PC forward 2).
 
     POPR: Pop stack to register pair
       This gets the value stored in SP and stores it into both the IREGs. It also moves SP forward 2.
@@ -223,6 +227,10 @@ Penren stands for Pending Render updates. This is how many memory cells have cha
     CALLNP: Push onto the stack with a pointer if non-parity
       If the F register is set, and the parity flag is set, then do nothing (moves PC forward 2).
       If the F register is set, and the parity flag is NOT set, then move SP back 2, temporarily store P1 and P2, write SP into P1 and P2 and jump to the original P1 and P2 values.
+
+    CALLS: Push onto the stack with a pointer if not sign
+      If the F register is set, and the sign flag is set, then move SP back 2, temporarily store P1 and P2, write SP into P1 and P2 and jump to the original P1 and P2 values.
+      If the F register is set, and the sign flag is NOT set, then do nothing (moves PC forward 2).
 
     PUSH: Push onto the stack
       Move both IREGs, or P1 and P2 into SP and move SP back 2.

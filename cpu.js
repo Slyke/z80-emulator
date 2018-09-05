@@ -144,9 +144,13 @@ var z80CPU = function() {
       RET: Return
         Gets the SP from memory and sets PC with it.
 
-      RETZ: Return Non-Zero
+      RETZ: Return Zero
         If the F register is set, and the zero flag is set, get the value in memory pointed to by SP, and put it into PC.
         If the F register is set, and the zero flag is NOT set, then do nothing (moves PC forward 2).
+
+      RETNS: Return Non-Sign
+        If the F register is set, and the sign flag is set, get the value in memory pointed to by SP, and put it into PC.
+        If the F register is set, and the sign flag is NOT set, then do nothing (moves PC forward 2).
 
       POPR: Pop stack to register pair
         This gets the value stored in SP and stores it into both the IREGs. It also moves SP forward 2.
@@ -174,6 +178,10 @@ var z80CPU = function() {
       CALLNP: Push onto the stack with a pointer if non-parity
         If the F register is set, and the parity flag is set, then do nothing (moves PC forward 2).
         If the F register is set, and the parity flag is NOT set, then move SP back 2, temporarily store P1 and P2, write SP into P1 and P2 and jump to the original P1 and P2 values.
+
+      CALLS: Push onto the stack with a pointer if not sign
+        If the F register is set, and the sign flag is set, then move SP back 2, temporarily store P1 and P2, write SP into P1 and P2 and jump to the original P1 and P2 values.
+        If the F register is set, and the sign flag is NOT set, then do nothing (moves PC forward 2).
 
       PUSH: Push onto the stack
         Move both IREGs, or P1 and P2 into SP and move SP back 2.
@@ -559,9 +567,9 @@ var z80CPU = function() {
       case 0xe8: output.opCode = "RETP"; output.z80OPCode = "RET"; (state.flags.f & fFlags.zero) ? output.cycles = 11 : output.cycles = 5; output.cycleConditional = true; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); break;
       case 0xe9: output.opCode = "JMP"; output.z80OPCode = "JP"; output.ireg = "HL"; output.cycles = 4; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); break;
       case 0xea: output.opCode = "JMPP"; output.z80OPCode = "JP"; (state.flags.f & fFlags.carry) ? output.cycles = 15 : output.cycles = 10; output.cycleConditional = true; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
-      case 0xeb: output.opCode = "XCHR"; output.z80OPCode = "EX"; output.cycles = 4; output.ireg = "DE"; output.oreg = "HL"; break; // TODO: Finish this
+      case 0xeb: output.opCode = "XCHR"; output.z80OPCode = "EX"; output.cycles = 4; output.ireg = "DE"; output.oreg = "HL"; break;
       case 0xec: output.opCode = "UKNOP"; output.z80OPCode = "CALL"; output.ptr = "!"; output.cycles = 18; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break; // TODO: Update cycle count with F flag condition
-      case 0xed: output.opCode = "UKNOP"; output.z80OPCode = "UKNOP"; output.ptr = "!"; output.cycles = 4; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
+      case 0xed: output.opCode = "NOP"; output.z80OPCode = "UKNOP"; output.ptr = "!"; output.cycles = 4; output.opBytes = 3; break; // Not sure if this is correct
       case 0xee: output.opCode = "XORR"; output.z80OPCode = "XOR"; output.cycles = 7; output.para1 = opCode[1].toString(16); output.ireg = "A"; output.oreg = "A"; output.opBytes = 2; break;
       case 0xef: output.opCode = "RST28"; output.z80OPCode = "RST 28"; output.cycles = 11; output.oreg = "SP"; break;
   
@@ -598,7 +606,7 @@ var z80CPU = function() {
     state.flags.pc++ & 0xffff;
 
     switch (opCode[0]) {
-      case 0x00: state.cycles += 4; break;	                    // NOP
+      case 0x00: state.cycles += 4; break;	                          // NOP
       case 0x01: 							                                        // LD2R	BC, word
         state.flags.c = opCode[1] & 0xff;
         state.flags.b = opCode[2] & 0xff;
@@ -1664,18 +1672,15 @@ var z80CPU = function() {
         if (state.flags.f & fFlags.zero) {
           state.cycles += 5;
         } else {
-          state.flags.pc = cpu.readWord(state, state.flags.sp);
-          state.flags.sp += 2;
-          state.flags.sp &= 0xffff;
+          state.flags.pc = cpu.pop(state);
           state.cycles += 11;
         }
         break;
 
       case 0xc1:      							                                // POPR    BC
-        var ret = cpu.splitBytes(cpu.readWord(state, state.flags.sp));
+        var ret = cpu.splitBytes(cpu.pop(state));
 				state.flags.b = ret[1];
 				state.flags.c = ret[0];
-        state.flags.sp += 2;
         state.cycles += 10;
         break;
         
@@ -1701,11 +1706,9 @@ var z80CPU = function() {
           state.cycles += 11;
         } else {
           var jumpTo = ((opCode[2] << 8) | opCode[1]) & 0xffff;
-          state.flags.sp -= 2;
-          state.flags.sp &= 0xffff;
           state.flags.pc += 2;
           state.flags.pc &= 0xffff;
-          cpu.writeWord(state, state.flags.sp, state.flags.pc);
+          cpu.push(state, state.flags.pc);
 
           state.flags.pc = jumpTo;
           state.cycles += 18;
@@ -1713,10 +1716,8 @@ var z80CPU = function() {
         break;
 
       case 0xc5:      							                                // PUSH BC
-        state.flags.sp -= 2;
-        state.flags.sp &= 0xffff;
         var bc = cpu.getFlags(state, "bc");
-        cpu.writeWord(state, state.flags.sp, bc);
+        cpu.push(state, bc);
 
         state.cycles += 11;
         break;
@@ -1728,20 +1729,16 @@ var z80CPU = function() {
         break;
 
       case 0xc7:      							                                // RST 00
-        state.flags.sp -= 2;
-        state.flags.sp &= 0xffff;
         state.flags.pc += 2;
         state.flags.pc &= 0xffff;
-        cpu.writeWord(state, state.flags.sp, state.flags.pc);
+        cpu.push(state, state.flags.pc);
         state.flags.pc = 0;
         state.cycles += 11;
         break;
 
       case 0xc8:      							                                // RETZ
         if (state.flags.f & fFlags.zero) {
-          state.flags.pc =  cpu.readWord(state, state.flags.sp);
-          state.flags.sp += 2;
-          state.flags.sp &= 0xffff;
+          state.flags.pc =  cpu.pop(state);
           state.cycles += 11;
         } else {
           state.cycles += 5;
@@ -1749,9 +1746,7 @@ var z80CPU = function() {
         break;
 
       case 0xc9:      							                                // RET
-        state.flags.pc = cpu.readWord(state, state.flags.sp);
-        state.flags.sp += 2;
-        state.flags.sp &= 0xffff;
+        state.flags.pc = cpu.pop(state);
         state.cycles += 10;
         break;
 
@@ -1771,11 +1766,9 @@ var z80CPU = function() {
       case 0xcc:      							                                  // CALLZ word
       if (state.flags.f & fFlags.zero) {
         var	ret = (opCode[1] | (opCode[2] << 8)) & 0xffff;
-        state.flags.sp -= 2;
-        state.flags.sp &= 0xffff;
         state.flags.pc += 2;
         state.flags.pc &= 0xffff;
-        cpu.writeWord(state, state.flags.sp, state.flags.pc);
+        cpu.push(state, state.flags.pc);
         state.flags.pc = (opCode[1] | (opCode[2] << 8)) & 0xffff;
         state.cycles += 18;
       } else {
@@ -1788,11 +1781,9 @@ var z80CPU = function() {
       case 0xcd:      							                                // CALL (word)
       
         var	ret = (opCode[1] | (opCode[2] << 8)) & 0xffff;
-        state.flags.sp -= 2;
-        state.flags.sp &= 0xffff;
         state.flags.pc += 2;
         state.flags.pc &= 0xffff;
-        cpu.writeWord(state, state.flags.sp, state.flags.pc);
+        cpu.push(state, state.flags.pc);
         state.flags.pc = ret;
         state.cycles += 17;
         break;
@@ -1804,11 +1795,9 @@ var z80CPU = function() {
         break;
 
       case 0xcf:      							                                // RST 08
-        state.flags.sp -= 2;
-        state.flags.sp &= 0xffff;
         state.flags.pc += 2;
         state.flags.pc &= 0xffff;
-        cpu.writeWord(state, state.flags.sp, state.flags.pc);
+        cpu.push(state, state.flags.pc);
         state.flags.pc = (0x08 * 8);
         state.cycles += 11;
         break;
@@ -1824,10 +1813,9 @@ var z80CPU = function() {
         break;
 
       case 0xd1:      							                                // POPR    DE
-        var ret = cpu.splitBytes(cpu.readWord(state, state.flags.sp));
+        var ret = cpu.splitBytes(cpu.pop(state));
         state.flags.d = ret[1];
         state.flags.e = ret[0];
-        state.flags.sp += 2;
         state.cycles += 10;
         break;
 
@@ -1854,21 +1842,17 @@ var z80CPU = function() {
           state.cycles += 11;
         } else {
           var jumpTo = ((opCode[2] << 8) | opCode[1]) & 0xffff;
-          state.flags.sp -= 2;
-          state.flags.sp &= 0xffff;
           state.flags.pc += 2;
           state.flags.pc &= 0xffff;
-          cpu.writeByte(state, state.flags.sp, state.flags.pc);
+          cpu.push(state, state.flags.pc);
           state.flags.pc = jumpTo;
           state.cycles += 18;
         }
         break;
 
       case 0xd5:      							                                // PUSH DE
-        state.flags.sp -= 2;
-        state.flags.sp &= 0xffff;
         var de = cpu.getFlags(state, "de");
-        cpu.writeWord(state, state.flags.sp, de);
+        cpu.push(state, de);
 
         state.cycles += 11;
         break;
@@ -1880,20 +1864,16 @@ var z80CPU = function() {
         break;
 
       case 0xd7:      							                                // RST 10
-        state.flags.sp -= 2;
-        state.flags.sp &= 0xffff;
         state.flags.pc += 2;
         state.flags.pc &= 0xffff;
-        cpu.writeWord(state, state.flags.sp, state.flags.pc);
+        cpu.push(state, state.flags.pc);
         state.flags.pc = (0x10 * 8);
         state.cycles += 11;
         break;
 
       case 0xd8:      							                                // RETC
         if (state.flags.f & fFlags.carry) {
-          state.flags.pc = cpu.readWord(state, state.flags.sp);
-          state.flags.sp += 2;
-          state.flags.sp &= 0xffff;
+          state.flags.pc = cpu.pop(state);
           state.cycles += 11;
         } else {
           state.cycles += 5;
@@ -1922,11 +1902,9 @@ var z80CPU = function() {
       case 0xdc:      							                                  // CALLC (word)
         if (state.flags.f & fFlags.carry) {
           var	ret = (opCode[1] | (opCode[2] << 8)) & 0xffff;
-          state.flags.sp -= 2;
-          state.flags.sp &= 0xffff;
           state.flags.pc += 2;
           state.flags.pc &= 0xffff;
-          cpu.writeWord(state, state.flags.sp, state.flags.pc);
+          cpu.push(state, state.flags.pc);
 
           state.flags.pc = (opCode[1] | (opCode[2] << 8)) & 0xffff;
           state.cycles += 18;
@@ -1946,11 +1924,9 @@ var z80CPU = function() {
 
 
       case 0xdf:      							                                // RST 18
-        state.flags.sp -= 2;
-        state.flags.sp &= 0xffff;
         state.flags.pc += 2;
         state.flags.pc &= 0xffff;
-        cpu.writeWord(state, state.flags.sp, state.flags.pc);
+        cpu.push(state, state.flags.pc);
         state.flags.pc = (0x18 * 8);
         state.cycles += 11;
         break;
@@ -1966,10 +1942,9 @@ var z80CPU = function() {
         break;
 
       case 0xe1:      							                                // POPR    HL
-        var ret = cpu.splitBytes(cpu.readWord(state, state.flags.sp));
+        var ret = cpu.splitBytes(cpu.pop(state));
         state.flags.h = ret[1];
         state.flags.l = ret[0];
-        state.flags.sp += 2;
         state.cycles += 10;
         break;
 
@@ -1979,11 +1954,6 @@ var z80CPU = function() {
           state.flags.pc &= 0xffff;
           state.cycles += 10;
         } else {
-          state.flags.sp -= 2;
-          state.flags.sp &= 0xffff;
-          state.flags.pc += 2;
-          state.flags.pc &= 0xffff;
-          cpu.writeWord(state, state.flags.sp, state.flags.pc);
           state.flags.pc = ((opCode[2] << 8) | opCode[1]) & 0xffff;
           state.cycles += 15;
         }
@@ -2003,21 +1973,17 @@ var z80CPU = function() {
           state.cycles += 11;
         } else {
           var jumpTo = ((opCode[2] << 8) | opCode[1]) & 0xffff;
-          state.flags.sp -= 2;
-          state.flags.sp &= 0xffff;
           state.flags.pc += 2;
           state.flags.pc &= 0xffff;
-          cpu.writeWord(state, state.flags.sp, state.flags.pc);
+          cpu.push(state, state.flags.pc);
           state.flags.pc = jumpTo;
           state.cycles += 18;
         }
         break;
 
       case 0xe5:      							                                //PUSH   HL
-        state.flags.sp -= 2;
-        state.flags.sp &= 0xffff;
         var hl = cpu.getFlags(state, "hl");
-        cpu.writeWord(state, state.flags.sp, hl);
+        cpu.push(state, hl);
         state.cycles += 11;
         break;
 
@@ -2028,20 +1994,16 @@ var z80CPU = function() {
         break;
 
       case 0xe7:      							                                // RST 20
-        state.flags.sp -= 2;
-        state.flags.sp &= 0xffff;
         state.flags.pc += 2;
         state.flags.pc &= 0xffff;
-        cpu.writeWord(state, state.flags.sp, state.flags.pc);
+        cpu.push(state, state.flags.pc);
         state.flags.pc = (0x20 * 8);
         state.cycles += 11;
         break;
 
       case 0xe8:      							                                // RETP
         if (state.flags.f & fFlags.parity) {
-          state.flags.pc = cpu.readWord(state, state.flags.sp);
-          state.flags.sp += 2;
-          state.flags.sp &= 0xffff;
+          state.flags.pc = cpu.pop(state);
           state.cycles += 11;
         } else {
           state.cycles += 5;
@@ -2077,11 +2039,9 @@ var z80CPU = function() {
       case 0xec:      							                                // CALLP (word)
         if (state.flags.f & fFlags.parity) {
           var	ret = (opCode[1] | (opCode[2] << 8)) & 0xffff;
-          state.flags.sp -= 2;
-          state.flags.sp &= 0xffff;
           state.flags.pc += 2;
           state.flags.pc &= 0xffff;
-          cpu.writeWord(state, state.flags.sp, ret);
+          cpu.push(state, ret);
 
           state.flags.pc = (opCode[1] | (opCode[2] << 8)) & 0xffff;
           state.cycles += 18;
@@ -2092,7 +2052,7 @@ var z80CPU = function() {
         }
         break;
 
-      case 0xed: cpu.unimplementedInstruction(state); break;
+      case 0xed: state.cycles += 4; break;	                          // NOP
 
       case 0xee:      							                                // XORR   A,byte
         state.flags.a = cpu.operandByte(state, state.flags.a, opCode[1], "^") & 0xff;
@@ -2101,34 +2061,52 @@ var z80CPU = function() {
         break;
 
       case 0xef:      							                                // RST 28
-        state.flags.sp -= 2;
-        state.flags.sp &= 0xffff;
         state.flags.pc += 2;
         state.flags.pc &= 0xffff;
-        cpu.writeWord(state, state.flags.sp, state.flags.pc);
+        cpu.push(state, state.flags.pc);
         state.flags.pc = (0x28 * 8);
         state.cycles += 11;
         break;
 
-      case 0xf0: cpu.unimplementedInstruction(state); break;
+      case 0xf0:      							                                // RETNS
+        if (state.flags.f & fFlags.sign) {
+          state.cycles += 5;
+        } else {
+          state.flags.pc = cpu.pop(state);
+          state.cycles += 11;
+        }
+        break;
+
 
       case 0xf1:      							                                // POPR    AF
-        var ret = cpu.splitBytes(cpu.readWord(state, state.flags.sp));
+        var ret = cpu.splitBytes(cpu.pop(state));
         state.flags.a = ret[1];
         state.flags.f = ret[0];
-        state.flags.sp += 2;
         state.cycles += 10;
         break;
       
       case 0xf2: cpu.unimplementedInstruction(state); break;
       case 0xf3: cpu.unimplementedInstruction(state); break;
-      case 0xf4: cpu.unimplementedInstruction(state); break;
-      
+
+      case 0xf4:      							                                // CALLS (word)
+        if (state.flags.f & fFlags.sign) {
+          var	ret = (opCode[1] | (opCode[2] << 8)) & 0xffff;
+          state.flags.pc += 2;
+          state.flags.pc &= 0xffff;
+          cpu.push(state, ret);
+
+          state.flags.pc = (opCode[1] | (opCode[2] << 8)) & 0xffff;
+          state.cycles += 18;
+        } else {
+          state.flags.pc += 2;
+          state.flags.pc &= 0xffff;
+          state.cycles += 11;
+        }
+        break;
+
       case 0xf5:      							                                // PUSH AF
-        state.flags.sp -= 2;
-        state.flags.sp &= 0xffff;
         var af = cpu.getFlags(state, "af");
-        cpu.writeWord(state, state.flags.sp, af);
+        cpu.push(state, af);
         state.cycles += 11;
         break;
 
@@ -2139,11 +2117,9 @@ var z80CPU = function() {
         break;
 
       case 0xf7:      							                                // RST 30
-        state.flags.sp -= 2;
-        state.flags.sp &= 0xffff;
         state.flags.pc += 2;
         state.flags.pc &= 0xffff;
-        cpu.writeWord(state, state.flags.sp, state.flags.pc);
+        cpu.push(state, state.flags.pc);
         state.flags.pc = (0x30 * 8);
         state.cycles += 11;
         break;
@@ -2176,11 +2152,9 @@ var z80CPU = function() {
         break;
 
       case 0xff:      							                                // RST 38
-        state.flags.sp -= 2;
-        state.flags.sp &= 0xffff;
         state.flags.pc += 2;
         state.flags.pc &= 0xffff;
-        cpu.writeWord(state, state.flags.sp, state.flags.pc);
+        cpu.push(state, state.flags.pc);
         state.flags.pc = (0x38 * 8);
         state.cycles += 11;
         break;
@@ -2219,16 +2193,30 @@ var z80CPU = function() {
 
     if (state.flags.f & fFlags.interrupt) {
       // We need to push the current PC to (SP) so we can return after executing the interrupt.
-      state.flags.sp -= 2;
-      state.flags.sp &= 0xffff;
-
-      cpu.writeWord(state, state.flags.sp, state.flags.pc);
+      cpu.push(state, state.flags.pc);
 
       state.flags.pc = state.pInterrupt;
       if (typeof(state.cInterrupt) === "function") {
         state.cInterrupt(state, state.pInterrupt);
       }
     }
+  }
+
+  cpu.push = function(state, value) {
+    state.flags.sp -= 2;
+    state.flags.sp &= 0xffff;
+    cpu.writeWord(state, state.flags.sp, value);
+  }
+
+  cpu.pop = function(state, update = false) {
+    var ret = cpu.readWord(state, state.flags.sp);
+    state.flags.sp += 2;
+    state.flags.sp &= 0xffff;
+    if (update) {
+      state.flags.pc = ret;
+    }
+
+    return ret;
   }
 
   cpu.readHWPort = function(state, portCh) {
