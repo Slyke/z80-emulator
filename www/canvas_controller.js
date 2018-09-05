@@ -11,7 +11,7 @@ var previouslyExecInstructions = [];
 var screenDimensions = [0, 0];
 var gameDimensions = [224, 256];
 var gameTopLeftCoord = [0.05, 0.05]
-var gameScale = 1;
+var gameScale = 1.5;
 var gameScreenImageData = [];
 var memoryMapImageData = [];
 var screenRedrawing = false;
@@ -99,6 +99,50 @@ function keyEvents(event, eventType) {
       showMemoryInspector = !showMemoryInspector;
       if (showMemoryInspector) {
         renderMemoryMap(runningCPU, runningCPU.db.memoryUpdated, true);
+      }
+    }
+  } else if (eventType === "down") {
+    if (cpuCanStart) {
+      if (event.key === 'a') {
+        runningCPU.hwIntPorts[0x01] |= 0x20;
+      }
+
+      if (event.key === 'd') {
+        runningCPU.hwIntPorts[0x01] |= 0x40;
+      }
+
+      if (event.key === ' ') {
+        runningCPU.hwIntPorts[0x01] |= 0x10;;
+      }
+
+      if (event.key === '1') {
+        runningCPU.hwIntPorts[0x01] |= 0x04;;
+      }
+
+      if (event.key === 'c') {
+        runningCPU.hwIntPorts[0x01] |= 0x01;;
+      }
+    }
+  } else if (eventType === "up") {
+    if (cpuCanStart) {
+      if (event.key === 'a') {
+        runningCPU.hwIntPorts[0x01] &= 0xff - 0x20;
+      }
+
+      if (event.key === 'd') {
+        runningCPU.hwIntPorts[0x01] &= 0xff - 0x40;
+      }
+
+      if (event.key === ' ') {
+        runningCPU.hwIntPorts[0x01] &= 0xff - 0x10;;
+      }
+
+      if (event.key === '1') {
+        runningCPU.hwIntPorts[0x01] &= 0xff - 0x04;;
+      }
+
+      if (event.key === 'c') {
+        runningCPU.hwIntPorts[0x01] &= 0xff - 0x01;;
       }
     }
   }

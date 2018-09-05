@@ -6,15 +6,19 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
   }
 
   var helpText = [
-    "Keys:",
-    "     P - Pause/Resume",
+    "Game Keys:",
+    "     A - Left        D - Right",
+    "     Spacebar - Shoot",
+    "     1 - Player 1    2 - Player 2",
+    "     C - Insert Coin",
+    "     ",
+    "Emulator Keys:",
+    "     P - Pause/Resume Emulator (Press this to start)",
     "     M - Show/Hide memory disassembly",
     "     ",
     "Skip Ahead X instructions:",
-    "     G - 10, 000",
-    "     H - 1, 000",
-    "     J - 100",
-    "     K - 10",
+    "     G - 10, 000     H - 1, 000",
+    "     J - 100         K - 10 ",
     "     L - 1 (Step by step)"
   ];
 

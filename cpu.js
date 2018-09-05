@@ -358,7 +358,7 @@ var z80CPU = function() {
       case 0x24: output.opCode = "INCR"; output.z80OPCode = "INC"; output.cycles = 5; output.ireg = "H"; output.oreg = "H"; break;
       case 0x25: output.opCode = "DCRR"; output.z80OPCode = "DEC"; output.cycles = 5; output.ireg = "H"; output.oreg = "H"; break;
       case 0x26: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 7; output.oreg = "H"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
-      case 0x27: output.opCode = "UNKOP"; output.z80OPCode = "DAA"; output.cycles = 7; output.ptr = "!"; output.para1 = opCode[1].toString(16); output.para2 = opCode[1].toString(16); output.opBytes = 2; break;
+      case 0x27: output.opCode = "NOP"; output.z80OPCode = "DAA"; output.cycles = 7; output.ptr = "!"; output.para1 = opCode[1].toString(16); output.para2 = opCode[1].toString(16); output.opBytes = 2; break;
       case 0x28: output.opCode = "NOP"; output.z80OPCode = "NOP"; output.cycles = 4; break;
       case 0x29: output.opCode = "INXR"; output.z80OPCode = "ADD"; output.cycles = 11; output.oreg = "HL"; output.ireg = "HL"; break;
       case 0x2a: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 16; output.ptr = "&"; output.oreg = "HL"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
@@ -855,7 +855,7 @@ var z80CPU = function() {
         state.cycles += 7;
         break;
     
-      case 0x27: cpu.unimplementedInstruction(state); break;        // TODO: This one   // DAA
+      case 0x27: state.cycles += 4; break;                    // NOP // DAA
 
       case 0x28: state.cycles += 4; break;                    // NOP
 
