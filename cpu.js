@@ -699,7 +699,7 @@ var z80CPU = function() {
         state.cycles += 7;
         break;
 
-      case 0x0f: 							                                      // RRC A
+      case 0x0f: 							                                      // RRCA
         var hi = (state.flags.a & 1) << 7;
         if (hi) {
           state.flags.f |= fFlags.carry;
@@ -904,7 +904,7 @@ var z80CPU = function() {
 
       case 0x2f: 							                                      // CPL A
         state.flags.a ^= 0xff;
-        state.cycles += 7;
+        state.cycles += 4;
         break;
 
       case 0x30: state.cycles += 4; break;                    // NOP
@@ -1536,7 +1536,7 @@ var z80CPU = function() {
       case 0xa6:      							                                // ANDR   A,(HL)
         var offset = (state.flags.h << 8) | (state.flags.l);
         state.flags.a = cpu.operandByte(state, state.flags.a, (cpu.readByte(state, offset)), "&") & 0xff;
-        state.cycles += 4;
+        state.cycles += 7;
         break;
       
       case 0xa7:      							                                // ANDR   A,A

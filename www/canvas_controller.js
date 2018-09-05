@@ -1,5 +1,5 @@
 var showFPS = false;
-var showMemoryInspector = false;
+var showMemoryInspector = true;
 var consoleOutWarnings = false;
 var fontStyle = "monospace"; // "Megrim";
 
@@ -291,7 +291,7 @@ function printMemorySlice(cpuState, pc, lower, upper) {
 function setupCPU() {
   runningCPU = z80CPU();
 
-  runningCPU.hwIntPorts[0x01] = 0b00000001;
+  runningCPU.hwIntPorts[0x01] = 0b00000000;
   runningCPU.hwIntPorts[0x02] = 0b00000000;
   runningCPU.hwIntPorts[0x03] = 0b00000000; // Looks like it communicates to something external with port 3 and 4. Maybe a sound card?
   runningCPU.hwIntPorts[0x04] = 0b00000000; 
@@ -322,6 +322,9 @@ function setupCPU() {
     if (event === 'postwrite' && portCh === 0x04) {
       state.hwIntPorts[0x03] = value;
       // console.log("Port 3 written   PC: ", state.flags.pc.toString(16), "  Value: ", value);
+    } else if (event === 'preread' && portCh === 0x02) {
+      state.hwIntPorts[0x02] = 0;
+      // console.log("Port 2 written   PC: ", state.flags.pc.toString(16), "  Value: ", value);
     }
   };
 
