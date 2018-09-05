@@ -1781,7 +1781,7 @@ describe('Z80 CPU Emulator', () => {
           it('should turn on zero flag (0x40)', () => {
             assert.equal(modifiyState.flags.f & 0x40, 0x40);
           });
-          it('should turn on sign flag (0x80)', () => {
+          it('should not turn on sign flag (0x80)', () => {
             assert.equal(modifiyState.flags.f & 0x80, 0x00);
           });
         });
@@ -1897,7 +1897,7 @@ describe('Z80 CPU Emulator', () => {
           it('should turn on zero flag (0x40)', () => {
             assert.equal(modifiyState.flags.f & 0x40, 0x40);
           });
-          it('should turn on sign flag (0x80)', () => {
+          it('should not turn on sign flag (0x80)', () => {
             assert.equal(modifiyState.flags.f & 0x80, 0x00);
           });
         });
@@ -1975,8 +1975,242 @@ describe('Z80 CPU Emulator', () => {
           it('should turn on zero flag (0x40)', () => {
             assert.equal(modifiyState.flags.f & 0x40, 0x40);
           });
-          it('should turn on sign flag (0x80)', () => {
+          it('should not turn on sign flag (0x80)', () => {
             assert.equal(modifiyState.flags.f & 0x80, 0x00);
+          });
+        });
+      });
+    });
+
+    describe('indecrementByte', () => {
+      describe('Add', () => {
+        describe('Basic', () => {
+          cpu = cpuFunc();
+          var cpuInputState = Object.freeze({
+            ...cpu,
+            flags: {
+              f: 0x00
+            },
+            memory: [ ]
+          });
+
+          var modifiyState = JSON.parse(JSON.stringify(cpuInputState));
+
+          var cpuOut = cpu.indecrementByte(modifiyState, 0x03, 1);
+
+          //Basic tests
+          it('should increment 0x03 to 0x04', () => {
+            assert.equal(cpuOut, 0x04);
+          });
+          it('should not turn on carry flag (0x01)', () => {
+            assert.equal(modifiyState.flags.f & 0x01, 0x00);
+          });
+          it('should turn on parity flag (0x04)', () => {
+            assert.equal(modifiyState.flags.f & 0x04, 0x04);
+          });
+          it('should not turn on halfcarry flag (0x10)', () => {
+            assert.equal(modifiyState.flags.f & 0x10, 0x00);
+          });
+          it('should not turn on interrupt flag (0x20)', () => {
+            assert.equal(modifiyState.flags.f & 0x20, 0x00);
+          });
+          it('should not turn on zero flag (0x40)', () => {
+            assert.equal(modifiyState.flags.f & 0x40, 0x00);
+          });
+          it('should not turn on sign flag (0x80)', () => {
+            assert.equal(modifiyState.flags.f & 0x80, 0x00);
+          });
+        });
+
+        describe('Turn on the zero flag', () => {
+          cpu = cpuFunc();
+          var cpuInputState = Object.freeze({
+            ...cpu,
+            flags: {
+              f: 0x00
+            },
+            memory: [ ]
+          });
+
+          var modifiyState = JSON.parse(JSON.stringify(cpuInputState));
+
+          var cpuOut = cpu.indecrementByte(modifiyState, 0xff, 1);
+
+          //Basic tests
+          it('should increment 0xff to 0x00', () => {
+            assert.equal(cpuOut, 0x00);
+          });
+          it('should not turn on carry flag (0x01)', () => {
+            assert.equal(modifiyState.flags.f & 0x01, 0x00);
+          });
+          it('should turn on parity flag (0x04)', () => {
+            assert.equal(modifiyState.flags.f & 0x04, 0x04);
+          });
+          it('should turn on halfcarry flag (0x10)', () => {
+            assert.equal(modifiyState.flags.f & 0x10, 0x10);
+          });
+          it('should not turn on interrupt flag (0x20)', () => {
+            assert.equal(modifiyState.flags.f & 0x20, 0x00);
+          });
+          it('should turn on zero flag (0x40)', () => {
+            assert.equal(modifiyState.flags.f & 0x40, 0x40);
+          });
+          it('should not turn on sign flag (0x80)', () => {
+            assert.equal(modifiyState.flags.f & 0x80, 0x00);
+          });
+        });
+
+        describe('Turn on the zero flag', () => {
+          cpu = cpuFunc();
+          var cpuInputState = Object.freeze({
+            ...cpu,
+            flags: {
+              f: 0x00
+            },
+            memory: [ ]
+          });
+
+          var modifiyState = JSON.parse(JSON.stringify(cpuInputState));
+
+          var cpuOut = cpu.indecrementByte(modifiyState, 0xee, 1);
+
+          //Basic tests
+          it('should increment 0xee to 0xef', () => {
+            assert.equal(cpuOut, 0xef);
+          });
+          it('should not turn on carry flag (0x01)', () => {
+            assert.equal(modifiyState.flags.f & 0x01, 0x00);
+          });
+          it('should not turn on parity flag (0x04)', () => {
+            assert.equal(modifiyState.flags.f & 0x04, 0x00);
+          });
+          it('should not turn on halfcarry flag (0x10)', () => {
+            assert.equal(modifiyState.flags.f & 0x10, 0x00);
+          });
+          it('should not turn on interrupt flag (0x20)', () => {
+            assert.equal(modifiyState.flags.f & 0x20, 0x00);
+          });
+          it('should not turn on zero flag (0x40)', () => {
+            assert.equal(modifiyState.flags.f & 0x40, 0x00);
+          });
+          it('should not turn on sign flag (0x80)', () => {
+            assert.equal(modifiyState.flags.f & 0x80, 0x80);
+          });
+        });
+      });
+
+      describe('Subtract', () => {
+        describe('Basic', () => {
+          cpu = cpuFunc();
+          var cpuInputState = Object.freeze({
+            ...cpu,
+            flags: {
+              f: 0x00
+            },
+            memory: [ ]
+          });
+
+          var modifiyState = JSON.parse(JSON.stringify(cpuInputState));
+
+          var cpuOut = cpu.indecrementByte(modifiyState, 0x03, -1);
+
+          //Basic tests
+          it('should increment 0x03 to 0x02', () => {
+            assert.equal(cpuOut, 0x02);
+          });
+          it('should not turn on carry flag (0x01)', () => {
+            assert.equal(modifiyState.flags.f & 0x01, 0x00);
+          });
+          it('should turn on parity flag (0x04)', () => {
+            assert.equal(modifiyState.flags.f & 0x04, 0x04);
+          });
+          it('should not turn on halfcarry flag (0x10)', () => {
+            assert.equal(modifiyState.flags.f & 0x10, 0x00);
+          });
+          it('should not turn on interrupt flag (0x20)', () => {
+            assert.equal(modifiyState.flags.f & 0x20, 0x00);
+          });
+          it('should not turn on zero flag (0x40)', () => {
+            assert.equal(modifiyState.flags.f & 0x40, 0x00);
+          });
+          it('should not turn on sign flag (0x80)', () => {
+            assert.equal(modifiyState.flags.f & 0x80, 0x00);
+          });
+        });
+
+        describe('Turn on the zero flag', () => {
+          cpu = cpuFunc();
+          var cpuInputState = Object.freeze({
+            ...cpu,
+            flags: {
+              f: 0x00
+            },
+            memory: [ ]
+          });
+
+          var modifiyState = JSON.parse(JSON.stringify(cpuInputState));
+
+          var cpuOut = cpu.indecrementByte(modifiyState, 0x01, -1);
+
+          //Basic tests
+          it('should increment 0x01 to 0x00', () => {
+            assert.equal(cpuOut, 0x00);
+          });
+          it('should not turn on carry flag (0x01)', () => {
+            assert.equal(modifiyState.flags.f & 0x01, 0x00);
+          });
+          it('should turn on parity flag (0x04)', () => {
+            assert.equal(modifiyState.flags.f & 0x04, 0x04);
+          });
+          it('should not turn on halfcarry flag (0x10)', () => {
+            assert.equal(modifiyState.flags.f & 0x10, 0x00);
+          });
+          it('should not turn on interrupt flag (0x20)', () => {
+            assert.equal(modifiyState.flags.f & 0x20, 0x00);
+          });
+          it('should turn on zero flag (0x40)', () => {
+            assert.equal(modifiyState.flags.f & 0x40, 0x40);
+          });
+          it('should not turn on sign flag (0x80)', () => {
+            assert.equal(modifiyState.flags.f & 0x80, 0x00);
+          });
+        });
+
+        describe('Turn on the zero flag', () => {
+          cpu = cpuFunc();
+          var cpuInputState = Object.freeze({
+            ...cpu,
+            flags: {
+              f: 0x00
+            },
+            memory: [ ]
+          });
+
+          var modifiyState = JSON.parse(JSON.stringify(cpuInputState));
+
+          var cpuOut = cpu.indecrementByte(modifiyState, 0xef, -1);
+
+          //Basic tests
+          it('should increment 0xef to 0xee', () => {
+            assert.equal(cpuOut, 0xee);
+          });
+          it('should not turn on carry flag (0x01)', () => {
+            assert.equal(modifiyState.flags.f & 0x01, 0x00);
+          });
+          it('should turn on parity flag (0x04)', () => {
+            assert.equal(modifiyState.flags.f & 0x04, 0x04);
+          });
+          it('should not turn on halfcarry flag (0x10)', () => {
+            assert.equal(modifiyState.flags.f & 0x10, 0x00);
+          });
+          it('should not turn on interrupt flag (0x20)', () => {
+            assert.equal(modifiyState.flags.f & 0x20, 0x00);
+          });
+          it('should not turn on zero flag (0x40)', () => {
+            assert.equal(modifiyState.flags.f & 0x40, 0x00);
+          });
+          it('should not turn on sign flag (0x80)', () => {
+            assert.equal(modifiyState.flags.f & 0x80, 0x80);
           });
         });
       });
