@@ -1,17 +1,20 @@
-var showFPS = false;
-var showMemoryInspector = true;
-var consoleOutWarnings = false;
+var showFPS = getLocalStorage('showFPS', false) !== "false";
+var showMemoryInspector = getLocalStorage('showMemoryInspector', true) !== "false";
+var consoleOutWarnings = getLocalStorage('consoleOutWarnings', true) !== "false";
+var loadSpaceInvadersByDefault = getLocalStorage('loadSpaceInvadersByDefault', true) !== "false";
 var fontStyle = "monospace"; // "Megrim";
 
 var romLoaded = 0;
 var cpuCanStart = false;
 var cpuRunning = false;
 var previouslyExecInstructions = [];
+var loadedMemoryFilesList = [];
 
 var screenDimensions = [0, 0];
 var gameDimensions = [224, 256];
 var gameTopLeftCoord = [0.05, 0.05]
-var gameScale = 1.5;
+var gameScale = getLocalStorage('gameScale', 1.5);
+var gameScreenRenderData = new Image();
 var gameScreenImageData = [];
 var memoryMapImageData = [];
 var screenRedrawing = false;
@@ -23,6 +26,8 @@ var fpsNumber = 0;
 var isAnimating = true;
 var cpuClock;
 
+var objCanvas;
+
 var runningCPU = z80CPU();
 
 var persistantObjects = {
@@ -33,8 +38,91 @@ var persistantObjects = {
   stackPointer: {},
   screenBox: {},
   portInfo: {},
-  mm: {}
+  mm: {},
+  gameFiles: {}
 };
+
+function fileDropHandler(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  if (event.dataTransfer.files.length > 1) {
+    console.error("Error: Uploaded too many files at the same time. Only upload one at a time, to ensure the order is correct.");
+    return;
+  }
+
+  var uploadedFile = event.dataTransfer.files[0];
+
+  var fileExt = uploadedFile.name.substring(uploadedFile.name.lastIndexOf('.') + 1);
+
+  if (fileExt === "bin") {
+    var reader = new FileReader();
+
+    reader.onload = function (event) {
+      cpuRunning = false;
+
+      if (loadedMemoryFilesList.length === 0) {
+        runningCPU = z80CPU();
+        runningCPU.memory = new Array();
+        setupCPUCallbacks();
+      }
+
+      memoryOffset = runningCPU.memory.length;
+      var byteArray = new Uint8Array(event.target.result);
+      for (var i = 0; i < byteArray.byteLength; i++) {
+        runningCPU.memory[i + memoryOffset] = byteArray[i];
+      }
+      loadedMemoryFilesList.push(uploadedFile.name);
+
+      renderMemoryMap(runningCPU, runningCPU.db.memoryUpdated, true);
+    };
+
+    reader.onerror = function (err) {
+      console.log("Error loading binary data from file: ", err)
+    };
+
+    reader.readAsArrayBuffer(uploadedFile);
+  } else if (fileExt === "json") {
+    var reader = new FileReader();
+
+    reader.onload = function (event) {
+      cpuRunning = false;
+
+      if (loadedMemoryFilesList.length === 0) {
+        runningCPU = z80CPU();
+        runningCPU.memory = new Array();
+        setupCPUCallbacks();
+      }
+
+      memoryOffset = runningCPU.memory.length;
+      var jsonGame = JSON.parse(event.target.result);
+      var jsonData = jsonGame.data;
+      for (var i = 0; i < jsonData.length; i++) {
+        runningCPU.memory[i + memoryOffset] = parseInt("0x" + jsonData[i]);
+      }
+      loadedMemoryFilesList.push(uploadedFile.name);
+
+      renderMemoryMap(runningCPU, runningCPU.db.memoryUpdated, true);
+    };
+
+    reader.onerror = function (err) {
+      console.log("Error loading json data from file: ", err)
+    };
+
+    reader.readAsText(uploadedFile);
+  } else {
+    console.error("Error, ", fileExt, "is not a valid file type. Only *.bin and *.json are valid.");
+  }
+
+  renderMemoryMap(runningCPU, runningCPU.db.memoryUpdated, true);
+}
+
+function getLocalStorage(key, defaultValue) {
+  if (localStorage.getItem(key) === null) {
+    localStorage.setItem(key, defaultValue)
+  }
+
+  return localStorage.getItem(key);
+}
 
 function setupEventHandlers(objCanvas, objCanvasController) {
   objCanvas.addEventListener('click', function(e) {
@@ -49,103 +137,6 @@ function setupEventHandlers(objCanvas, objCanvasController) {
   window.addEventListener("keypress", function(e){
     keyEvents(e, "press");
   });
-}
-
-function keyEvents(event, eventType) {
-  if (eventType === "press") {
-    if (event.keyCode === 32) { // 32 is spacebar
-
-    }
-    if (event.key === 'l') { // 1
-      if (!cpuRunning) {
-        cpuExec();
-        renderGameScreen(runningCPU, runningCPU.db.videoMemoryUpdated);
-        renderMemoryMap(runningCPU, runningCPU.db.memoryUpdated, true);
-      }
-    }
-    if (event.key === 'k') { // 10
-      if (!cpuRunning) {
-        for (var i = 0; i < 10; i++) { cpuExec(); }
-        renderGameScreen(runningCPU, runningCPU.db.videoMemoryUpdated);
-        renderMemoryMap(runningCPU, runningCPU.db.memoryUpdated, true);
-      }
-    }
-    if (event.key === 'j') { // 100
-      if (!cpuRunning) {
-        for (var i = 0; i < 100; i++) { cpuExec(); }
-        renderGameScreen(runningCPU, runningCPU.db.videoMemoryUpdated);
-        renderMemoryMap(runningCPU, runningCPU.db.memoryUpdated, true);
-      }
-    }
-    if (event.key === 'h') { // 1000
-      if (!cpuRunning) {
-        for (var i = 0; i < 1000; i++) { cpuExec(); }
-        renderGameScreen(runningCPU, runningCPU.db.videoMemoryUpdated);
-        renderMemoryMap(runningCPU, runningCPU.db.memoryUpdated, true);
-      }
-    }
-    if (event.key === 'g') { // 10000
-      if (!cpuRunning) {
-        for (var i = 0; i < 10000; i++) { cpuExec(); }
-        renderGameScreen(runningCPU, runningCPU.db.videoMemoryUpdated);
-        renderMemoryMap(runningCPU, runningCPU.db.memoryUpdated, true);
-      }
-    }
-    if (event.key === 'p') {
-      cpuRunning = !cpuRunning;
-      runCPU();
-    }
-    if (event.key === 'm') {
-      showMemoryInspector = !showMemoryInspector;
-      if (showMemoryInspector) {
-        renderMemoryMap(runningCPU, runningCPU.db.memoryUpdated, true);
-      }
-    }
-  } else if (eventType === "down") {
-    if (cpuCanStart) {
-      if (event.key === 'a') {
-        runningCPU.hwIntPorts[0x01] |= 0x20;
-      }
-
-      if (event.key === 'd') {
-        runningCPU.hwIntPorts[0x01] |= 0x40;
-      }
-
-      if (event.key === ' ') {
-        runningCPU.hwIntPorts[0x01] |= 0x10;;
-      }
-
-      if (event.key === '1') {
-        runningCPU.hwIntPorts[0x01] |= 0x04;;
-      }
-
-      if (event.key === 'c') {
-        runningCPU.hwIntPorts[0x01] |= 0x01;;
-      }
-    }
-  } else if (eventType === "up") {
-    if (cpuCanStart) {
-      if (event.key === 'a') {
-        runningCPU.hwIntPorts[0x01] &= 0xff - 0x20;
-      }
-
-      if (event.key === 'd') {
-        runningCPU.hwIntPorts[0x01] &= 0xff - 0x40;
-      }
-
-      if (event.key === ' ') {
-        runningCPU.hwIntPorts[0x01] &= 0xff - 0x10;;
-      }
-
-      if (event.key === '1') {
-        runningCPU.hwIntPorts[0x01] &= 0xff - 0x04;;
-      }
-
-      if (event.key === 'c') {
-        runningCPU.hwIntPorts[0x01] &= 0xff - 0x01;;
-      }
-    }
-  }
 }
 
 function animateLoop() {
@@ -189,9 +180,13 @@ function animateLoop() {
 
   if (isAnimating) {
     this.lastAnimationTime = currentTime;
+
     canvasControl.refreshScreen(false);
 
-    canvasControl.canvasContext.putImageData(gameScreenImageData, relToAbs(gameTopLeftCoord[0], 0), relToAbs(gameTopLeftCoord[1], 1));
+    if (gameScale === 1) { // Dump video array to canvas (no resize).
+      canvasControl.canvasContext.putImageData(gameScreenImageData, relToAbs(gameTopLeftCoord[0], 0), relToAbs(gameTopLeftCoord[1], 1));
+    }
+    
     
     if (showMemoryInspector) {
       canvasControl.canvasContext.putImageData(memoryMapImageData, relToAbs(0.75, 0), relToAbs(0.63, 1));
@@ -289,6 +284,24 @@ function writeGamePixel(x, y, v, c) {
   gameScreenImageData.data[imageIndex + 3] = a;
 }
 
+function injectJSONDataIntoMemory(memory, filename, memoryOffset = 0, cb) {
+
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', filename, true);
+
+  xhr.onload = function(e) {
+    if (this.status === 200) {
+      var memoryData = this.response.data;
+      for (var i = 0; i < byteArray.length; i++) {
+        memory[i + memoryOffset] = memoryData[i];
+      }
+      cb();
+    }
+  };
+   
+  xhr.send();
+}
+
 function injectBinaryDataIntoMemory(memory, filename, memoryOffset = 0, cb) {
 
   var xhr = new XMLHttpRequest();
@@ -332,34 +345,41 @@ function printMemorySlice(cpuState, pc, lower, upper) {
   return memoryOutput;
 };
 
-function setupCPU() {
-  runningCPU = z80CPU();
+function loadSpaceInvadersGame() {
 
-  runningCPU.hwIntPorts[0x01] = 0b00000000;
-  runningCPU.hwIntPorts[0x02] = 0b00000000;
-  runningCPU.hwIntPorts[0x03] = 0b00000000; // Looks like it communicates to something external with port 3 and 4. Maybe a sound card?
-  runningCPU.hwIntPorts[0x04] = 0b00000000; 
-
-  runningCPU.memory = new Array(0x10000).fill(0);
-
-  injectBinaryDataIntoMemory(runningCPU.memory, "../rom/invaders/invaders.h", 0, () => {
+  injectBinaryDataIntoMemory(runningCPU.memory, "../rom/invaders/invaders1.h.bin", 0, () => {
+    loadedMemoryFilesList.push("invaders1.h.bin");
     romLoaded++;
-    postCPUReady();
+    if (romLoaded === 4) {
+      postCPUReady();
+    }
   });
 
-  injectBinaryDataIntoMemory(runningCPU.memory, "../rom/invaders/invaders.g", 0x800, () => {
+  injectBinaryDataIntoMemory(runningCPU.memory, "../rom/invaders/invaders2.g.bin", 0x800, () => {
+    loadedMemoryFilesList.push("invaders2.g.bin");
     romLoaded++;
-    postCPUReady();
+    if (romLoaded === 4) {
+      postCPUReady();
+    }
   });
-  injectBinaryDataIntoMemory(runningCPU.memory, "../rom/invaders/invaders.f", 0x1000, () => {
+  injectBinaryDataIntoMemory(runningCPU.memory, "../rom/invaders/invaders3.f.bin", 0x1000, () => {
+    loadedMemoryFilesList.push("invaders3.f.bin");
     romLoaded++;
-    postCPUReady();
+    if (romLoaded === 4) {
+      postCPUReady();
+    }
   });
 
-  injectBinaryDataIntoMemory(runningCPU.memory, "../rom/invaders/invaders.e", 0x1800, () => {
+  injectBinaryDataIntoMemory(runningCPU.memory, "../rom/invaders/invaders4.e.bin", 0x1800, () => {
+    loadedMemoryFilesList.push("invaders4.e.bin");
     romLoaded++;
-    postCPUReady();
+    if (romLoaded === 4) {
+      postCPUReady();
+    }
   });
+}
+
+function setupCPUCallbacks() {
 
   // Looks like the game is communicating with some external hardware. This function mocks that hardware. Game crashes without it.
   runningCPU.hwPortHook = function(event, state, portCh, value) {
@@ -385,21 +405,42 @@ function setupCPU() {
 }
 
 function postCPUReady() {
-  if (romLoaded === 4) {
-
-    memoryMapImageData = objContext.createImageData(0xff, 0xff);
+  if (objCanvas) {
+    memoryMapImageData = canvasControl.canvasContext.createImageData(0xff, 0xff);
     for (var i = 0; i < memoryMapImageData.data.length; i++) {
       memoryMapImageData.data[i] = ((i % 4) !== 3 ? 0 : 255);
     }
-
-    cpuCanStart = true;
+    renderMemoryMap(runningCPU, runningCPU.db.memoryUpdated, true);
   }
+  
+  cpuCanStart = true;
 }
 
 function runCPU () {
   if (cpuCanStart === true) {
     cpuLoop();
   }
+}
+
+function setupCPU() {
+  runningCPU = z80CPU();
+
+  runningCPU.hwIntPorts[0x01] = 0b00000000;
+  runningCPU.hwIntPorts[0x02] = 0b00000000;
+  runningCPU.hwIntPorts[0x03] = 0b00000000; // Looks like it communicates to something external with port 3 and 4. Maybe a sound card?
+  runningCPU.hwIntPorts[0x04] = 0b00000000; 
+
+  runningCPU.memory = new Array(0x10000).fill(0);
+
+  if (loadSpaceInvadersByDefault) {
+    loadSpaceInvadersGame();
+  } else {
+    cpuCanStart = true;
+    postCPUReady();
+  }
+  
+  setupCPUCallbacks();
+
 }
 
 async function cpuLoop() {
@@ -443,6 +484,12 @@ function cpuExec() {
 function setupCanvas() {
   lastAnimationTime = new Date().getTime();
   objCanvas = document.getElementById("canvasDraw");
+
+  objCanvas.addEventListener('drop', fileDropHandler, false);
+  objCanvas.addEventListener('dragenter', function(event) {event.preventDefault();event.preventDefault();}, false);
+  objCanvas.addEventListener('dragover', function(event) {event.preventDefault();event.preventDefault();}, false);
+  objCanvas.addEventListener('dragleave', function(event) {event.preventDefault();event.preventDefault();}, false);
+
   objCanvas.imageSmoothingEnabled = true;
   canvasControl = new CanvasControl();
   // This is the canvas resolution, NOT the size.
@@ -454,6 +501,14 @@ function setupCanvas() {
   screenDimensions = [objCanvas.width, objCanvas.height];
   gameScreenImageData = objContext.createImageData(gameDimensions[0], gameDimensions[1]);
   memoryMapImageData = objContext.createImageData(0xff, 0xff);
+
+  if (cpuCanStart) {
+    for (var i = 0; i < memoryMapImageData.data.length; i++) {
+      memoryMapImageData.data[i] = ((i % 4) !== 3 ? 0 : 255);
+    }
+    renderMemoryMap(runningCPU, runningCPU.db.memoryUpdated, true);
+  }
+
   animateLoop();
 }
 

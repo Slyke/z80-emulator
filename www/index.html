@@ -5,6 +5,7 @@
     <script src="../node_modules/js-ui-engine/src/canvas_ui.min.js"></script>
     <script src="../cpu.js"></script>
     <script src="ui_helpers.js"></script>
+    <script src="keybind_helpers.js"></script>
     <script src="canvas_controller.js"></script>
     <style>
       body {
@@ -20,12 +21,18 @@
       .canvasContainer {
         position:absolute;
         width: 95%;
-        height: 90%;
+        height: 93%;
         margin: auto;
         position: absolute;
-        top: 5%;
+        top: 3%;
         left: 0;
         right: 0;
+      }
+      .titlediv {
+        text-align: center;
+      }
+      .title {
+        margin: 0;
       }
     </style> 
     
@@ -35,5 +42,8 @@
     <div class="canvasContainer">
       <canvas id="canvasDraw">Hmmm... Your browser doesn't seem to support HTML 5 Canvas</canvas>
     </div>
+    <br />
+    <div>&nbsp; &nbsp; <a href="https://github.com/Slyke/z80-emulator">Source Code</a> &nbsp;&nbsp;&nbsp; <a href="http://stevenlawler.name/home">Creator</a></div>
+    <div class="titlediv"><h3 class="title">Z80 Emulator</h3></div>
   </body>
 </html>

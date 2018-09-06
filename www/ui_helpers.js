@@ -1,4 +1,17 @@
 
+function Uint8ClampedArrayImageToPNG(arrayImage, gameDimensions) {
+  var resizeCanvas = document.createElement("canvas");
+  resizeCanvas.height = gameDimensions[1];
+  resizeCanvas.width = gameDimensions[0];
+  var resizeContext = resizeCanvas.getContext("2d");
+
+  resizeContext.putImageData(arrayImage, 0, 0);
+  var dataURL = resizeCanvas;
+  // document.removeChild(resizeCanvas);
+
+  return dataURL;
+}
+
 function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanStart, showMemoryInspector) {
 
   if (!cpuCanStart) {
@@ -15,6 +28,8 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
     "Emulator Keys:",
     "     P - Pause/Resume Emulator (Press this to start)",
     "     M - Show/Hide memory disassembly",
+    "     Shift + R - Reset CPU State (All Memory Intract)",
+    "     Shift + Q - Wipe memory (all = 0x00)",
     "     ",
     "Skip Ahead X instructions:",
     "     G - 10, 000     H - 1, 000",
@@ -25,7 +40,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
   helpText.forEach(function(helpIndex, i) {
     var objHelpText = {
       "x": relToAbs(0.05, 0),
-      "y": relToAbs(0.6 + (i * 0.02), 1),
+      "y": (relToAbs(0.4, 1) * gameScale) + (relToAbs(i * 0.02, 1)),
       "name":"lblHelpText" + i,
       "text": helpIndex,
       "shape":"text",
@@ -37,6 +52,25 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
     canvasControl.canvasObjects.push(objHelpText);
   });
+
+  if (gameScale !== 1) {
+    gameScreenRenderData = Uint8ClampedArrayImageToPNG(gameScreenImageData, gameDimensions);
+  }
+  persistantObjects.gameScreen = {
+    "x": relToAbs(gameTopLeftCoord[0], 0),
+    "y": relToAbs(gameTopLeftCoord[1], 1),
+    "w": gameDimensions[0],
+    "h": gameDimensions[1],
+    "name":"gameScreen",
+    "sw": gameDimensions[0] * gameScale,
+    "sh": gameDimensions[1] * gameScale,
+    "src": {objImage: gameScreenRenderData},
+    "shape":"image",
+    "render":function(self) {
+      canvasControl.drawImage(self.src, self.x, self.y, self.sw, self.sh, null, null, self.w, self.h, canvasControl.canvasContext);
+    },
+    "visible":true
+  };
 
   persistantObjects.screenBox = {
     "x": relToAbs(gameTopLeftCoord[0], 0),
@@ -304,6 +338,10 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
   };
 
   canvasControl.canvasObjects.push(persistantObjects.screenBox);
+
+  if (gameScale !== 1) {
+    canvasControl.canvasObjects.push(persistantObjects.gameScreen);
+  }
 
   canvasControl.canvasObjects.push(persistantObjects.debug.label);
   canvasControl.canvasObjects.push(persistantObjects.debug.execCount);
@@ -650,4 +688,35 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
   canvasControl.canvasObjects.push(persistantObjects.mm.box);
   canvasControl.canvasObjects.push(persistantObjects.mm.label);
+
+  persistantObjects.gameFiles.label = {
+    "x": relToAbs(0.50, 0),
+    "y": relToAbs(0.80, 1),
+    "name":"lblCPUGameFilesLabel",
+    "text":"Loaded Game Files: " + (loadedMemoryFilesList.length > 0 ? ("(MemOffset: " + pad(runningCPU.memory.length.toString(16), 4) + ")") : ''),
+    "shape":"text",
+    "render":function(self) {
+      canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#99FF00"});
+    },
+    "visible": true
+  };
+
+  canvasControl.canvasObjects.push(persistantObjects.gameFiles.label);
+
+  for (var i = 0; i < loadedMemoryFilesList.length; i++) {
+    var newFile = {
+      "x": relToAbs(0.50, 0),
+      "y": relToAbs(0.82 + (i * 0.02), 1),
+      "name":"lblCPUGameFilesLoaded" + i,
+      "text": "    " + loadedMemoryFilesList[i],
+      "shape":"text",
+      "render":function(self) {
+        canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#00FFFF"});
+      },
+      "visible": true
+    };
+
+    canvasControl.canvasObjects.push(newFile);
+  }
+
 }

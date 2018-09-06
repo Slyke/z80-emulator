@@ -22,9 +22,13 @@ var runDecompile = function() {
 
       memory[k] = fileData.charCodeAt(k);
     }
+
+    var normalizedFileName = decompileFiles[i].replace(/\\/g,"/");
+    normalizedFileName = normalizedFileName.substring(normalizedFileName.lastIndexOf('/') + 1);
+    var outputFileName = normalizedFileName + '.asm';
   
     var fileHeadingHelper = "; Address  |   OP Code   |   Mnem    | IREG  | OREG |   P1  |  P2   | PTR | opBytes | Cycles | CondCycle \n";
-    var outputFileName = './' + decompileFiles[i] + '.asm';
+    
     var commandPCOffset = 0;
 
     decompilingCPU.memory = memory;
