@@ -7,7 +7,7 @@ var z80CPU = function() {
   I tried to keep this code a balance between not repeating myself and in the process creating 18 layers of functions. Pls forgive me and my protension.
   I have modified the assembly OP codes to be easier to understand by those not familiar with the Z80 processor's instruction set for the disassembler.
   In the mnemonics list below, I've added a reference to the original instruction mnemonic.
-  
+
   Disassembler Instructions:
   Terms:
     PC      - Program Counter. This is a special register used by the CPU. This is the command that's currently being executed.
@@ -39,7 +39,7 @@ var z80CPU = function() {
         If a memory location is provided, only one register will be written to.
         If 1 parameter is provided, only 1 register is written to. If 2 parameters are provided, 2 registers are written to.
         Note that if there is 2 parameters, and 1 OREG, the pointer flag maybe set.
-        
+
       INCR: Increment register(s) by 1
         Increments a register, or 2 registers (the pair register) by 1. Register(s) effected are described in OREG and IREG.
 
@@ -333,10 +333,10 @@ var z80CPU = function() {
       case 0x0d: output.opCode = "DCRR"; output.z80OPCode = "DEC"; output.cycles = 5; output.ireg = "C"; output.oreg = "C"; break;
       case 0x0e: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 7; output.oreg = "C"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
       case 0x0f: output.opCode = "RRCA"; output.z80OPCode = "RRCA"; output.cycles = 4; output.oreg = "A"; output.ireg = "A"; break;
-      
+
       case 0x10: output.opCode = "NOP"; output.z80OPCode = "NOP"; output.cycles = 4; break;
       case 0x11: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 10; output.oreg = "DE"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
-      case 0x12: output.opCode = "LD2M"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "#"; output.ireg = "A"; output.ireg = "DE"; break;
+      case 0x12: output.opCode = "LD2M"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "#"; output.oreg = "DE"; output.ireg = "A"; break;
       case 0x13: output.opCode = "INCR"; output.z80OPCode = "INC"; output.cycles = 6; output.oreg = "DE"; output.ireg = "DE"; break;
       case 0x14: output.opCode = "INCR"; output.z80OPCode = "INC"; output.cycles = 5; output.oreg = "D"; output.ireg = "D"; break;
       case 0x15: output.opCode = "DCRR"; output.z80OPCode = "DEC"; output.cycles = 5; output.ireg = "D"; break;
@@ -418,7 +418,7 @@ var z80CPU = function() {
       case 0x5d: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "E"; output.ireg = "L"; break;
       case 0x5e: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "$"; output.oreg = "E"; output.ireg = "HL"; break;
       case 0x5f: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "E"; output.ireg = "A"; break;
-  
+
       case 0x60: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "H"; output.ireg = "B"; break;
       case 0x61: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "H"; output.ireg = "C"; break;
       case 0x62: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "H"; output.ireg = "D"; break;
@@ -435,7 +435,7 @@ var z80CPU = function() {
       case 0x6d: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "L"; output.ireg = "L"; break;
       case 0x6e: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "$"; output.oreg = "L"; output.ireg = "HL"; break;
       case 0x6f: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "L"; output.ireg = "A"; break;
-  
+
       case 0x70: output.opCode = "LD2M"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "#"; output.oreg = "HL"; output.ireg = "B"; break;
       case 0x71: output.opCode = "LD2M"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "#"; output.oreg = "HL"; output.ireg = "C"; break;
       case 0x72: output.opCode = "LD2M"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "#"; output.oreg = "HL"; output.ireg = "D"; break;
@@ -452,7 +452,7 @@ var z80CPU = function() {
       case 0x7d: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "A"; output.ireg = "L"; break;
       case 0x7e: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "$"; output.ireg = "A"; output.ireg = "HL"; break;
       case 0x7f: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "A"; output.ireg = "A"; break;
-  
+
       case 0x80: output.opCode = "INXR"; output.z80OPCode = "ADD"; output.cycles = 4; output.oreg = "A"; output.ireg = "B"; break;
       case 0x81: output.opCode = "INXR"; output.z80OPCode = "ADD"; output.cycles = 4; output.oreg = "A"; output.ireg = "C"; break;
       case 0x82: output.opCode = "INXR"; output.z80OPCode = "ADD"; output.cycles = 4; output.oreg = "A"; output.ireg = "D"; break;
@@ -470,7 +470,7 @@ var z80CPU = function() {
       case 0x8e: output.opCode = "ICXR"; output.z80OPCode = "ADD"; output.cycles = 7; output.ptr = "$"; output.oreg = "A"; output.ireg = "HL"; break;
       case 0x8f: output.opCode = "ICXR"; output.z80OPCode = "ADD"; output.cycles = 4; output.oreg = "A"; output.ireg = "A"; break;
       case 0x8f: output.opCode = "ICXR"; output.z80OPCode = "ADD"; output.cycles = 4; output.oreg = "A"; output.ireg = "A"; break;
-  
+
       case 0x90: output.opCode = "DCXR"; output.z80OPCode = "SUB"; output.cycles = 4; output.oreg = "A"; output.ireg = "B"; break;
       case 0x91: output.opCode = "DCXR"; output.z80OPCode = "SUB"; output.cycles = 4; output.oreg = "A"; output.ireg = "C"; break;
       case 0x92: output.opCode = "DCXR"; output.z80OPCode = "SUB"; output.cycles = 4; output.oreg = "A"; output.ireg = "D"; break;
@@ -487,7 +487,7 @@ var z80CPU = function() {
       case 0x9d: output.opCode = "DEXR"; output.z80OPCode = "SBC"; output.cycles = 4; output.oreg = "A"; output.ireg = "L"; break;
       case 0x9e: output.opCode = "DEXR"; output.z80OPCode = "SBC"; output.cycles = 7; output.ptr = "$"; output.oreg = "A"; output.ireg = "HL"; break;
       case 0x9f: output.opCode = "DEXR"; output.z80OPCode = "SBC"; output.cycles = 4; output.oreg = "A"; output.ireg = "A"; break;
-  
+
       case 0xa0: output.opCode = "ANDR"; output.z80OPCode = "AND"; output.cycles = 4; output.oreg = "A"; output.ireg = "B"; break;
       case 0xa1: output.opCode = "ANDR"; output.z80OPCode = "AND"; output.cycles = 4; output.oreg = "A"; output.ireg = "C"; break;
       case 0xa2: output.opCode = "ANDR"; output.z80OPCode = "AND"; output.cycles = 4; output.oreg = "A"; output.ireg = "D"; break;
@@ -504,7 +504,7 @@ var z80CPU = function() {
       case 0xad: output.opCode = "XORR"; output.z80OPCode = "XOR"; output.cycles = 4; output.oreg = "A"; output.ireg = "L"; break;
       case 0xae: output.opCode = "XORR"; output.z80OPCode = "XOR"; output.cycles = 7; output.ptr = "$"; output.oreg = "A"; output.ireg = "HL"; break;
       case 0xaf: output.opCode = "XORR"; output.z80OPCode = "XOR"; output.cycles = 4; output.oreg = "A"; output.ireg = "A"; break;
-  
+
       case 0xb0: output.opCode = "ORR"; output.z80OPCode = "OR"; output.cycles = 4; output.oreg = "A"; output.ireg = "B"; break;
       case 0xb1: output.opCode = "ORR"; output.z80OPCode = "OR"; output.cycles = 4; output.oreg = "A"; output.ireg = "C"; break;
       case 0xb2: output.opCode = "ORR"; output.z80OPCode = "OR"; output.cycles = 4; output.oreg = "A"; output.ireg = "D"; break;
@@ -538,7 +538,7 @@ var z80CPU = function() {
       case 0xcd: output.opCode = "CALL"; output.z80OPCode = "CALL"; output.cycles = 17; output.para1 = opCode[1].toString(16); output.ptr = "#"; output.oreg = "SP"; output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
       case 0xce: output.opCode = "ICXR"; output.z80OPCode = "ADC"; output.cycles = 7; output.ireg = "A"; output.oreg = "A"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
       case 0xcf: output.opCode = "RST1"; output.z80OPCode = "RST08"; output.cycles = 11; output.oreg = "SP"; break;
-  
+
       case 0xd0: output.opCode = "RETNC"; output.z80OPCode = "RET NC"; (state.flags.f & fFlags.zero) ? output.cycles = 5 : output.cycles = 11; output.cycleConditional = true; break;
       case 0xd1: output.opCode = "POPR"; output.z80OPCode = "POP"; output.cycles = 10; output.oreg = "DE"; output.ireg = "SP"; output.ptr = "$"; break;
       case 0xd2: output.opCode = "JMPNP"; output.z80OPCode = "JP NC"; (state.flags.f & fFlags.carry) ? output.cycles = 10 : output.cycles = 15; output.cycleConditional = true; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
@@ -555,7 +555,7 @@ var z80CPU = function() {
       case 0xdd: output.opCode = "CALL"; output.z80OPCode = "CALL"; output.cycles = 4; output.ptr = "!"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
       case 0xde: output.opCode = "DEXR"; output.z80OPCode = "SBC"; output.cycles = 7; output.para1 = opCode[1].toString(16); output.oreg = "A"; output.ireg = "A"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
       case 0xdf: output.opCode = "RST18"; output.z80OPCode = "RST 18"; output.cycles = 11; output.oreg = "SP"; break;
-  
+
       case 0xe0: output.opCode = "RETNP"; output.z80OPCode = "RET"; (state.flags.f & fFlags.zero) ? output.cycles = 5 : output.cycles = 11; output.cycleConditional = true;  break;
       case 0xe1: output.opCode = "POPR"; output.z80OPCode = "POP"; output.cycles = 10; output.oreg = "HL"; output.ireg = "SP"; output.ptr = "$"; break;
       case 0xe2: output.opCode = "JMPNP"; output.z80OPCode = "JP PO"; (state.flags.f & fFlags.zero) ? output.cycles = 10 : output.cycles = 15; output.cycleConditional = true;  output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
@@ -572,7 +572,7 @@ var z80CPU = function() {
       case 0xed: output.opCode = "NOP"; output.z80OPCode = "UKNOP"; output.ptr = "!"; output.cycles = 4; output.opBytes = 3; break; // Not sure if this is correct
       case 0xee: output.opCode = "XORR"; output.z80OPCode = "XOR"; output.cycles = 7; output.para1 = opCode[1].toString(16); output.ireg = "A"; output.oreg = "A"; output.opBytes = 2; break;
       case 0xef: output.opCode = "RST28"; output.z80OPCode = "RST 28"; output.cycles = 11; output.oreg = "SP"; break;
-  
+
       case 0xf0: output.opCode = "UKNOP"; output.z80OPCode = "RET"; output.ptr = "!"; output.cycles = 11; break; // TODO: Update cycle count with F flag condition
       case 0xf1: output.opCode = "POPR"; output.z80OPCode = "POP"; output.cycles = 10; output.oreg = "AF"; output.ireg = "SP"; output.ptr = "$"; break;
       case 0xf2: output.opCode = "UKNOP"; output.z80OPCode = "JP"; output.ptr = "!"; output.cycles = 15; output.cycles = 11; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break; // TODO: Update cycle count with F flag condition
@@ -749,7 +749,7 @@ var z80CPU = function() {
         state.flags.pc++ & 0xffff;
         state.cycles += 7;
         break;
-      
+
       case 0x17:                                                    // RLC9 A
         var carry = (state.flags.f & fFlags.carry) ? 1 : 0;
         if(state.flags.a & 0x80) {
@@ -757,7 +757,7 @@ var z80CPU = function() {
         } else {
           state.flags.f &= ~fFlags.carry & 0xff;
         }
-    
+
         state.flags.a = ((state.flags.a & 0x7f) << 7) | carry;
         this.cycles += 4;
         break;
@@ -815,7 +815,7 @@ var z80CPU = function() {
       case 0x20: state.cycles += 4; break;                    // NOP
 
       case 0x21: 							                                      // LD2R	HL,word
-        state.flags.l = opCode[1] & 0xff;  
+        state.flags.l = opCode[1] & 0xff;
         state.flags.h = opCode[2] & 0xff;
         state.flags.pc += 2;
         state.flags.pc &= 0xffff;
@@ -854,7 +854,7 @@ var z80CPU = function() {
         state.flags.pc++ & 0xffff;
         state.cycles += 7;
         break;
-    
+
       case 0x27: state.cycles += 4; break;                    // NOP // DAA
 
       case 0x28: state.cycles += 4; break;                    // NOP
@@ -867,7 +867,7 @@ var z80CPU = function() {
         state.cycles += 11;
         break;
 
-      // This is a tricky one. It gets the memory location pointer from opCode[1] and opCode[2], then puts that value and the proceeding value into L and H respectively. 
+      // This is a tricky one. It gets the memory location pointer from opCode[1] and opCode[2], then puts that value and the proceeding value into L and H respectively.
       case 0x2a:  							                                    // LD2R	HL, (word)
         var offset = (opCode[2] << 8) | (opCode[1]);
         state.flags.l = state.memory[(offset) & 0xffff] & 0xff;
@@ -910,7 +910,7 @@ var z80CPU = function() {
       case 0x30: state.cycles += 4; break;                    // NOP
 
       case 0x31:                                                    // LD2R SP,word
-        state.flags.sp = ((opCode[2] << 8) | opCode[1]) & 0xffff;   
+        state.flags.sp = ((opCode[2] << 8) | opCode[1]) & 0xffff;
         state.flags.pc += 2;
         state.flags.pc &= 0xffff;
         state.cycles += 10;
@@ -1502,7 +1502,7 @@ var z80CPU = function() {
         state.flags.a = cpu.addSubWithCarryByte(state, state.flags.a, state.flags.a, -1) & 0xff;
         state.cycles += 4;
         break;
-        
+
       case 0xa0:      							                                // ANDR   A,B
         state.flags.a = cpu.operandByte(state, state.flags.a, state.flags.b, "&") & 0xff;
         state.cycles += 4;
@@ -1538,7 +1538,7 @@ var z80CPU = function() {
         state.flags.a = cpu.operandByte(state, state.flags.a, (cpu.readByte(state, offset)), "&") & 0xff;
         state.cycles += 7;
         break;
-      
+
       case 0xa7:      							                                // ANDR   A,A
         state.flags.a = cpu.operandByte(state, state.flags.a, state.flags.a, "&") & 0xff;
         state.cycles += 4;
@@ -1579,7 +1579,7 @@ var z80CPU = function() {
         state.flags.a = cpu.operandByte(state, state.flags.a, (cpu.readByte(state, offset)), "^") & 0xff;
         state.cycles += 7;
         break;
-      
+
       case 0xaf:      							                                // XORR   A,A
         state.flags.a = cpu.operandByte(state, state.flags.a, state.flags.a, "^") & 0xff;
         state.cycles += 4;
@@ -1620,7 +1620,7 @@ var z80CPU = function() {
         state.flags.a = cpu.operandByte(state, state.flags.a, (cpu.readByte(state, offset)), "|") & 0xff;
         state.cycles += 7;
         break;
-    
+
       case 0xb7:      							                                // ORR   A,A
         state.flags.a = cpu.operandByte(state, state.flags.a, state.flags.a, "|") & 0xff;
         state.cycles += 4;
@@ -1683,7 +1683,7 @@ var z80CPU = function() {
 				state.flags.c = ret[0];
         state.cycles += 10;
         break;
-        
+
       case 0xc2:      							                                // JMPNZ (word)
         if (state.flags.f & fFlags.zero) {
           state.flags.pc += 2;
@@ -1779,7 +1779,7 @@ var z80CPU = function() {
       break;
 
       case 0xcd:      							                                // CALL (word)
-      
+
         var	ret = (opCode[1] | (opCode[2] << 8)) & 0xffff;
         state.flags.pc += 2;
         state.flags.pc &= 0xffff;
@@ -2035,7 +2035,7 @@ var z80CPU = function() {
         state.flags.l = register2 & 0xff;
         state.cycles += 4;
         break;
-        
+
       case 0xec:      							                                // CALLP (word)
         if (state.flags.f & fFlags.parity) {
           var	ret = (opCode[1] | (opCode[2] << 8)) & 0xffff;
@@ -2084,7 +2084,7 @@ var z80CPU = function() {
         state.flags.f = ret[0];
         state.cycles += 10;
         break;
-      
+
       case 0xf2: cpu.unimplementedInstruction(state); break;
       case 0xf3: cpu.unimplementedInstruction(state); break;
 
@@ -2305,7 +2305,7 @@ var z80CPU = function() {
     if (state.db.memoryUpdated.indexOf(address) === -1) {
       state.db.memoryUpdated.push(address);
     }
-    
+
     if (address >= 0xffff) {
       if (typeof(state.warningCb) === 'function') { state.warningCb('writeByte', state, [
         "You are writing into out of bounds memory. The emulator will allow this, but it generally indicates something is wrong.",
@@ -2337,19 +2337,19 @@ var z80CPU = function() {
     } else {
       state.flags.f |= fFlags.parity;
     }
-    
+
     if (byteRes & 0x80) {
       state.flags.f |= fFlags.sign;
     } else {
       state.flags.f &= ~fFlags.sign & 0xFF;
     }
-    
+
     if (res) {
       state.flags.f &= ~fFlags.zero & 0xff;
     } else {
       state.flags.f |= fFlags.zero;
     }
-    
+
     if (((rhv ^ byteRes) ^ lhv) & 0x10) {
       state.flags.f |= fFlags.halfcarry;
     } else {
@@ -2395,7 +2395,7 @@ var z80CPU = function() {
     } else {
       state.flags.f &= ~fFlags.sign & 0xff;
     }
-    
+
     if (res) {
       state.flags.f &= ~fFlags.zero & 0xff;
     } else {
@@ -2407,7 +2407,7 @@ var z80CPU = function() {
     } else {
       state.flags.f &= ~fFlags.halfcarry & 0xff;
     }
-    
+
     if (byteRes >= 0x100 || byteRes < 0) {
       state.flags.f |= fFlags.carry;
     } else {
@@ -2437,7 +2437,7 @@ var z80CPU = function() {
     } else {
       state.flags.f |= fFlags.parity;
     }
-    
+
     if (operandRes & 0x80) {
       state.flags.f |= fFlags.sign;
     } else {
@@ -2459,7 +2459,7 @@ var z80CPU = function() {
     }
 
     state.flags.f &= ~fFlags.carry & 0xff;
-    
+
     if (operand === "^" || operand === "|") {
       state.flags.f &= ~fFlags.halfcarry & 0xff;
     }
@@ -2495,13 +2495,13 @@ var z80CPU = function() {
     } else {
       state.flags.f |= fFlags.zero;
     }
-    
+
     if (((1 ^ valueChange) ^ value) & 0x10) {
       state.flags.f |= fFlags.halfcarry;
     } else {
       state.flags.f &= ~fFlags.halfcarry & 0xff;
     }
-    
+
     return pz;
   };
 
@@ -2534,25 +2534,25 @@ var z80CPU = function() {
     // Technically cpu.parity(x, 8) will produce this. I extracted the values so it doesn't have to each time.
     var parityBits = [
       1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
-      0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0, 
-      0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0, 
-      1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, 
-      0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0, 
-      1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, 
-      1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, 
-      0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0, 
-      0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0, 
-      1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, 
-      1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, 
-      0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0, 
-      1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, 
-      0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0, 
-      0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0, 
+      0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
+      0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
+      1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
+      0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
+      1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
+      1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
+      0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
+      0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
+      1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
+      1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
+      0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
+      1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
+      0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
+      0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
       1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1
     ];
     return parityBits[value];
   };
-  
+
   return cpu;
 };
 
