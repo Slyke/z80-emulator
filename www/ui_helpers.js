@@ -703,6 +703,74 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
   canvasControl.canvasObjects.push(persistantObjects.gameFiles.label);
 
+  persistantObjects.gameFiles.helpText1 = {
+    "x": relToAbs(0.50, 0),
+    "y": relToAbs(0.82, 1),
+    "name":"lblCPUGameFilesLabel",
+    "text":"  Drag and drop '*.bin' or '*.json'",
+    "shape":"text",
+    "render":function(self) {
+      canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#00FFFF"});
+    },
+    "visible": true
+  };
+
+  persistantObjects.gameFiles.helpText2 = {
+    "x": relToAbs(0.50, 0),
+    "y": relToAbs(0.84, 1),
+    "name":"lblCPUGameFilesLabel",
+    "text":"  files here to load them into memory.",
+    "shape":"text",
+    "render":function(self) {
+      canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#00FFFF"});
+    },
+    "visible": true
+  };
+  
+  persistantObjects.gameFiles.helpText3 = {
+    "x": relToAbs(0.50, 0),
+    "y": relToAbs(0.86, 1),
+    "name":"lblCPUGameFilesLabel",
+    "text":"  Use bin2json to convert.",
+    "shape":"text",
+    "render":function(self) {
+      canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#00FFFF"});
+    },
+    "visible": true
+  };
+
+  persistantObjects.gameFiles.helpText4 = {
+    "x": relToAbs(0.50, 0),
+    "y": relToAbs(0.90, 1),
+    "name":"lblCPUGameFilesLabel",
+    "text":"See the readme with the source code",
+    "shape":"text",
+    "render":function(self) {
+      canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#00FFFF"});
+    },
+    "visible": true
+  };
+  
+  persistantObjects.gameFiles.helpText5 = {
+    "x": relToAbs(0.50, 0),
+    "y": relToAbs(0.92, 1),
+    "name":"lblCPUGameFilesLabel",
+    "text":"for more help",
+    "shape":"text",
+    "render":function(self) {
+      canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#00FFFF"});
+    },
+    "visible": true
+  };
+  
+  if (loadedMemoryFilesList.length === 0) {
+    canvasControl.canvasObjects.push(persistantObjects.gameFiles.helpText1);
+    canvasControl.canvasObjects.push(persistantObjects.gameFiles.helpText2);
+    canvasControl.canvasObjects.push(persistantObjects.gameFiles.helpText3);
+    canvasControl.canvasObjects.push(persistantObjects.gameFiles.helpText4);
+    canvasControl.canvasObjects.push(persistantObjects.gameFiles.helpText5);
+  }
+
   for (var i = 0; i < loadedMemoryFilesList.length; i++) {
     var newFile = {
       "x": relToAbs(0.50, 0),

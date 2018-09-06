@@ -16,7 +16,7 @@ Then any of:
 
 `npm run decom LIST OF FILES` Runs the disassembler on all given files and outputs to `originalFileName.asm`
 
-Right now on the browser, it just draws up to the title screen for space invaders, because you can't "insert" a coin.
+`npm run bin2json LIST OF FILES` Converts binary files into json files that the emulator can also load. It outputs the file names as: `originalFileName.json`. Note, that you can manually concatenate multiple binary files into the data array (as I have done with space invaders).
 
 Z80 Specs: http://datasheets.chipdb.org/Mostek/3880.pdf
 
