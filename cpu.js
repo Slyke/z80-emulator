@@ -356,7 +356,7 @@ var z80CPU = function() {
       case 0x14: output.opCode = "INCR"; output.z80OPCode = "INC"; output.cycles = 5; output.oreg = "D"; output.ireg = "D"; break;
       case 0x15: output.opCode = "DCRR"; output.z80OPCode = "DEC"; output.cycles = 5; output.ireg = "D"; break;
       case 0x16: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 7; output.oreg = "D"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
-      case 0x17: output.opCode = "RLC9"; output.z80OPCode = "RLA"; output.cycles = 4; output.oreg = "A"; break;
+      case 0x17: output.opCode = "RLC9"; output.z80OPCode = "RLA"; output.cycles = 4; output.oreg = "A"; output.ireg = "A"; break;
       case 0x18: output.opCode = "NOP"; output.z80OPCode = "NOP"; output.cycles = 4; break;
       case 0x19: output.opCode = "INXR"; output.z80OPCode = "ADD"; output.cycles = 11; output.oreg = "HL"; output.ireg = "DE"; break;
       case 0x1a: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "&"; output.ireg = "DE"; output.oreg = "A"; break;
@@ -774,7 +774,7 @@ var z80CPU = function() {
         }
 
         state.flags.a = ((state.flags.a & 0x7f) << 7) | carry;
-        this.cycles += 4;
+        state.cycles += 4;
         break;
 
       case 0x18: state.cycles += 4; break;                    // NOP
