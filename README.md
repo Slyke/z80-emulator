@@ -14,9 +14,15 @@ Then any of:
 
 `npm run test` Runs unit tests of CPU.
 
-`npm run decom LIST OF FILES` Runs the disassembler on all given files and outputs to `originalFileName.asm`
+`npm run decom -- LIST OF FILES` Runs the disassembler on all given files and outputs to `originalFileName.asm`
 
-`npm run bin2json LIST OF FILES` Converts binary files into json files that the emulator can also load. It outputs the file names as: `originalFileName.json`. Note, that you can manually concatenate multiple binary files into the data array (as I have done with space invaders).
+`npm run bin2json -- LIST OF FILES` Converts binary files into json files that the emulator can also load. It outputs the file names as: `originalFileName.json`.
+
+`-c` Chunks and combines listed files into the same JSON file in the order specified. You can manually adjust the offset in the JSON file for each chunked file. Output file name will be the first file specified.
+
+`-l` Increases output file size (adds JSON spacing, newlines), but makes it easier to work with.
+
+Example: `npm run bin2json -- -c /rom/invaders/invaders1.h.bin /rom/invaders/invaders2.g.bin /rom/invaders/invaders3.f.bin /rom/invaders/invaders4.e.bin`
 
 Z80 Specs: http://datasheets.chipdb.org/Mostek/3880.pdf
 
@@ -158,6 +164,9 @@ Penren stands for Pending Render updates. This is how many memory cells have cha
     SIF: Sets the interrupt bit
       Sets the interrupt flag bit (On).
 
+    DIF: Disable the interrupt bit
+      Turns off the interrupt flag bit (Off).
+
     HALT: Halts
       Omea wa mou shindeiru
 
@@ -177,6 +186,10 @@ Penren stands for Pending Render updates. This is how many memory cells have cha
     RETC: Return Carry
       If the F register is set, and the zero flag is set, then get the value from SP and put it into PC. This in effect pops the stack.
       If the F register is set, and the zero flag is NOT set, then do nothing (moves PC forward 2).
+
+    RETS: Return Sign
+      If the F register is set, and the sign flag is set, then get the value from SP and put it into PC. This in effect pops the stack.
+      If the F register is set, and the sign flag is NOT set, then do nothing (moves PC forward 2).
 
     RETP: Return Parity
       If the F register is set, and the parity flag is set, then get the value from SP and put it into PC. This in effect pops the stack.
@@ -228,9 +241,13 @@ Penren stands for Pending Render updates. This is how many memory cells have cha
       If the F register is set, and the parity flag is set, then do nothing (moves PC forward 2).
       If the F register is set, and the parity flag is NOT set, then move SP back 2, temporarily store P1 and P2, write SP into P1 and P2 and jump to the original P1 and P2 values.
 
-    CALLS: Push onto the stack with a pointer if not sign
+    CALLS: Push onto the stack with a pointer if sign
       If the F register is set, and the sign flag is set, then move SP back 2, temporarily store P1 and P2, write SP into P1 and P2 and jump to the original P1 and P2 values.
       If the F register is set, and the sign flag is NOT set, then do nothing (moves PC forward 2).
+
+    CALLS: Push onto the stack with a pointer if not sign
+      If the F register is set, and the sign flag is set, then do nothing (moves PC forward 2).
+      If the F register is set, and the sign flag is NOT set, then move SP back 2, temporarily store P1 and P2, write SP into P1 and P2 and jump to the original P1 and P2 values.
 
     PUSH: Push onto the stack
       Move both IREGs, or P1 and P2 into SP and move SP back 2.

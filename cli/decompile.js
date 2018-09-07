@@ -3,7 +3,17 @@ var cpu = require('../cpu');
 
 var decompileFiles = [];
 
+var combineFiles = false;
+
+var memoryOffset = 0;
+var outputFileName;
+
 for (var i = 2; i < process.argv.length; i++) {
+  if (process.argv[i] === "-c") {
+    combineFiles = true;
+    continue;
+  }
+  
   if (fs.existsSync(process.argv[i])) {
     decompileFiles.push(process.argv[i])
   }
@@ -19,22 +29,36 @@ var runDecompile = function() {
     var memory = [];
   
     for (var k = 0; k < fileData.length; k++) {
-
       memory[k] = fileData.charCodeAt(k);
     }
 
     var normalizedFileName = decompileFiles[i].replace(/\\/g,"/");
     normalizedFileName = normalizedFileName.substring(normalizedFileName.lastIndexOf('/') + 1);
-    var outputFileName = normalizedFileName + '.asm';
+
+    if (combineFiles) {
+      if (i === 0) {
+        outputFileName = normalizedFileName + '.asm';
+      }
+    } else {
+      outputFileName = normalizedFileName + '.asm';
+    }
   
+    var fileHeadingHelper = "";
+
     var fileHeadingHelper = "; Address  |   OP Code   |   Mnem    | IREG  | OREG |   P1  |  P2   | PTR | opBytes | Cycles | CondCycle \n";
     
     var commandPCOffset = 0;
 
     decompilingCPU.memory = memory;
   
-    fs.writeFileSync(outputFileName, fileHeadingHelper);
-
+    if (combineFiles) {
+      if (i === 0) {
+        fs.writeFileSync(outputFileName, fileHeadingHelper);
+      }
+    } else {
+      fs.writeFileSync(outputFileName, fileHeadingHelper);
+    }
+    
     for (var k = 0; k < memory.length; k++) {
       decompilingCPU.flags.pc = (k + commandPCOffset);
 
@@ -45,7 +69,7 @@ var runDecompile = function() {
       }
   
       var lineOutput = "";
-      lineOutput += `   ${pad(disObj.programCounter.toString(16), 4)}        `;
+      lineOutput += `   ${pad((parseInt(disObj.programCounter + memoryOffset)).toString(16), 4)}        `;
       lineOutput += `(${pad(disObj.opCodeHex.toString(16), 2)})     `; // Change to disObj.z80OPCode for original Z80 instruction set.
       lineOutput += `${pad(disObj.opCode, 10, " ")}      `;
       lineOutput += `${pad(disObj.ireg, 3, " ")}    `;
@@ -62,8 +86,6 @@ var runDecompile = function() {
   
       commandPCOffset += (disObj.opBytes - 1);
     }
-    
-  
   }
 }
 

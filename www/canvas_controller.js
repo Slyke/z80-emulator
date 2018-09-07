@@ -95,10 +95,13 @@ function fileDropHandler(event) {
 
       memoryOffset = runningCPU.memory.length;
       var jsonGame = JSON.parse(event.target.result);
-      var jsonData = jsonGame.data;
-      for (var i = 0; i < jsonData.length; i++) {
-        runningCPU.memory[i + memoryOffset] = parseInt("0x" + jsonData[i]);
-      }
+      var jsonData = jsonGame.chunks;
+      jsonData.forEach(function(chunkData) {
+        for (var i = 0; i < chunkData.data.length; i++) {
+          runningCPU.memory[i + memoryOffset + parseInt("0x" + chunkData.offset)] = parseInt("0x" + chunkData.data[i]);
+        }
+      });
+
       loadedMemoryFilesList.push(uploadedFile.name);
 
       renderMemoryMap(runningCPU, runningCPU.db.memoryUpdated, true);
