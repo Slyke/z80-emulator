@@ -318,7 +318,8 @@ var z80CPU = function() {
       ptr: "",
       opBytes: 0,
       cycles: 0,
-      cycleConditional: false
+      cycleConditional: false,
+      error: true
     };
 
     output.execCount = state.db.executionCount;
@@ -327,6 +328,12 @@ var z80CPU = function() {
       if (typeof(state.warningCb) === 'function') { state.warningCb('disassemble8080OP', state, ["Warning: No instruction passed: ", opCode, 'State: ', state, "PC", pc ]); }
       return output;
     }
+
+    if (opCode[1] == null | opCode[2] == null) {
+      if (typeof(state.warningCb) === 'function') { state.warningCb('disassemble8080OP', state, ["Warning: OP Code undefined.", opCode, 'State: ', state, "PC", pc ]); }
+      return output;
+    }
+
     output.opCodeHex = opCode[0].toString(16);
 
     output.opBytes = 1;
@@ -605,6 +612,8 @@ var z80CPU = function() {
       case 0xfe: output.opCode = "DCXR"; output.z80OPCode = "CP"; output.cycles = 7; output.oreg = "A"; output.ireg = "A"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
       case 0xff: output.opCode = "RST38"; output.z80OPCode = "RST 38"; output.cycles = 7; output.oreg = "SP"; break;
     }
+
+    output.error = false;
 
     return output;
   }
