@@ -98,7 +98,7 @@ function fileDropHandler(event) {
       var jsonData = jsonGame.chunks;
       jsonData.forEach(function(chunkData) {
         for (var i = 0; i < chunkData.data.length; i++) {
-          runningCPU.memory[i + memoryOffset + parseInt(chunkData.offset)] = parseInt("0x" + chunkData.data[i]);
+          runningCPU.memory[i + memoryOffset + parseInt(chunkData.offset)] = parseInt(chunkData.data[i]);
         }
       });
 
@@ -294,10 +294,17 @@ function injectJSONDataIntoMemory(memory, filename, memoryOffset = 0, cb) {
 
   xhr.onload = function(e) {
     if (this.status === 200) {
-      var memoryData = this.response.data;
-      for (var i = 0; i < byteArray.length; i++) {
-        memory[i + memoryOffset] = memoryData[i];
-      }
+      var fileData = this.response;
+      var memoryChunks = fileData.chunks;
+      memoryChunks.forEach((chunkArray) => {
+        var chunkMemoryOffset = parseInt(chunkArray.offset);
+        
+        var memoryData = chunkArray.data;
+
+        for (var i = 0; i < memoryData.length; i++) {
+          memory[i + memoryOffset + chunkMemoryOffset] = parseInt(memoryData[i]);
+        }
+      });
       cb();
     }
   };

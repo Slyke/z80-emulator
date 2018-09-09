@@ -68,14 +68,16 @@ Penren stands for Pending Render updates. This is how many memory cells have cha
 #### Disassembler Instructions:
 
 ##### Registers
-    A -  Results from the ALU end up here. 2 bytes, grouped with F.
-    B -  General register, 2 bytes, grouped with C
-    C -  General register, 2 bytes, grouped with B
-    D -  General register, 2 bytes, grouped with E
-    E -  General register, 2 bytes, grouped with D
-    F -  F is a special flag. Mainly used for overflows and parity. 2 bytes, grouped with A
-    H -  General register, 2 bytes, grouped with L. These are generally used as a buffer, or for calculations.
-    L -  General register, 2 bytes, grouped with H. These are generally used as a buffer, or for calculations.
+    A  -  Results from the ALU end up here. 2 bytes, grouped with F.
+    B  -  General register, 2 bytes, grouped with C
+    C  -  General register, 2 bytes, grouped with B
+    D  -  General register, 2 bytes, grouped with E
+    E  -  General register, 2 bytes, grouped with D
+    F  -  F is a special flag. Mainly used for overflows and parity. 2 bytes, grouped with A
+    H  -  General register, 2 bytes, grouped with L. These are generally used as a buffer, or for calculations.
+    L  -  General register, 2 bytes, grouped with H. These are generally used as a buffer, or for calculations.
+    ix -  Index Register
+    iy -  Index Register
     sp - Stack pointer, 4 bytes
     pc - Program counter (Current executing address), 4 bytes
 
@@ -311,6 +313,9 @@ Penren stands for Pending Render updates. This is how many memory cells have cha
 
     HWOUT: Hardware Input
       Write data to the hardware. It can be accessed with cpu.hwIntPorts[0 - 255]
+
+    NEXTOP: Next OP Register
+      The next operation will be performed on either the IX or IY special register, instead of on the HL register.
 
     RST [number]: Reset/Move
       This looks like it resets the machine, or is used to jump to specific points in memory.

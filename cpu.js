@@ -244,6 +244,9 @@ var z80CPU = function() {
       HWOUT: Hardware Input
         Write data to the hardware. It can be accessed with cpu.hwIntPorts[0 - 255]
 
+      NEXTOP: Next OP Register
+        The next operation will be performed on either the IX or IY special register, instead of on the HL register.
+
       RST [number]: Reset/Move
         This looks like it resets the machine, or is used to jump to specific points in memory.
         It stores PC into SP, and moves SP back 2, before setting PC to the predetermined locations listed below.
@@ -268,6 +271,8 @@ var z80CPU = function() {
     f: 0,       // F is a special flag. Mainly used for overflows and parity. 2 bytes, grouped with A
     h: 0,       // General register, 2 bytes, grouped with L. These are generally used as a buffer, or for calculations.
     l: 0,       // General register, 2 bytes, grouped with H. These are generally used as a buffer, or for calculations.
+    ix: 0,       // Index Register
+    iy: 0,       // Index Register
     sp: 0,      // Stack pointer, 4 bytes
     pc: 0,      // Program counter (Current executing address), 4 bytes
     enabled: 1  // Chip enabled
@@ -287,7 +292,8 @@ var z80CPU = function() {
     totalCPUCycles: 0,
     videoMemoryUpdated: [],
     memoryUpdated: [],
-    cycleRollover: false
+    cycleRollover: false,
+    nextOpIReg: ""           // Let the emulator know the next instruction is for IX or IY and not HL.
   });
 
   cpu.hwIntPorts = [];
@@ -319,7 +325,8 @@ var z80CPU = function() {
       opBytes: 0,
       cycles: 0,
       cycleConditional: false,
-      error: true
+      error: true,
+      indexRegUsed: false
     };
 
     output.execCount = state.db.executionCount;
@@ -329,7 +336,7 @@ var z80CPU = function() {
       return output;
     }
 
-    if (opCode[1] == null | opCode[2] == null) {
+    if (opCode[1] == null || opCode[2] == null) {
       if (typeof(state.warningCb) === 'function') { state.warningCb('disassemble8080OP', state, ["Warning: OP Code undefined.", opCode, 'State: ', state, "PC", pc ]); }
       return output;
     }
@@ -574,7 +581,7 @@ var z80CPU = function() {
       case 0xda: output.opCode = "JMPC"; output.z80OPCode = "JP"; (state.flags.f & fFlags.carry) ? output.cycles = 15 : output.cycles = 10; output.cycleConditional = true; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
       case 0xdb: output.opCode = "HWIN"; output.z80OPCode = "EXX"; output.cycles = 10; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
       case 0xdc: output.opCode = "CALLC"; output.z80OPCode = "CP"; (state.flags.f & fFlags.carry) ? output.cycles = 18 : output.cycles = 10; output.cycleConditional = true; output.oreg = "SP"; output.ptr = "#"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break; // TODO: Update cycle count with F flag condition
-      case 0xdd: output.opCode = "CALL"; output.z80OPCode = "CALL"; output.cycles = 4; output.ptr = "!"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
+      case 0xdd: output = state.disassemble8080OP(state, pc + 1); output.opBytes += 1; output.indexRegUsed = "IX"; output.z80OPCode = "**"; output.cycles = 4; break;
       case 0xde: output.opCode = "DEXR"; output.z80OPCode = "SBC"; output.cycles = 7; output.para1 = opCode[1].toString(16); output.oreg = "A"; output.ireg = "A"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
       case 0xdf: output.opCode = "RST18"; output.z80OPCode = "RST 18"; output.cycles = 11; output.oreg = "SP"; break;
 
@@ -605,12 +612,17 @@ var z80CPU = function() {
       case 0xf7: output.opCode = "RST30"; output.z80OPCode = "RST 30"; output.cycles = 11; output.oreg = "SP"; break;
       case 0xf8: output.opCode = "RETS"; output.z80OPCode = "RET"; (state.flags.f & fFlags.sign) ? output.cycles = 11 : output.cycles = 5; output.cycleConditional = true; break;
       case 0xf9: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.oreg = "SP"; output.ireg = "HL";  output.cycles = 6; break;
-      case 0xfa: output.opCode = "UKNOP"; output.z80OPCode = "JP"; output.ptr = "!"; output.cycles = 15; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break; // TODO: Update cycle count with F flag condition
+      case 0xfa: output.opCode = "JMPS"; output.z80OPCode = "JP"; (state.flags.f & fFlags.sign) ? output.cycles = 15 : output.cycles = 10; output.cycleConditional = true; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
       case 0xfb: output.opCode = "SIF"; output.z80OPCode = "EI"; output.cycles = 4; break;
       case 0xfc: output.opCode = "CALLS"; output.z80OPCode = "CALL"; (state.flags.f & fFlags.sign) ? output.cycles = 18 : output.cycles = 11; output.cycleConditional = true; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
       case 0xfd: output.opCode = "UKNOP"; output.z80OPCode = "UKNOP"; output.ptr = "!"; output.cycles = 4; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
       case 0xfe: output.opCode = "DCXR"; output.z80OPCode = "CP"; output.cycles = 7; output.oreg = "A"; output.ireg = "A"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
       case 0xff: output.opCode = "RST38"; output.z80OPCode = "RST 38"; output.cycles = 7; output.oreg = "SP"; break;
+    }
+
+    if (output.indexRegUsed) {
+      output.ireg = output.ireg === "HL" ? output.indexRegUsed : output.ireg;
+      output.oreg = output.oreg === "HL" ? output.indexRegUsed : output.oreg;
     }
 
     output.error = false;
@@ -685,11 +697,21 @@ var z80CPU = function() {
       case 0x08: state.cycles += 4; break;                    // NOP
 
       case 0x09: 							                                      // INXR HL, BC
-        var hl = cpu.getFlags(state, "hl");
+        var reg;
+        if ((state.db.nextOpIReg === "IX") || (state.db.nextOpIReg === "IY")) {
+          reg = cpu.getFlags(state, state.db.nextOpIReg.toLowerCase());
+        } else {
+          reg = cpu.getFlags(state, "hl");
+        }
         var bc = cpu.getFlags(state, "bc");
-        var res = hl + bc;
-        state.flags.h = (res & 0xff00) >> 8;
-        state.flags.l = res & 0xff;
+        var res = reg + bc;
+        if (state.db.nextOpIReg === "IX" || state.db.nextOpIReg === "IY") {
+          state.flags[state.db.nextOpIReg.toLowerCase()] = res & 0xffff;
+        } else {
+          state.flags.h = (res & 0xff00) >> 8;
+          state.flags.l = res & 0xff;
+        }
+        state.db.nextOpIReg = "";
         state.cycles += 11;
         break;
 
@@ -1937,7 +1959,14 @@ var z80CPU = function() {
         }
         break;
 
-      case 0xdd: cpu.unimplementedInstruction(state); break;
+      case 0xdd:      							                                  // NEXTOP IX
+        state.flags.pc++ & 0xffff;
+        state.db.nextOpIReg = "IX";
+        state.emulate8080OP(state);
+        
+        // state.flags.pc++ & 0xffff;
+        state.cycles += 10;
+        break;
 
       case 0xde:      							                                // DEXR   A,byte
         state.flags.a = cpu.addSubWithCarryByte(state, state.flags.a, opCode[1], -1) & 0xff;
@@ -2203,7 +2232,12 @@ var z80CPU = function() {
         }
         break;
 
-      case 0xfd: cpu.unimplementedInstruction(state); break;
+      case 0xfd:      							                                  // NEXTOP IY
+      state.db.nextOpIReg = "IY";
+      state.db.nextOpIRegState = 0x04;
+      state.flags.pc++ & 0xffff;
+      break;
+
 
       case 0xfe:      							                                // DCXR   A,byte
         cpu.addSubByte(state, state.flags.a, opCode[1], -1) & 0xff;
@@ -2575,6 +2609,10 @@ var z80CPU = function() {
       return ((state.flags.d << 8) | state.flags.e) & 0xffff;
     } else if (flagCombo === "hl") {
       return ((state.flags.h << 8) | state.flags.l) & 0xffff;
+    } else if (flagCombo === "IX") {
+      return state.flags.ix & 0xffff;
+    } else if (flagCombo === "IY") {
+      return state.flags.iy & 0xffff;
     }
 
     if (typeof(state.warningCb) === 'function') { state.warningCb('getFlags', state, ["Invalid flag combo selected: ", flagCombo, " at: ", cpu.disassemble8080OP(state, state.flags.pc - 1)]); }
