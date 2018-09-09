@@ -183,7 +183,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
   persistantObjects.flags.pc = {
     "x": relToAbs(0.5, 0),
-    "y": relToAbs(0.03, 1),
+    "y": relToAbs(0.025, 1),
     "name":"lblCPUFlagPC",
     "text":"  PC (Address): " + pad(runningCPU.flags.pc.toString(16), 4),
     "shape":"text",
@@ -195,7 +195,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
   persistantObjects.flags.sp = {
     "x": relToAbs(0.5, 0),
-    "y": relToAbs(0.05, 1),
+    "y": relToAbs(0.04, 1),
     "name":"lblCPUFlagSP",
     "text":"  SP (Address): " + pad(runningCPU.flags.sp.toString(16), 4),
     "shape":"text",
@@ -205,9 +205,33 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
     "visible": true
   };
 
+  persistantObjects.flags.ix = {
+    "x": relToAbs(0.5, 0),
+    "y": relToAbs(0.06, 1),
+    "name":"lblCPUFlagIX",
+    "text":"  IX          : " + pad(runningCPU.flags.ix.toString(16), 4),
+    "shape":"text",
+    "render":function(self) {
+      canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#00FFFF"});
+    },
+    "visible": true
+  };
+
+  persistantObjects.flags.iy = {
+    "x": relToAbs(0.5, 0),
+    "y": relToAbs(0.075, 1),
+    "name":"lblCPUFlagIY",
+    "text":"  IY          : " + pad(runningCPU.flags.iy.toString(16), 4),
+    "shape":"text",
+    "render":function(self) {
+      canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#00FFFF"});
+    },
+    "visible": true
+  };
+
   persistantObjects.flags.af = {
     "x": relToAbs(0.5, 0),
-    "y": relToAbs(0.07, 1),
+    "y": relToAbs(0.095, 1),
     "name":"lblCPUFlagA",
     "text":"  A F:         " + pad(runningCPU.flags.a.toString(16), 2) + " " + pad(runningCPU.flags.f.toString(16), 2),
     "shape":"text",
@@ -219,7 +243,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
   persistantObjects.flags.bc = {
     "x": relToAbs(0.5, 0),
-    "y": relToAbs(0.09, 1),
+    "y": relToAbs(0.115, 1),
     "name":"lblCPUFlagB",
     "text":"  B C:         " + pad(runningCPU.flags.b.toString(16), 2) + " " + pad(runningCPU.flags.c.toString(16), 2),
     "shape":"text",
@@ -231,7 +255,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
   persistantObjects.flags.de = {
     "x": relToAbs(0.5, 0),
-    "y": relToAbs(0.11, 1),
+    "y": relToAbs(0.135, 1),
     "name":"lblCPUFlagD",
     "text":"  D E:         " + pad(runningCPU.flags.d.toString(16), 2) + " " + pad(runningCPU.flags.e.toString(16), 2),
     "shape":"text",
@@ -243,7 +267,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
   persistantObjects.flags.hl = {
     "x": relToAbs(0.5, 0),
-    "y": relToAbs(0.13, 1),
+    "y": relToAbs(0.155, 1),
     "name":"lblCPUFlagH",
     "text":"  H L:         " + pad(runningCPU.flags.h.toString(16), 2) + " " + pad(runningCPU.flags.l.toString(16), 2),
     "shape":"text",
@@ -352,6 +376,8 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
   canvasControl.canvasObjects.push(persistantObjects.flags.label);
   canvasControl.canvasObjects.push(persistantObjects.flags.pc);
   canvasControl.canvasObjects.push(persistantObjects.flags.sp);
+  canvasControl.canvasObjects.push(persistantObjects.flags.ix);
+  canvasControl.canvasObjects.push(persistantObjects.flags.iy);
   canvasControl.canvasObjects.push(persistantObjects.flags.af);
   canvasControl.canvasObjects.push(persistantObjects.flags.bc);
   canvasControl.canvasObjects.push(persistantObjects.flags.de);
@@ -371,7 +397,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
   persistantObjects.stackPointer.label = {
     "x": relToAbs(0.5, 0),
-    "y": relToAbs(0.16, 1),
+    "y": relToAbs(0.18, 1),
     "name":"lblCPUSPHelper",
     "text":"Stack Pointer Values (SP+0 to SP+8)",
     "shape":"text",
@@ -383,7 +409,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
   persistantObjects.stackPointer.labelA = {
     "x": relToAbs(0.495, 0),
-    "y": relToAbs(0.18, 1),
+    "y": relToAbs(0.20, 1),
     "name":"lblCPUSPA",
     "text":"  A",
     "shape":"text",
@@ -395,7 +421,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
   persistantObjects.stackPointer.labelV = {
     "x": relToAbs(0.495, 0),
-    "y": relToAbs(0.20, 1),
+    "y": relToAbs(0.22, 1),
     "name":"lblCPUSPV",
     "text":"  V",
     "shape":"text",
@@ -407,7 +433,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
   persistantObjects.memoryInspect.label = {
     "x": relToAbs(0.5, 0),
-    "y": relToAbs(0.24, 1),
+    "y": relToAbs(0.26, 1),
     "name":"lblCPUMEMInspect",
     "text":"Memory Inspector",
     "shape":"text",
@@ -419,7 +445,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
   persistantObjects.memoryInspect.helper = {
     "x": relToAbs(0.5, 0),
-    "y": relToAbs(0.26, 1),
+    "y": relToAbs(0.28, 1),
     "name":"lblCPUMEMHelper",
     "text":"Address    |   OP Code   |   Mnem    | IREG  | OREG |   P1  |  P2   | PTR ",
     "shape":"text",
@@ -457,7 +483,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
     var newSPPrint = {
       "x": relToAbs(0.53 + (k  * 0.045), 0),
-      "y": relToAbs(0.18),
+      "y": relToAbs(0.20),
       "name":"lblCPUMEMSPADDR" + k,
       "text": "" + pad((runningCPU.flags.sp + k).toString(16), 4) + "-" + pad((runningCPU.flags.sp + k + 1).toString(16), 4),
       "shape":"text",
@@ -469,7 +495,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
     var newSPMemPrint = {
       "x": relToAbs(0.53 + (k * 0.045), 0),
-      "y": relToAbs(0.20),
+      "y": relToAbs(0.22),
       "name":"lblCPUMEMSPADDR" + k,
       "text": "0x" + pad(mem1.toString(16), 2) + " 0x" + pad(mem2.toString(16), 2),
       "shape":"text",
@@ -498,7 +524,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
     
     var newMemPrint = {
       "x": relToAbs(0.5, 0),
-      "y": relToAbs(0.28 + (index * 0.02), 1),
+      "y": relToAbs(0.30 + (index * 0.015), 1),
       "name":"lblCPUMEMPrevPrint" + index,
       "text": textOutput,
       "shape":"text",
@@ -513,7 +539,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
   var commandPCOffset = 0;
 
-  for (var i = 0; i < 8; i++) {
+  for (var i = 0; i < 10; i++) {
     var disObj = runningCPU.disassemble8080OP(runningCPU, (runningCPU.flags.pc + i + commandPCOffset));
     var textOutput = "     ";
     textOutput += pad(disObj.programCounter.toString(16), 4) + "         ";
@@ -528,7 +554,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
     var newMemPrint = {
       "x": relToAbs(0.5, 0),
-      "y": relToAbs(0.28 + ((i + previouslyExecInstructions.length) * 0.02), 1),
+      "y": relToAbs(0.30 + ((i + previouslyExecInstructions.length) * 0.015), 1),
       "name":"lblCPUMEMPrint" + i,
       "text": textOutput,
       "shape":"text",
@@ -541,7 +567,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
     if (i === 0) {
       var currentPos = {
         "x": relToAbs(0.505, 0),
-        "y": relToAbs(0.28 + (previouslyExecInstructions.length * 0.02), 1),
+        "y": relToAbs(0.30 + (previouslyExecInstructions.length * 0.015), 1),
         "name":"lblCPUMEMPointer",
         "text": "==>",
         "shape":"text",
@@ -693,7 +719,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
     "x": relToAbs(0.50, 0),
     "y": relToAbs(0.80, 1),
     "name":"lblCPUGameFilesLabel",
-    "text":"Loaded Game Files: " + (loadedMemoryFilesList.length > 0 ? ("(MemOffset: " + pad(runningCPU.memory.length.toString(16), 4) + ")") : ''),
+    "text":"Loaded ROM Files: " + (loadedMemoryFilesList.length > 0 ? ("(MemOffset: " + pad(runningCPU.memory.length.toString(16), 4) + ")") : ''),
     "shape":"text",
     "render":function(self) {
       canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#99FF00"});

@@ -83,7 +83,7 @@ Penren stands for Pending Render updates. This is how many memory cells have cha
 
 ##### Terms:
   * PC      - Program Counter. This is a special register used by the CPU. This is the command that's currently being executed.
-            It always increases by at least 1, and no more than 3 after each instruction, some instructions can increase it by 2 or 3.
+            It always increases by at least 1, and no more than 3 after each instruction (with expection to the index registers, which can have up to 4), some instructions can increase it by 2 or 3.
   * OREG    - Output to registers. Usually used to determine a memory location, but not always.
   * IREG    - Input from registers. Usually used to load a value from to write somewhere.
   * P1      - Parameter 1. This will be PC + 1 in memory.

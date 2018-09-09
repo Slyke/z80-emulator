@@ -485,7 +485,7 @@ function cpuExec() {
     printMemoryTrace(runningCPU);
   } else {
     previouslyExecInstructions.push(disassembleExec);
-    if (previouslyExecInstructions.length > 8) {
+    if (previouslyExecInstructions.length > 10) {
       previouslyExecInstructions.shift();
     }
   }
