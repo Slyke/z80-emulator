@@ -21,6 +21,11 @@ function printHelp() {
   console.log("           This message.");
 }
 
+if (process.argv.length === 2) {
+  printHelp();
+  process.exit(0);
+}
+
 for (var i = 2; i < process.argv.length; i++) {
   if (process.argv[i] === "-c") {
     rtoCombineFiles = true;
@@ -38,8 +43,6 @@ for (var i = 2; i < process.argv.length; i++) {
     decompileFiles.push(process.argv[i])
   }
 }
-
-
 
 function loadJSONToMemory(fileList) {
 
@@ -65,23 +68,25 @@ function loadJSONToMemory(fileList) {
       console.log(`ROM Name: ${fileData.name}`);
       console.log(`Memory Size: ${"0x" + memoryLength.toString(16)} (${memoryLength})`);
       console.log(`Chunks: ${"0x" + jsonDataList.length.toString(16)} (${jsonDataList.length})`);
+      console.log(` `);
     }
 
     fileData.chunks.forEach((chunkArray) => {
-      memoryOffset = chunkArray.offset;
+      memoryOffset = parseInt(chunkArray.offset);
       if (!rtoQuiet) {
         console.log(`Converting Chunk: ${"0x" + memoryOffset.toString(16)} (${memoryOffset})`);
+        console.log(`Chunk Size: ${"0x" + chunkArray.data.length.toString(16)} (${chunkArray.data.length})`);
       }
-      for (var k = 0; k < fileData.length; k++) {
-        memory[k + memoryOffset] = chunkArray.data[k];
+      for (var k = 0; k < chunkArray.data.length; k++) {
+        memory[k + memoryOffset] = parseInt(chunkArray.data[k]);
       }
     });
 
     if (!rtoQuiet) {
       console.log(" ");
     }
-    
-    ret.push({ name: normaliseName(fileIndex), data: memory });
+
+    ret.push({ name: fileIndex, data: memory });
   });
 
   return ret;

@@ -98,7 +98,7 @@ function fileDropHandler(event) {
       var jsonData = jsonGame.chunks;
       jsonData.forEach(function(chunkData) {
         for (var i = 0; i < chunkData.data.length; i++) {
-          runningCPU.memory[i + memoryOffset + parseInt("0x" + chunkData.offset)] = parseInt("0x" + chunkData.data[i]);
+          runningCPU.memory[i + memoryOffset + parseInt(chunkData.offset)] = parseInt("0x" + chunkData.data[i]);
         }
       });
 
