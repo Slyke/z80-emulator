@@ -290,8 +290,6 @@ var z80CPU = function() {
   var debugFlags = Object.freeze({
     executionCount: 0,
     totalCPUCycles: 0,
-    videoMemoryUpdated: [],
-    memoryUpdated: [],
     cycleRollover: false,
     nextOpIReg: ""           // Let the emulator know the next instruction is for IX or IY and not HL.
   });
@@ -304,6 +302,7 @@ var z80CPU = function() {
   cpu.pInterrupt = 0x10;
   cpu.memory = [];
   cpu.warningCb;
+  cpu.memoryUpdateCb;
 
   cpu.disassemble8080OP = function(state, pc) {
     var memory = state.memory;
@@ -2431,16 +2430,10 @@ var z80CPU = function() {
   };
 
   cpu.writeByte = function(state, address, value) {
-
     cpu.romWriteCheck(state, address);
-    if (address >= 0x2400) {
-      if (state.db.videoMemoryUpdated.indexOf(address) === -1) {
-        state.db.videoMemoryUpdated.push(address);
-      }
-    }
-
-    if (state.db.memoryUpdated.indexOf(address) === -1) {
-      state.db.memoryUpdated.push(address);
+    
+    if (typeof(state.memoryUpdateCb) === "function") {
+      state.memoryUpdateCb(address, value);
     }
 
     if (address >= 0xffff) {

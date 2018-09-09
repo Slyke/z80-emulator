@@ -161,7 +161,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
     "x": relToAbs(0.65, 0),
     "y": relToAbs(0.09, 1),
     "name":"lblCPUDebugCycles",
-    "text":"  Penren: " + pad(runningCPU.db.videoMemoryUpdated.length, 4),
+    "text":"  Penren: " + pad(videoMemoryUpdated.length, 4),
     "shape":"text",
     "render":function(self) {
       canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#00FFFF"});
