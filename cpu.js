@@ -2197,10 +2197,16 @@ var z80CPU = function() {
       break;
 
       case 0xe3:                                                      //  XCHM
-        var spv = cpu.splitBytes(cpu.readWord(state, state.flags.sp));
-        cpu.writeWord(state, state.flags.sp, cpu.getFlags(state, "hl"));
-        state.flags.h = spv[1];
-        state.flags.l = spv[0];
+        if ((state.db.nextOpIReg === "IX") || (state.db.nextOpIReg === "IY")) {
+          var tmp = state.flags.sp;
+          cpu.writeWord(state, state.flags.sp, cpu.getFlags(state, state.db.nextOpIReg.toLowerCase()));
+          state.flags[state.db.nextOpIReg.toLowerCase()] = tmp & 0xffff;
+        } else {
+          var spv = cpu.splitBytes(cpu.readWord(state, state.flags.sp));
+          cpu.writeWord(state, state.flags.sp, cpu.getFlags(state, "hl"));
+          state.flags.h = spv[1];
+          state.flags.l = spv[0];
+        }
         state.cycles += 4;
         break;
 
@@ -2219,8 +2225,13 @@ var z80CPU = function() {
         break;
 
       case 0xe5:      							                                //PUSH   HL
-        var hl = cpu.getFlags(state, "hl");
-        cpu.push(state, hl);
+      var reg;
+        if ((state.db.nextOpIReg === "IX") || (state.db.nextOpIReg === "IY")) {
+          reg = cpu.getFlags(state, state.db.nextOpIReg.toLowerCase());
+        } else {
+          reg = cpu.getFlags(state, "hl");
+        }
+        cpu.push(state, reg);
         state.cycles += 11;
         break;
 
@@ -2248,7 +2259,11 @@ var z80CPU = function() {
         break;
 
       case 0xe9:      							                                // JMP HL
-        state.flags.pc = cpu.getFlags(state, "hl");
+        if ((state.db.nextOpIReg === "IX") || (state.db.nextOpIReg === "IY")) {
+          state.flags.pc = cpu.getFlags(state, state.db.nextOpIReg.toLowerCase());
+        } else {
+          state.flags.pc = cpu.getFlags(state, "hl");
+        }
         state.cycles += 4;
         break;
 
