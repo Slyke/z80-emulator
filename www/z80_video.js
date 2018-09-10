@@ -1,5 +1,7 @@
 var videoDriver = function() {
-  var videoDriverRet = {};
+  var videoDriverRet = {
+    name: "Z80 Arcade"
+  };
   
   videoDriverRet.renderGameScreen = function(cpuState, updatedMemoryAddressList, screenImage, renderStateChangeCb) {
     if (typeof(renderStateChangeCb) === "function") {

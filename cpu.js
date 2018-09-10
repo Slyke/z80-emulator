@@ -1,5 +1,7 @@
 var z80CPU = function() {
-  var cpu = {};
+  var cpu = {
+    name: "Z80"
+  };
   /*
   Read this to keep some semblance of sanity.
 
@@ -857,7 +859,11 @@ var z80CPU = function() {
         state.cycles += 7;
         break;
 
-      case 0x1e: cpu.unimplementedInstruction(state); break;        // UNKOP
+      case 0x1e: 							                                      // LD2R
+        state.flags.e = opCode[1] & 0xff;
+        state.flags.pc++ & 0xffff;
+        state.cycles += 7;
+        break;
 
       case 0x1f: 							                                      // RRC A
         var carry = (state.flags.f & fFlags.carry) ? 0x80 : 0;
@@ -2586,7 +2592,7 @@ var z80CPU = function() {
   };
 
   cpu.readWord = function(state, address) {
-    return (cpu.readByte(state, (address + 1) & 0xffff) << 8) | cpu.readByte(state, address)
+    return (cpu.readByte(state, (address + 1) & 0xffff) << 8) | cpu.readByte(state, address);
   };
 
   cpu.writeByte = function(state, address, value) {

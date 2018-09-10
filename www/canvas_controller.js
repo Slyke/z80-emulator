@@ -2,6 +2,7 @@ var showFPS = getLocalStorage('showFPS', false) !== "false";
 var showMemoryInspector = getLocalStorage('showMemoryInspector', true) !== "false";
 var consoleOutWarnings = getLocalStorage('consoleOutWarnings', true) !== "false";
 var loadSpaceInvadersByDefault = getLocalStorage('loadSpaceInvadersByDefault', true) !== "false";
+var gameBoyMode = getLocalStorage('gameBoyMode', false) !== "false";
 var gameScale = getLocalStorage('gameScale', 1.5);
 var fontStyle = "monospace"; // "Megrim";
 
@@ -31,6 +32,7 @@ var cpuClock;
 var objCanvas;
 
 var runningCPU = z80CPU();
+var runningCPUOverride = gameBoyCPU();
 
 var persistantObjects = {
   flags: {},
@@ -405,6 +407,10 @@ function runCPU () {
 
 function setupCPU() {
   runningCPU = z80CPU();
+  if (gameBoyMode) {
+    runningCPUOverride = gameBoyCPU();
+    runningCPU.name = runningCPUOverride.name;
+  }
 
   runningCPU.hwIntPorts[0x01] = 0b00000000;
   runningCPU.hwIntPorts[0x02] = 0b00000000;
@@ -446,7 +452,15 @@ async function cpuLoop() {
 
 function cpuExec() {
   var disassembleExec = runningCPU.disassemble8080OP(runningCPU, runningCPU.flags.pc);
-  var ret = runningCPU.emulate8080OP(runningCPU);
+  var ret = -1;
+  if (gameBoyMode) {
+    ret = runningCPUOverride.opCodeOverwrite(runningCPU);
+    if (ret === 2) { // Passthrough was returned.
+      ret = runningCPU.emulate8080OP(runningCPU);
+    }
+  } else {
+    ret = runningCPU.emulate8080OP(runningCPU);
+  }
 
   if (ret > 0) {
     cpuCanStart = false;
