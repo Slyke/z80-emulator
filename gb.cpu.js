@@ -10,7 +10,7 @@ var gameBoyCPU = function() {
     halfcarry: 0x10,
     interrupt: 0x20,
     zero: 0x40,
-    sign: 0x80,
+    sign: 0x80
   });
 
   cpu.opCodeOverwrite = function(state) {
@@ -22,9 +22,8 @@ var gameBoyCPU = function() {
     state.flags.pc++ & 0xffff;
     
     switch (opCode[0]) {
-
       case 0x08:      							                                // LD (word),SP
-        cpu.unimplementedInstruction(state);
+        cpu.writeByte(state, ((opCode[1] | (0xff << 8)) & 0xffff), state.flags.sp);
         state.cycles += 4;
         break;
 
@@ -35,7 +34,7 @@ var gameBoyCPU = function() {
 
       case 0x22:      							                                // LD (HLI),A
         var hl = cpu.getFlags(state, "hl");
-        state.flags.a = cpu.writeByte(state, hl, state.flags.a);
+        cpu.writeByte(state, hl, state.flags.a);
         hl++ & 0xffff;
 
         var ret = cpu.splitBytes(hl);
@@ -58,20 +57,35 @@ var gameBoyCPU = function() {
         break;
 
       case 0x32:      							                                // LD (HLD),A
-        cpu.unimplementedInstruction(state);
-        state.cycles += 4;
+        var hl = cpu.getFlags(state, "hl");
+        cpu.writeByte(state, hl, state.flags.a);
+        hl-- & 0xffff;
+
+        var ret = cpu.splitBytes(hl);
+        state.flags.h = ret[1];
+        state.flags.l = ret[0];
+        state.cycles += 7;
+        state.flags.pc++ & 0xffff;
         break;
 
       case 0x3a:      							                                // LD A,(HLD)
-        cpu.unimplementedInstruction(state);
-        state.cycles += 4;
+        var hl = cpu.getFlags(state, "hl");
+        state.flags.a = cpu.readByte(state, hl);
+        hl-- & 0xffff;
+        
+        var ret = cpu.splitBytes(hl);
+        state.flags.h = ret[1];
+        state.flags.l = ret[0];
+        state.cycles += 7;
+        state.flags.pc++ & 0xffff;
         break;
 
-      case 0xd3: state.cycles += 4; break;
+      case 0xd3: state.cycles += 4; break;                          // NOP
 
       case 0xd9:      							                                // RETI
-        cpu.unimplementedInstruction(state);
-        state.cycles += 4;
+        state.pInterrupt === 0x01;
+        state.flags.pc = cpu.pop(state, true);
+        state.cycles += 11;
         break;
 
       case 0xdb: state.cycles += 4; break;                          // NOP
@@ -92,9 +106,13 @@ var gameBoyCPU = function() {
       case 0xe4: state.cycles += 4; break;                          // NOP
 
       case 0xe8:      							                                // ADD SP,offset
-        cpu.unimplementedInstruction(state);
-        state.cycles += 4;
+        var signedOp = opCode[1];
+        signedOp = (signedOp >= 0x80) ? signedOp - 0xff : signedOp;
+        state.flags.sp = cpu.addSubByte(state, state.flags.sp, signedOp) & 0xffff;
+        state.cycles += 7;
+        state.flags.pc &= 0xffff;
         break;
+
 
       case 0xea:      							                                // LD (word),A
         cpu.writeByte(state, ((opCode[1] | (opCode[2] << 8)) & 0xffff), state.flags.a);
@@ -143,26 +161,17 @@ var gameBoyCPU = function() {
 
     state.db.totalCPUCycles += (state.cycles - preCycleChange);
 
-    cpu.interruptCheck(state);
-
     return 0;
   };
 
-  cpu.interruptCheck = function(state) {
-    if (state.cycles < 16667) {
-      return;
+  cpu.interrupt = function(state, address) {
+    if (state.cycles > 16667) {
+      state.db.cycleRollover = true;
+      state.cycles -= 16667;
     }
 
-    state.db.cycleRollover = true;
-    state.cycles -= 16667;
-
-    if (state.pInterrupt === 0x10) {
-      state.pInterrupt = 0x08;
-    } else {
-      state.pInterrupt = 0x10;
-    }
-
-    if (state.flags.f & fFlags.interrupt) {
+    if (state.pInterrupt === 0x01) {
+      state.pInterrupt = 0x00;
       // We need to push the current PC to (SP) so we can return after executing the interrupt.
       cpu.push(state, state.flags.pc);
 
