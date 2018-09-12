@@ -3,10 +3,14 @@ if (!videoDriver) {
 }
 videoDriver.push(function() {
   var videoDriverRet = {
-    name: "Z80 Arcade"
+    name: "Z80 Arcade",
+    resolution: [224, 256],
+    redrawing: false,
+    memoryMapRendering: false
   };
   
   videoDriverRet.renderGameScreen = function(cpuState, updatedMemoryAddressList, screenImage, renderStateChangeCb) {
+    videoDriverRet.redrawing = true;
     if (typeof(renderStateChangeCb) === "function") {
       renderStateChangeCb(true);
     }
@@ -21,6 +25,7 @@ videoDriver.push(function() {
       }
     }
 
+    videoDriverRet.redrawing = false;
     if (typeof(renderStateChangeCb) === "function") {
       renderStateChangeCb(false);
     }
@@ -54,7 +59,13 @@ videoDriver.push(function() {
     screenImage.data[imageIndex + 3] = a;
   };
 
-  videoDriverRet.renderMemoryMap = function(cpuState, memoryList, renderStateChangeCb, fullRender = false) {
+  videoDriverRet.memoryUpdate = function(cpuState, memoryList, address, value,  fullMemorySync = false) {
+
+  };
+
+  videoDriverRet.renderMemoryMap = function(cpuState, memoryList, memoryMapImageData, renderStateChangeCb, fullRender = false) {
+
+    videoDriverRet.memoryMapRendering = true;
     if (typeof(renderStateChangeCb) === "function") {
       renderStateChangeCb(true);
     }
@@ -96,6 +107,7 @@ videoDriver.push(function() {
       }
     }
   
+    videoDriverRet.memoryMapRendering = false;
     if (typeof(renderStateChangeCb) === "function") {
       renderStateChangeCb(false);
     }

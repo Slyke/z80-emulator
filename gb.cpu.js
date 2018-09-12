@@ -402,11 +402,6 @@ cpuCoreOverload.push(function() {
     }
 
     var res = (byteRes & 0xff);
-    if (res % 2) {
-      state.flags.f &= ~fFlags.parity & 0xff;
-    } else {
-      state.flags.f |= fFlags.parity;
-    }
 
     if (byteRes & 0x80) {
       state.flags.f |= fFlags.sign;
@@ -424,12 +419,6 @@ cpuCoreOverload.push(function() {
       state.flags.f |= fFlags.halfcarry;
     } else {
       state.flags.f &= ~fFlags.halfcarry & 0xff;
-    }
-
-    if (byteRes >= 0x100 || byteRes < 0) {
-      state.flags.f |= fFlags.carry;
-    } else {
-      state.flags.f &= ~fFlags.carry & 0xff;
     }
 
     return res;
@@ -454,12 +443,6 @@ cpuCoreOverload.push(function() {
     }
 
     var res = (byteRes & 0xff);
-    if (res % 2) {
-      state.flags.f &= ~fFlags.parity & 0xff;
-    } else {
-      state.flags.f |= fFlags.parity;
-    }
-
     if (byteRes & 0x80) {
       state.flags.f |= fFlags.sign;
     } else {
@@ -476,12 +459,6 @@ cpuCoreOverload.push(function() {
       state.flags.f |= fFlags.halfcarry;
     } else {
       state.flags.f &= ~fFlags.halfcarry & 0xff;
-    }
-
-    if (byteRes >= 0x100 || byteRes < 0) {
-      state.flags.f |= fFlags.carry;
-    } else {
-      state.flags.f &= ~fFlags.carry & 0xff;
     }
 
     return res;
@@ -501,12 +478,6 @@ cpuCoreOverload.push(function() {
     }
 
     var res = operandRes & 0xff;
-
-    if (res % 2) {
-      state.flags.f &= ~fFlags.parity & 0xff;
-    } else {
-      state.flags.f |= fFlags.parity;
-    }
 
     if (operandRes & 0x80) {
       state.flags.f |= fFlags.sign;
@@ -528,8 +499,6 @@ cpuCoreOverload.push(function() {
       }
     }
 
-    state.flags.f &= ~fFlags.carry & 0xff;
-
     if (operand === "^" || operand === "|") {
       state.flags.f &= ~fFlags.halfcarry & 0xff;
     }
@@ -548,12 +517,6 @@ cpuCoreOverload.push(function() {
     }
 
     var pz = (valueChange & 0xff);
-    if (pz % 2) {
-      state.flags.f &= ~fFlags.parity & 0xff;
-    } else {
-      state.flags.f |= fFlags.parity;
-    }
-
     if (valueChange & 0x80) {
       state.flags.f |= fFlags.sign;
     } else {

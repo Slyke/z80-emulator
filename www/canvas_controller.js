@@ -15,15 +15,12 @@ var cpuRunning = false;
 var previouslyExecInstructions = [];
 var loadedMemoryFilesList = [];
 var screenDimensions = [0, 0];
-var gameDimensions = [224, 256];
 var gameTopLeftCoord = [0.05, 0.05]
 var gameScreenRenderData = new Image();
 var gameScreenImageData = [];
 var videoMemoryUpdated = [];
 var anyMemoryUpdated = [];
 var memoryMapImageData = [];
-var screenRedrawing = false;
-var screenRedrawingMemMap = false;
 
 var usingVideoDriver;
 var usingCPUCore;
@@ -51,89 +48,6 @@ var persistantObjects = {
   mm: {},
   gameFiles: {}
 };
-
-function fileDropHandler(event) {
-  event.preventDefault();
-  event.stopPropagation();
-  if (event.dataTransfer.files.length > 1) {
-    console.error("Error: Uploaded too many files at the same time. Only upload one at a time, to ensure the order is correct.");
-    return;
-  }
-
-  var uploadedFile = event.dataTransfer.files[0];
-
-  var fileExt = uploadedFile.name.substring(uploadedFile.name.lastIndexOf('.') + 1);
-
-  if (fileExt === "bin") {
-    var reader = new FileReader();
-
-    reader.onload = function (event) {
-      cpuRunning = false;
-
-      if (loadedMemoryFilesList.length === 0) {
-        runningCPU = usingCPUCore();
-        runningCPU.memory = new Array();
-        setupCPUCallbacks();
-      }
-
-      memoryOffset = runningCPU.memory.length;
-      var byteArray = new Uint8Array(event.target.result);
-      for (var i = 0; i < byteArray.byteLength; i++) {
-        runningCPU.memory[i + memoryOffset] = byteArray[i];
-      }
-      loadedMemoryFilesList.push(uploadedFile.name);
-
-      usingVideoDriver.renderMemoryMap(runningCPU, anyMemoryUpdated, function(renderngState) {
-        screenRedrawingMemMap = renderngState;
-      }, true);
-    };
-
-    reader.onerror = function (err) {
-      console.log("Error loading binary data from file: ", err)
-    };
-
-    reader.readAsArrayBuffer(uploadedFile);
-  } else if (fileExt === "json") {
-    var reader = new FileReader();
-
-    reader.onload = function (event) {
-      cpuRunning = false;
-
-      if (loadedMemoryFilesList.length === 0) {
-        runningCPU = usingCPUCore();
-        runningCPU.memory = new Array();
-        setupCPUCallbacks();
-      }
-
-      memoryOffset = runningCPU.memory.length;
-      var jsonGame = JSON.parse(event.target.result);
-      var jsonData = jsonGame.chunks;
-      jsonData.forEach(function(chunkData) {
-        for (var i = 0; i < chunkData.data.length; i++) {
-          runningCPU.memory[i + memoryOffset + parseInt(chunkData.offset)] = parseInt(chunkData.data[i]);
-        }
-      });
-
-      loadedMemoryFilesList.push(uploadedFile.name);
-
-      usingVideoDriver.renderMemoryMap(runningCPU, anyMemoryUpdated, function(renderngState) {
-        screenRedrawingMemMap = renderngState;
-      }, true);
-    };
-
-    reader.onerror = function (err) {
-      console.log("Error loading json data from file: ", err)
-    };
-
-    reader.readAsText(uploadedFile);
-  } else {
-    console.error("Error, ", fileExt, "is not a valid file type. Only *.bin and *.json are valid.");
-  }
-
-  usingVideoDriver.renderMemoryMap(runningCPU, anyMemoryUpdated, function(renderngState) {
-    screenRedrawingMemMap = renderngState;
-  }, true);
-}
 
 function getLocalStorage(key, defaultValue) {
   if (localStorage.getItem(key) === null) {
@@ -171,16 +85,12 @@ function animateLoop() {
 
   uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanStart, showMemoryInspector);
 
-  if (cpuCanStart && cpuRunning && videoMemoryUpdated.length > 1 && !screenRedrawing) {
-    usingVideoDriver.renderGameScreen(runningCPU, videoMemoryUpdated, gameScreenImageData, function(renderngState) {
-      screenRedrawing = renderngState;
-    });
+  if (cpuCanStart && cpuRunning && videoMemoryUpdated.length > 1 && !usingVideoDriver.redrawing) {
+    usingVideoDriver.renderGameScreen(runningCPU, videoMemoryUpdated, gameScreenImageData);
   }
 
-  if (cpuCanStart && cpuRunning && anyMemoryUpdated.length > 1 && !screenRedrawingMemMap) {
-    usingVideoDriver.renderMemoryMap(runningCPU, anyMemoryUpdated, function(renderngState) {
-      screenRedrawingMemMap = renderngState;
-    }, true);
+  if (cpuCanStart && cpuRunning && anyMemoryUpdated.length > 1 && !usingVideoDriver.memoryMapRendering) {
+    usingVideoDriver.renderMemoryMap(runningCPU, anyMemoryUpdated, memoryMapImageData, null, true);
   }
   
   if (showFPS) {
@@ -219,50 +129,6 @@ function animateLoop() {
 
 }
 
-function injectJSONDataIntoMemory(memory, filename, memoryOffset = 0, cb) {
-
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', filename, true);
-
-  xhr.onload = function(e) {
-    if (this.status === 200) {
-      var fileData = this.response;
-      var memoryChunks = fileData.chunks;
-      memoryChunks.forEach((chunkArray) => {
-        var chunkMemoryOffset = parseInt(chunkArray.offset);
-        
-        var memoryData = chunkArray.data;
-
-        for (var i = 0; i < memoryData.length; i++) {
-          memory[i + memoryOffset + chunkMemoryOffset] = parseInt(memoryData[i]);
-        }
-      });
-      cb();
-    }
-  };
-   
-  xhr.send();
-}
-
-function injectBinaryDataIntoMemory(memory, filename, memoryOffset = 0, cb) {
-
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', filename, true);
-  xhr.responseType = 'arraybuffer';
-
-  xhr.onload = function(e) {
-    if (this.status === 200) {
-      var byteArray = new Uint8Array(this.response);
-      for (var i = 0; i < byteArray.byteLength; i++) {
-        memory[i + memoryOffset] = byteArray[i];
-      }
-      cb();
-    }
-  };
-   
-  xhr.send();
-}
-
 function printMemoryTrace(cpuState) {
   console.warn(" ");
   console.log("Last instruction executed: ");
@@ -286,38 +152,6 @@ function printMemorySlice(cpuState, pc, lower, upper) {
   var memoryOutput = memorySlice.map((index) => { return pad(index.toString(16), 2); });
   return memoryOutput;
 };
-
-function loadSpaceInvadersGame() {
-
-  injectBinaryDataIntoMemory(runningCPU.memory, "../rom/invaders/invaders1.h.bin", 0, () => {
-    loadedMemoryFilesList.push("invaders1.h.bin");
-    romLoaded++;
-    if (romLoaded === 4) {
-      postCPUReady();
-    }
-  });
-  injectBinaryDataIntoMemory(runningCPU.memory, "../rom/invaders/invaders2.g.bin", 0x800, () => {
-    loadedMemoryFilesList.push("invaders2.g.bin");
-    romLoaded++;
-    if (romLoaded === 4) {
-      postCPUReady();
-    }
-  });
-  injectBinaryDataIntoMemory(runningCPU.memory, "../rom/invaders/invaders3.f.bin", 0x1000, () => {
-    loadedMemoryFilesList.push("invaders3.f.bin");
-    romLoaded++;
-    if (romLoaded === 4) {
-      postCPUReady();
-    }
-  });
-  injectBinaryDataIntoMemory(runningCPU.memory, "../rom/invaders/invaders4.e.bin", 0x1800, () => {
-    loadedMemoryFilesList.push("invaders4.e.bin");
-    romLoaded++;
-    if (romLoaded === 4) {
-      postCPUReady();
-    }
-  });
-}
 
 function setupCPUCallbacks() {
 
@@ -346,6 +180,10 @@ function setupCPUCallbacks() {
 
   // This lets the video renderer, and memory map renderer know when something has changed in memory.
   runningCPU.memoryUpdateCb = function(address, value) {
+    if (typeof(usingVideoDriver.memoryUpdate) === "function") {
+      videoDriverRet.memoryUpdate(cpuState, runningCPU.memory, address, value, false);
+    }
+
     if (address >= 0x2400) {
       if (videoMemoryUpdated.indexOf(address) === -1) {
         videoMemoryUpdated.push(address);
@@ -364,9 +202,7 @@ function postCPUReady() {
     for (var i = 0; i < memoryMapImageData.data.length; i++) {
       memoryMapImageData.data[i] = ((i % 4) !== 3 ? 0 : 255);
     }
-    usingVideoDriver.renderMemoryMap(runningCPU, anyMemoryUpdated, function(renderngState) {
-      screenRedrawingMemMap = renderngState;
-    }, true);
+    usingVideoDriver.renderMemoryMap(runningCPU, anyMemoryUpdated, memoryMapImageData, null, true);
   }
   
   cpuCanStart = true;
@@ -384,11 +220,6 @@ function setupCPU() {
     runningCPUOverride = usingCPUCoreOverload();
   }
 
-  runningCPU.hwIntPorts[0x01] = 0b00000000;
-  runningCPU.hwIntPorts[0x02] = 0b00000000;
-  runningCPU.hwIntPorts[0x03] = 0b00000000; // Looks like it communicates to something external with port 3 and 4. Maybe a sound card?
-  runningCPU.hwIntPorts[0x04] = 0b00000000; 
-
   runningCPU.memory = new Array(0x10000).fill(0);
 
   if (loadSpaceInvadersByDefault) {
@@ -399,7 +230,6 @@ function setupCPU() {
   }
   
   setupCPUCallbacks();
-
 }
 
 async function cpuLoop() {
@@ -475,16 +305,14 @@ function setupCanvas() {
   objContext.font = "12px " + fontStyle;
   setupEventHandlers(objCanvas, canvasControl);
   screenDimensions = [objCanvas.width, objCanvas.height];
-  gameScreenImageData = objContext.createImageData(gameDimensions[0], gameDimensions[1]);
+  gameScreenImageData = objContext.createImageData(usingVideoDriver.resolution[0], usingVideoDriver.resolution[1]);
   memoryMapImageData = objContext.createImageData(0xff, 0xff);
 
   if (cpuCanStart) {
     for (var i = 0; i < memoryMapImageData.data.length; i++) {
       memoryMapImageData.data[i] = ((i % 4) !== 3 ? 0 : 255);
     }
-    usingVideoDriver.renderMemoryMap(runningCPU, anyMemoryUpdated, function(renderngState) {
-      screenRedrawingMemMap = renderngState;
-    }, true);
+    usingVideoDriver.renderMemoryMap(runningCPU, anyMemoryUpdated, memoryMapImageData, null, true);
   }
 
   animateLoop();
@@ -499,6 +327,18 @@ function createHardware() {
 function init() {
 
   createHardware();
+
+  if (!usingVideoDriver) {
+    console.error("No video driver found! Choose from: ", videoDriver.map(function (videoDriver) { return videoDriver().name; } ));
+    console.error("Update the name in your browser's localstorage and refresh");
+    return;
+  }
+  
+  if (!usingCPUCore) {
+    console.error("No CPU core found! Choose from: ", cpuCore.map(function (cpuCoreIndex) { return cpuCoreIndex().name; } ));
+    console.error("Update the name in your browser's localstorage and refresh");
+    return;
+  }
 
   runningCPU = usingCPUCore();
   if (usingCPUCoreOverload) {

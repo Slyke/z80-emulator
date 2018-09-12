@@ -40,7 +40,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
   helpText.forEach(function(helpIndex, i) {
     var objHelpText = {
       "x": relToAbs(0.05, 0),
-      "y": (relToAbs(0.4, 1) * gameScale) + (relToAbs(i * 0.02, 1)),
+      "y": ((usingVideoDriver.resolution[1] * gameScale) + relToAbs(0.02, 1) + relToAbs(gameTopLeftCoord[1], 1)) + (relToAbs(i * 0.02, 1)),
       "name":"lblHelpText" + i,
       "text": helpIndex,
       "shape":"text",
@@ -54,16 +54,16 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
   });
 
   if (gameScale !== 1) {
-    gameScreenRenderData = Uint8ClampedArrayImageToPNG(gameScreenImageData, gameDimensions);
+    gameScreenRenderData = Uint8ClampedArrayImageToPNG(gameScreenImageData, usingVideoDriver.resolution);
   }
   persistantObjects.gameScreen = {
     "x": relToAbs(gameTopLeftCoord[0], 0),
     "y": relToAbs(gameTopLeftCoord[1], 1),
-    "w": gameDimensions[0],
-    "h": gameDimensions[1],
+    "w": usingVideoDriver.resolution[0],
+    "h": usingVideoDriver.resolution[1],
     "name":"gameScreen",
-    "sw": gameDimensions[0] * gameScale,
-    "sh": gameDimensions[1] * gameScale,
+    "sw": usingVideoDriver.resolution[0] * gameScale,
+    "sh": usingVideoDriver.resolution[1] * gameScale,
     "src": {objImage: gameScreenRenderData},
     "shape":"image",
     "render":function(self) {
@@ -75,8 +75,8 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
   persistantObjects.screenBox = {
     "x": relToAbs(gameTopLeftCoord[0], 0),
     "y": relToAbs(gameTopLeftCoord[1], 1),
-    "w": gameDimensions[0] * gameScale,
-    "h": gameDimensions[1] * gameScale,
+    "w": usingVideoDriver.resolution[0] * gameScale,
+    "h": usingVideoDriver.resolution[1] * gameScale,
     "shape":"rect",
     "render":function(self) {
       canvasControl.drawRect(self.x, self.y, self.w, self.h, self.renderType, canvasControl.canvasContext, {"strokeStyle": "#FFAAAA", "lineWidth":"3"});
