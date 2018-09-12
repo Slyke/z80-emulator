@@ -149,7 +149,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
     "x": relToAbs(0.65, 0),
     "y": relToAbs(0.07, 1),
     "name":"lblCPUDebugCycles",
-    "text":"  CPU Cycle:  " + pad(runningCPU.cycles, 5),
+    "text":"  CPU Cycle : " + pad(runningCPU.cycles, 5),
     "shape":"text",
     "render":function(self) {
       canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#00FFFF"});
@@ -161,7 +161,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
     "x": relToAbs(0.65, 0),
     "y": relToAbs(0.09, 1),
     "name":"lblCPUDebugCycles",
-    "text":"  Penren:     " + pad(videoMemoryUpdated.length, 4),
+    "text":"  Penren    : " + pad(videoMemoryUpdated.length, 4),
     "shape":"text",
     "render":function(self) {
       canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#00FFFF"});
@@ -173,7 +173,19 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
     "x": relToAbs(0.65, 0),
     "y": relToAbs(0.11, 1),
     "name":"lblCPUDebugCpuType",
-    "text":"  CPU Type:   " + runningCPU.name,
+    "text":"  CPU Type  : " + runningCPU.name,
+    "shape":"text",
+    "render":function(self) {
+      canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#00FFFF"});
+    },
+    "visible": true
+  };
+
+  persistantObjects.debug.cpuOverloadType = {
+    "x": relToAbs(0.65, 0),
+    "y": relToAbs(0.13, 1),
+    "name":"lblCPUDebugCpuType",
+    "text":"  CPU OVRLD : " + (runningCPUOverride ? runningCPUOverride.name : ''),
     "shape":"text",
     "render":function(self) {
       canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#00FFFF"});
@@ -183,9 +195,9 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
   persistantObjects.debug.displayDriver = {
     "x": relToAbs(0.65, 0),
-    "y": relToAbs(0.13, 1),
+    "y": relToAbs(0.15, 1),
     "name":"lblCPUDebugDisplayDriverMode",
-    "text":"  DispDriver: " + z80videoDriver.name,
+    "text":"  DispDriver: " + usingVideoDriver.name,
     "shape":"text",
     "render":function(self) {
       canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#00FFFF"});
@@ -397,6 +409,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
   canvasControl.canvasObjects.push(persistantObjects.debug.cycles);
   canvasControl.canvasObjects.push(persistantObjects.debug.pendingScreenUpdates);
   canvasControl.canvasObjects.push(persistantObjects.debug.cpuType);
+  canvasControl.canvasObjects.push(persistantObjects.debug.cpuOverloadType);
   canvasControl.canvasObjects.push(persistantObjects.debug.displayDriver);
 
   canvasControl.canvasObjects.push(persistantObjects.flags.label);

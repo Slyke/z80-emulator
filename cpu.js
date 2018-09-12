@@ -1,4 +1,8 @@
-var z80CPU = function() {
+if (!cpuCore) {
+  var cpuCore = [];
+}
+
+cpuCore.push(function() {
   var cpu = {
     name: "Z80"
   };
@@ -2854,13 +2858,13 @@ var z80CPU = function() {
   };
 
   return cpu;
-};
+});
 
 if (typeof(module) !== 'undefined') {
-  module.exports = z80CPU;
+  module.exports = cpuCore[0];
 } else if (typeof define === 'function' && define.amd) {
   define([], function () {
       'use strict';
-      return z80CPU;
+      return cpuCore;
   });
 }

@@ -2,8 +2,11 @@ var showFPS = getLocalStorage('showFPS', false) !== "false";
 var showMemoryInspector = getLocalStorage('showMemoryInspector', true) !== "false";
 var consoleOutWarnings = getLocalStorage('consoleOutWarnings', true) !== "false";
 var loadSpaceInvadersByDefault = getLocalStorage('loadSpaceInvadersByDefault', true) !== "false";
-var gameBoyMode = getLocalStorage('gameBoyMode', false) !== "false";
+var cpuCoreName = getLocalStorage('cpuCore', "Z80");
+var cpuCoreOverloadName = getLocalStorage('cpuCoreOverload', "");
+var videoDriverName = getLocalStorage('videoDriver', "Z80 Arcade");
 var gameScale = getLocalStorage('gameScale', 1.5);
+var settingsVersion = getLocalStorage('settingsVersion', "0.201809112326.0");
 var fontStyle = "monospace"; // "Megrim";
 
 var romLoaded = 0;
@@ -21,7 +24,10 @@ var anyMemoryUpdated = [];
 var memoryMapImageData = [];
 var screenRedrawing = false;
 var screenRedrawingMemMap = false;
-var z80videoDriver = videoDriver();
+
+var usingVideoDriver;
+var usingCPUCore;
+var usingCPUCoreOverload;
 
 var frameCount = 0;
 var fpsNumber = 0;
@@ -31,8 +37,8 @@ var cpuClock;
 
 var objCanvas;
 
-var runningCPU = z80CPU();
-var runningCPUOverride = gameBoyCPU();
+var runningCPU;
+var runningCPUOverride;
 
 var persistantObjects = {
   flags: {},
@@ -65,7 +71,7 @@ function fileDropHandler(event) {
       cpuRunning = false;
 
       if (loadedMemoryFilesList.length === 0) {
-        runningCPU = z80CPU();
+        runningCPU = usingCPUCore();
         runningCPU.memory = new Array();
         setupCPUCallbacks();
       }
@@ -77,7 +83,9 @@ function fileDropHandler(event) {
       }
       loadedMemoryFilesList.push(uploadedFile.name);
 
-      renderMemoryMap(runningCPU, anyMemoryUpdated, true);
+      usingVideoDriver.renderMemoryMap(runningCPU, anyMemoryUpdated, function(renderngState) {
+        screenRedrawingMemMap = renderngState;
+      }, true);
     };
 
     reader.onerror = function (err) {
@@ -92,7 +100,7 @@ function fileDropHandler(event) {
       cpuRunning = false;
 
       if (loadedMemoryFilesList.length === 0) {
-        runningCPU = z80CPU();
+        runningCPU = usingCPUCore();
         runningCPU.memory = new Array();
         setupCPUCallbacks();
       }
@@ -108,7 +116,9 @@ function fileDropHandler(event) {
 
       loadedMemoryFilesList.push(uploadedFile.name);
 
-      renderMemoryMap(runningCPU, anyMemoryUpdated, true);
+      usingVideoDriver.renderMemoryMap(runningCPU, anyMemoryUpdated, function(renderngState) {
+        screenRedrawingMemMap = renderngState;
+      }, true);
     };
 
     reader.onerror = function (err) {
@@ -120,7 +130,9 @@ function fileDropHandler(event) {
     console.error("Error, ", fileExt, "is not a valid file type. Only *.bin and *.json are valid.");
   }
 
-  renderMemoryMap(runningCPU, anyMemoryUpdated, true);
+  usingVideoDriver.renderMemoryMap(runningCPU, anyMemoryUpdated, function(renderngState) {
+    screenRedrawingMemMap = renderngState;
+  }, true);
 }
 
 function getLocalStorage(key, defaultValue) {
@@ -160,13 +172,15 @@ function animateLoop() {
   uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanStart, showMemoryInspector);
 
   if (cpuCanStart && cpuRunning && videoMemoryUpdated.length > 1 && !screenRedrawing) {
-    z80videoDriver.renderGameScreen(runningCPU, videoMemoryUpdated, gameScreenImageData, function(renderngState) {
+    usingVideoDriver.renderGameScreen(runningCPU, videoMemoryUpdated, gameScreenImageData, function(renderngState) {
       screenRedrawing = renderngState;
     });
   }
 
   if (cpuCanStart && cpuRunning && anyMemoryUpdated.length > 1 && !screenRedrawingMemMap) {
-    renderMemoryMap(runningCPU, anyMemoryUpdated, true);
+    usingVideoDriver.renderMemoryMap(runningCPU, anyMemoryUpdated, function(renderngState) {
+      screenRedrawingMemMap = renderngState;
+    }, true);
   }
   
   if (showFPS) {
@@ -203,49 +217,6 @@ function animateLoop() {
     requestAnimationFrame(() => { animateLoop(); });
   }
 
-}
-
-function renderMemoryMap(cpuState, memoryList, fullRender = false) {
-  screenRedrawingMemMap = true;
-
-  if (fullRender) {
-    for (var i = 0; i < cpuState.memory.length; i++) {
-      var color = 0x00;
-      var colorRAM = 0x00;
-      if ((i * 4) < 0x2000) { // ROM
-        color = 0x22;
-      }
-      if ((i * 4) > 0x2400 && (i * 4) < 0x4000) { // Video
-        color = 0x55;
-      }
-      if ((i * 4) > 0x4000) { // RAM
-        colorRAM = 0x55;
-      }
-      memoryMapImageData.data[(i * 4)] = cpuState.memory[i];
-      memoryMapImageData.data[(i * 4) + 1] = cpuState.memory[i] ? (color | colorRAM) : 0;
-      memoryMapImageData.data[(i * 4) + 2] = cpuState.memory[i] ? color : 0;
-    }
-    memoryMapImageData.data[(cpuState.flags.pc * 4) + 1] = 255;
-    memoryMapImageData.data[(cpuState.flags.sp * 4) + 2] = 255;
-  } else {
-    while((memoryIndex = memoryList.pop()) != null) {
-      var color = 0x00;
-      if ((memoryIndex * 4) < 0x2000) { // ROM
-        color = 0x22;
-      }
-      if ((memoryIndex * 4) > 0x2400) { // Video
-        color = 0x55;
-      }
-      memoryMapImageData.data[memoryIndex * 4] = cpuState.memory[memoryIndex];
-      memoryMapImageData.data[(memoryIndex * 4) + 1] = cpuState.memory[memoryIndex] ? color : 0;
-      memoryMapImageData.data[(memoryIndex * 4) + 2] = cpuState.memory[memoryIndex] ? color : 0;
-      memoryMapImageData.data[(memoryIndex * 4) + 3] = 255;
-      memoryMapImageData.data[(cpuState.flags.pc * 4) + 1] = 255;
-      memoryMapImageData.data[(cpuState.flags.sp * 4) + 2] = 255;
-    }
-  }
-
-  screenRedrawingMemMap = false;
 }
 
 function injectJSONDataIntoMemory(memory, filename, memoryOffset = 0, cb) {
@@ -393,7 +364,9 @@ function postCPUReady() {
     for (var i = 0; i < memoryMapImageData.data.length; i++) {
       memoryMapImageData.data[i] = ((i % 4) !== 3 ? 0 : 255);
     }
-    renderMemoryMap(runningCPU, anyMemoryUpdated, true);
+    usingVideoDriver.renderMemoryMap(runningCPU, anyMemoryUpdated, function(renderngState) {
+      screenRedrawingMemMap = renderngState;
+    }, true);
   }
   
   cpuCanStart = true;
@@ -406,10 +379,9 @@ function runCPU () {
 }
 
 function setupCPU() {
-  runningCPU = z80CPU();
-  if (gameBoyMode) {
-    runningCPUOverride = gameBoyCPU();
-    runningCPU.name = runningCPUOverride.name;
+  runningCPU = usingCPUCore();
+  if (runningCPUOverride) {
+    runningCPUOverride = usingCPUCoreOverload();
   }
 
   runningCPU.hwIntPorts[0x01] = 0b00000000;
@@ -451,9 +423,18 @@ async function cpuLoop() {
 }
 
 function cpuExec() {
-  var disassembleExec = runningCPU.disassemble8080OP(runningCPU, runningCPU.flags.pc);
+  var disassembleExec;
+  if (runningCPUOverride) {
+    disassembleExec = runningCPUOverride.disassemble8080OPOverwrte(runningCPU, runningCPU.flags.pc);
+    if (!disassembleExec.overwrite) {
+      disassembleExec = runningCPU.disassemble8080OP(runningCPU, runningCPU.flags.pc);
+    }
+  } else {
+    disassembleExec = runningCPU.disassemble8080OP(runningCPU, runningCPU.flags.pc);
+  }
+  
   var ret = -1;
-  if (gameBoyMode) {
+  if (runningCPUOverride) {
     ret = runningCPUOverride.opCodeOverwrite(runningCPU);
     if (ret === 2) { // Passthrough was returned.
       ret = runningCPU.emulate8080OP(runningCPU);
@@ -501,13 +482,29 @@ function setupCanvas() {
     for (var i = 0; i < memoryMapImageData.data.length; i++) {
       memoryMapImageData.data[i] = ((i % 4) !== 3 ? 0 : 255);
     }
-    renderMemoryMap(runningCPU, anyMemoryUpdated, true);
+    usingVideoDriver.renderMemoryMap(runningCPU, anyMemoryUpdated, function(renderngState) {
+      screenRedrawingMemMap = renderngState;
+    }, true);
   }
 
   animateLoop();
 }
 
+function createHardware() {
+  usingVideoDriver = videoDriver.map(function (videoDriver) { return videoDriver(); } ).filter(function(vidDriver) { return vidDriver.name === videoDriverName })[0];
+  usingCPUCore = cpuCore.map(function (cpuCoreIndex) { return cpuCoreIndex; } ).filter(function(cpuCoreFilterIndex) { return cpuCoreFilterIndex().name === cpuCoreName })[0];
+  usingCPUCoreOverload = cpuCoreOverload.map(function (usingCPUCoreOverloadIndex) { return usingCPUCoreOverloadIndex; } ).filter(function(usingCPUCoreOverloadFilterIndex) { return usingCPUCoreOverloadFilterIndex().name === cpuCoreOverloadName })[0];
+}
+
 function init() {
+
+  createHardware();
+
+  runningCPU = usingCPUCore();
+  if (usingCPUCoreOverload) {
+    runningCPUOverride = usingCPUCoreOverload();
+  }
+
   setupCPU();
   setupCanvas();
 };

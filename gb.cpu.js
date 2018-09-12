@@ -1,17 +1,96 @@
-var gameBoyCPU = function() {
+if (!cpuCoreOverload) {
+  var cpuCoreOverload = [];
+}
+
+cpuCoreOverload.push(function() {
   // Since many of the OP codes between the Z80 and GameBoy are the same, I'm just going to overwrite the different OP codes in here.
   var cpu = {
     name: "Gameboy"
   };
 
   const fFlags = Object.freeze({
-    carry: 0x01,
-    parity: 0x04,
     halfcarry: 0x10,
     interrupt: 0x20,
     zero: 0x40,
     sign: 0x80
   });
+
+  cpu.disassemble8080OPOverwrte = function(state, pc) {
+    var memory = state.memory;
+
+    // Not all OPCodes will have 3 bytes. The trailing bytes are ignored if unsed.
+    var opCode = [memory[pc], memory[pc + 1], memory[pc + 2]];
+
+    var output = {
+      execCount: 0,
+      programCounter: 0,
+      opCode: "",
+      z80OPCode: "", // I added this so the Z80 op codes could be referenced.
+      opCodeHex: 0,
+      ireg: "", // Input registers
+      oreg: "", // Output registers (usually determing a memory location)
+      para1: "",
+      para2: "",
+      ptr: "",
+      opBytes: 0,
+      cycles: 0,
+      cycleConditional: false,
+      error: true,
+      indexRegUsed: false,
+      overwrite: true
+    };
+
+    output.execCount = state.db.executionCount;
+    output.programCounter = pc.toString(16);
+    if (opCode[0] == null && pc < state.memory.length) {
+      if (typeof(state.warningCb) === 'function') { state.warningCb('disassemble8080OPOverwrte', state, ["Warning: No instruction passed: ", opCode, 'State: ', state, "PC", pc ]); }
+      return output;
+    } else if (pc >= state.memory.length) {
+      output.opCode = "--";
+      return output;
+    }
+
+    if ((opCode[1] == null && pc + 1 < state.memory.length) || (opCode[2] == null && pc + 2 < state.memory.length) ) {
+      if (typeof(state.warningCb) === 'function') { state.warningCb('disassemble8080OPOverwrte', state, ["Warning: OP Code undefined.", opCode, 'State: ', state, "PC", pc ]); }
+      return output;
+    }
+
+    output.opCodeHex = opCode[0].toString(16);
+
+    output.opBytes = 1;
+
+    switch (opCode[0]) {
+      case 0x00: output.opCode = "NOP"; output.z80OPCode = "NOP"; output.cycles = 4; break;
+      case 0x01: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 10; output.oreg = "BC"; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
+      case 0x02: output.opCode = "LD2M"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "#"; output.oreg = "BC"; output.ireg = "A"; break;
+
+      case 0xdb: output.opCode = "NOP"; output.z80OPCode = "NOP"; output.cycles = 4; break;
+      case 0xdd: output.opCode = "NOP"; output.z80OPCode = "NOP"; output.cycles = 4; break;
+
+      case 0xe3: output.opCode = "NOP"; output.z80OPCode = "NOP"; output.cycles = 4; break;
+      case 0xe4: output.opCode = "NOP"; output.z80OPCode = "NOP"; output.cycles = 4; break;
+
+      case 0xeb: output.opCode = "NOP"; output.z80OPCode = "NOP"; output.cycles = 4; break;
+      case 0xec: output.opCode = "NOP"; output.z80OPCode = "NOP"; output.cycles = 4; break;
+
+      case 0xf2: output.opCode = "NOP"; output.z80OPCode = "NOP"; output.cycles = 4; break;
+      case 0xf4: output.opCode = "NOP"; output.z80OPCode = "NOP"; output.cycles = 4; break;
+
+      case 0xf8: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 10; output.oreg = "A"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
+      case 0xfa: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 10; output.oreg = "A"; output.ptr = "$"; output.opBytes = 2; break;
+
+      case 0xfc: output.opCode = "NOP"; output.z80OPCode = "NOP"; output.cycles = 4; break;
+      case 0xfd: output.opCode = "NOP"; output.z80OPCode = "NOP"; output.cycles = 4; break;
+
+      default:
+        output.overwrite = false;
+    }
+
+    output.error = false;
+
+    return output;
+  }
+
 
   cpu.opCodeOverwrite = function(state) {
     var opCode = [state.memory[state.flags.pc], state.memory[state.flags.pc + 1], state.memory[state.flags.pc + 2]];
@@ -28,7 +107,9 @@ var gameBoyCPU = function() {
         break;
 
       case 0x10:      							                                // STOP
-        cpu.unimplementedInstruction(state);
+        if (typeof(state.cStop) === "function") {
+          state.cStop(state, state.pInterrupt);
+        }
         state.cycles += 4;
         break;
 
@@ -78,6 +159,16 @@ var gameBoyCPU = function() {
         state.flags.l = ret[0];
         state.cycles += 7;
         state.flags.pc++ & 0xffff;
+        break;
+
+        case 0x76:      							                                // STOP
+        if (state.pInterrupt === 0x01) {
+          if (typeof(state.cStop) === "function") {
+            state.cStop(state, state.pInterrupt);
+          }
+        }
+
+        state.cycles += 4;
         break;
 
       case 0xd3: state.cycles += 4; break;                          // NOP
@@ -134,7 +225,11 @@ var gameBoyCPU = function() {
       case 0xf4: state.cycles += 4; break;                          // NOP
 
       case 0xf8:      							                                // LD HL SP,byte
-        cpu.unimplementedInstruction(state);
+        var signedOp = opCode[1];
+        signedOp = (signedOp >= 0x80) ? signedOp - 0xff : signedOp;
+        var ret = cpu.splitBytes(cpu.addSubByte(state, state.flags.sp, signedOp, 1));
+        state.flags.h = ret[1];
+        state.flags.l = ret[0];
         state.cycles += 4;
         break;
 
@@ -230,18 +325,18 @@ var gameBoyCPU = function() {
   };
 
   cpu.unimplementedInstruction = function(cpuState) {
-    if (typeof(cpuState.warningCb) === 'function') { cpuState.warningCb('unimplementedInstruction', cpuState, ["Unimplmented instruction.", "Debug info: ", cpuState.disassemble8080OP(cpuState, cpuState.flags.pc - 1)]); }
+    if (typeof(cpuState.warningCb) === 'function') { cpuState.warningCb('unimplementedInstruction', cpuState, ["Unimplmented instruction.", "Debug info: ", cpu.disassemble8080OPOverwrte(cpuState, cpuState.flags.pc - 1)]); }
     // The emulate function returns 1 if the instruction is unimplemented upon execution.
     // We need to rollback the PC so the state can be correctly handled by the function calling emulate8080OP().
     cpuState.flags.pc--;
   };
 
   cpu.romWriteCheck = function(state, writeAddr) {
-    if (writeAddr < 0x2000 || writeAddr > 0xffff) {
+    if (writeAddr < 0x8000 || writeAddr > 0xffff) {
       if (typeof(state.warningCb) === 'function') { state.warningCb('romWriteCheck', state, [
         "This emulator allows writing to ROM, but if you are receiving this message it means that the CPU is writing to the ROM. This will in most cases break the process and lead to unknown states. Please check your ASM.",
         "Warning: Writing to ROM: ",
-        cpu.disassemble8080OP(state, state.flags.pc - 1)
+        cpu.disassemble8080OPOverwrte(state, state.flags.pc - 1)
       ]); }
     }
   };
@@ -262,7 +357,7 @@ var gameBoyCPU = function() {
         "Warning: Value is outside of valid range: '" + res + "' This is probably a bug.",
         "A valid range will be returned if one can be recovered.",
         "Debug info: ",
-        cpu.disassemble8080OP(state, state.flags.pc - 1),
+        cpu.disassemble8080OPOverwrte(state, state.flags.pc - 1),
         "Value info: Typeof: " + typeof(res) + "   < 0x00: " + res < 0x00 + "   > 0xff: " + res > 0xff + "   Empty string: " + res == "" + "   null: " + res == null
       ]); }
     }
@@ -285,7 +380,7 @@ var gameBoyCPU = function() {
       if (typeof(state.warningCb) === 'function') { state.warningCb('writeByte', state, [
         "You are writing into out of bounds memory. The emulator will allow this, but it generally indicates something is wrong.",
         "Debug info: ",
-        cpu.disassemble8080OP(state, state.flags.pc - 1)
+        cpu.disassemble8080OPOverwrte(state, state.flags.pc - 1)
       ]); }
     }
 
@@ -495,51 +590,18 @@ var gameBoyCPU = function() {
       return state.flags.iy & 0xffff;
     }
 
-    if (typeof(state.warningCb) === 'function') { state.warningCb('getFlags', state, ["Invalid flag combo selected: ", flagCombo, " at: ", cpu.disassemble8080OP(state, state.flags.pc - 1)]); }
+    if (typeof(state.warningCb) === 'function') { state.warningCb('getFlags', state, ["Invalid flag combo selected: ", flagCombo, " at: ", cpu.disassemble8080OPOverwrte(state, state.flags.pc - 1)]); }
     return ;
   };
 
-  cpu.parity = function(x, size) {
-    var p = 0;
-    x = (x & ((1 << size) - 1));
-    for (var i = 0; i < size; i++) {
-      if (x & 0x1) p++;
-      x = x >> 1;
-    }
-    return (0 == (p & 0x1));
-  };
-
-  cpu.preCalculatedParitySize8 = function(value) {
-    // Technically cpu.parity(x, 8) will produce this. I extracted the values so it doesn't have to each time.
-    var parityBits = [
-      1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
-      0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
-      0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
-      1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
-      0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
-      1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
-      1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
-      0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
-      0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
-      1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
-      1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
-      0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
-      1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
-      0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
-      0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
-      1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1
-    ];
-    return parityBits[value];
-  };
-
   return cpu;
-}
+});
 
 if (typeof(module) !== 'undefined') {
-  module.exports = z80CPU;
+  module.exports = cpuCoreOverload[0];
 } else if (typeof define === 'function' && define.amd) {
   define([], function () {
       'use strict';
-      return z80CPU;
+      return cpuCoreOverload;
   });
 }

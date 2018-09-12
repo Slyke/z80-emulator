@@ -3,7 +3,7 @@ if (!videoDriver) {
 }
 videoDriver.push(function() {
   var videoDriverRet = {
-    name: "Z80 Arcade"
+    name: "Gameboy"
   };
   
   videoDriverRet.renderGameScreen = function(cpuState, updatedMemoryAddressList, screenImage, renderStateChangeCb) {
@@ -63,15 +63,51 @@ videoDriver.push(function() {
       for (var i = 0; i < cpuState.memory.length; i++) {
         var color = 0x00;
         var colorRAM = 0x00;
-        if ((i * 4) < 0x2000) { // ROM
+
+        if ((i * 4) < 0x00ff) { // BIOS
           color = 0x22;
         }
-        if ((i * 4) > 0x2400 && (i * 4) < 0x4000) { // Video
+
+        if ((i * 4) > 0x0100 && (i * 4) < 0x014f) { // Cartridge header
+          color = 0x22;
+        }
+
+        if ((i * 4) > 0x4000 && (i * 4) < 0x7fff) { // ROM
+          color = 0x22;
+        }
+
+        if ((i * 4) > 0x0150 && (i * 4) < 0x3fff) { // ROM, bank 0
+          color = 0x22;
+        }
+
+        if ((i * 4) > 0x4000 && (i * 4) < 0x7fff) { // ROM, other banks
+          color = 0x22;
+        }
+
+        if ((i * 4) > 0x8000 && (i * 4) < 0x9fff) { // video ram
+          color = 0x99;
+        }
+
+        if ((i * 4) > 0xa000 && (i * 4) < 0xbfff) { // external ram (save files)
+          color = 0x77;
+        }
+
+        if ((i * 4) > 0xc000 && (i * 4) < 0xdfff) { // working ram
+          color = 0xbb;
+        }
+
+        if ((i * 4) > 0xe000 && (i * 4) < 0xfdff) { // working ram (shadow copy)
+          color = 0xbb;
+        }
+
+        if ((i * 4) > 0xff00 && (i * 4) < 0xff7f) { // memory map for IO
           color = 0x55;
         }
-        if ((i * 4) > 0x4000) { // RAM
-          colorRAM = 0x55;
+
+        if ((i * 4) > 0xff80 && (i * 4) < 0xffff) { // zero-page ram
+          color = 0x55;
         }
+
         memoryMapImageData.data[(i * 4)] = cpuState.memory[i];
         memoryMapImageData.data[(i * 4) + 1] = cpuState.memory[i] ? (color | colorRAM) : 0;
         memoryMapImageData.data[(i * 4) + 2] = cpuState.memory[i] ? color : 0;

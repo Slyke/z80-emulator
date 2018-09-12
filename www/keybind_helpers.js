@@ -4,7 +4,7 @@ function keyEvents(event, eventType) {
     if (event.key === 'R') {
       cpuRunning = false;
       var currentMemory = runningCPU.memory.slice(0);
-      runningCPU = z80CPU();
+      runningCPU = usingCPUCore();
 
       runningCPU.memory = currentMemory;
 
@@ -13,7 +13,9 @@ function keyEvents(event, eventType) {
     if (event.key === 'Q') {
       runningCPU.memory = new Array(0x10000).fill(0);
       loadedMemoryFilesList = [];
-      renderMemoryMap(runningCPU, anyMemoryUpdated, true);
+      z80videoDriver.renderMemoryMap(runningCPU, anyMemoryUpdated, function(renderngState) {
+        screenRedrawingMemMap = renderngState;
+      }, true);
     }
     if (event.key === 'l') { // 1
       if (!cpuRunning) {
@@ -21,7 +23,9 @@ function keyEvents(event, eventType) {
         z80videoDriver.renderGameScreen(runningCPU, videoMemoryUpdated, gameScreenImageData, function(renderngState) {
           screenRedrawing = renderngState;
         });
-        renderMemoryMap(runningCPU, anyMemoryUpdated, true);
+        z80videoDriver.renderMemoryMap(runningCPU, anyMemoryUpdated, function(renderngState) {
+          screenRedrawingMemMap = renderngState;
+        }, true);
       }
     }
     if (event.key === 'k') { // 10
@@ -30,7 +34,9 @@ function keyEvents(event, eventType) {
         z80videoDriver.renderGameScreen(runningCPU, videoMemoryUpdated, gameScreenImageData, function(renderngState) {
           screenRedrawing = renderngState;
         });
-        renderMemoryMap(runningCPU, anyMemoryUpdated, true);
+        z80videoDriver.renderMemoryMap(runningCPU, anyMemoryUpdated, function(renderngState) {
+          screenRedrawingMemMap = renderngState;
+        }, true);
       }
     }
     if (event.key === 'j') { // 100
@@ -39,7 +45,9 @@ function keyEvents(event, eventType) {
         z80videoDriver.renderGameScreen(runningCPU, videoMemoryUpdated, gameScreenImageData, function(renderngState) {
           screenRedrawing = renderngState;
         });
-        renderMemoryMap(runningCPU, anyMemoryUpdated, true);
+        z80videoDriver.renderMemoryMap(runningCPU, anyMemoryUpdated, function(renderngState) {
+          screenRedrawingMemMap = renderngState;
+        }, true);
       }
     }
     if (event.key === 'h') { // 1000
@@ -48,7 +56,9 @@ function keyEvents(event, eventType) {
         z80videoDriver.renderGameScreen(runningCPU, videoMemoryUpdated, gameScreenImageData, function(renderngState) {
           screenRedrawing = renderngState;
         });
-        renderMemoryMap(runningCPU, anyMemoryUpdated, true);
+        z80videoDriver.renderMemoryMap(runningCPU, anyMemoryUpdated, function(renderngState) {
+          screenRedrawingMemMap = renderngState;
+        }, true);
       }
     }
     if (event.key === 'g') { // 10000
@@ -57,7 +67,9 @@ function keyEvents(event, eventType) {
         z80videoDriver.renderGameScreen(runningCPU, videoMemoryUpdated, gameScreenImageData, function(renderngState) {
           screenRedrawing = renderngState;
         });
-        renderMemoryMap(runningCPU, anyMemoryUpdated, true);
+        z80videoDriver.renderMemoryMap(runningCPU, anyMemoryUpdated, function(renderngState) {
+          screenRedrawingMemMap = renderngState;
+        }, true);
       }
     }
     if (event.key === 'p') {
@@ -69,7 +81,9 @@ function keyEvents(event, eventType) {
       localStorage.setItem('showMemoryInspector', showMemoryInspector);
 
       if (showMemoryInspector) {
-        renderMemoryMap(runningCPU, anyMemoryUpdated, true);
+        z80videoDriver.renderMemoryMap(runningCPU, anyMemoryUpdated, function(renderngState) {
+          screenRedrawingMemMap = renderngState;
+        }, true);
       }
     }
   } else if (eventType === "down") {
