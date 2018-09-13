@@ -30,9 +30,7 @@ function fileDropHandler(event) {
       }
       loadedMemoryFilesList.push(uploadedFile.name);
 
-      usingVideoDriver.renderMemoryMap(runningCPU, anyMemoryUpdated, function(renderngState) {
-        screenRedrawingMemMap = renderngState;
-      }, true);
+      usingVideoDriver.renderMemoryMap(runningCPU, anyMemoryUpdated, memoryMapImageData, null, true);
     };
 
     reader.onerror = function (err) {
@@ -63,9 +61,7 @@ function fileDropHandler(event) {
 
       loadedMemoryFilesList.push(uploadedFile.name);
 
-      usingVideoDriver.renderMemoryMap(runningCPU, anyMemoryUpdated, function(renderngState) {
-        screenRedrawingMemMap = renderngState;
-      }, true);
+      usingVideoDriver.renderMemoryMap(runningCPU, anyMemoryUpdated, memoryMapImageData, null, true);
     };
 
     reader.onerror = function (err) {
@@ -77,9 +73,7 @@ function fileDropHandler(event) {
     console.error("Error, ", fileExt, "is not a valid file type. Only *.bin and *.json are valid.");
   }
 
-  usingVideoDriver.renderMemoryMap(runningCPU, anyMemoryUpdated, function(renderngState) {
-    screenRedrawingMemMap = renderngState;
-  }, true);
+  usingVideoDriver.renderMemoryMap(runningCPU, anyMemoryUpdated, memoryMapImageData, null, true);
 }
 
 function injectJSONDataIntoMemory(memory, filename, memoryOffset = 0, cb) {
