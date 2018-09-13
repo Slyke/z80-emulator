@@ -18,7 +18,6 @@ var screenDimensions = [0, 0];
 var gameTopLeftCoord = [0.05, 0.05]
 var gameScreenRenderData = new Image();
 var gameScreenImageData = [];
-var videoMemoryUpdated = [];
 var anyMemoryUpdated = [];
 var memoryMapImageData = [];
 
@@ -85,8 +84,8 @@ function animateLoop() {
 
   uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanStart, showMemoryInspector);
 
-  if (cpuCanStart && cpuRunning && videoMemoryUpdated.length > 1 && !usingVideoDriver.redrawing) {
-    usingVideoDriver.renderGameScreen(runningCPU, videoMemoryUpdated, gameScreenImageData);
+  if (cpuCanStart && cpuRunning && !usingVideoDriver.redrawing) {
+    usingVideoDriver.renderGameScreen(runningCPU, usingVideoDriver.videoMemory, gameScreenImageData);
   }
 
   if (cpuCanStart && cpuRunning && anyMemoryUpdated.length > 1 && !usingVideoDriver.memoryMapRendering) {
@@ -181,13 +180,7 @@ function setupCPUCallbacks() {
   // This lets the video renderer, and memory map renderer know when something has changed in memory.
   runningCPU.memoryUpdateCb = function(address, value) {
     if (typeof(usingVideoDriver.memoryUpdate) === "function") {
-      videoDriverRet.memoryUpdate(cpuState, runningCPU.memory, address, value, false);
-    }
-
-    if (address >= 0x2400) {
-      if (videoMemoryUpdated.indexOf(address) === -1) {
-        videoMemoryUpdated.push(address);
-      }
+      usingVideoDriver.memoryUpdate(runningCPU, runningCPU.memory, address, value, false);
     }
 
     if (anyMemoryUpdated.indexOf(address) === -1) {

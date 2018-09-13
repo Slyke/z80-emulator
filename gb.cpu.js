@@ -201,7 +201,7 @@ cpuCoreOverload.push(function() {
         signedOp = (signedOp >= 0x80) ? signedOp - 0xff : signedOp;
         state.flags.sp = cpu.addSubByte(state, state.flags.sp, signedOp) & 0xffff;
         state.cycles += 7;
-        state.flags.pc &= 0xffff;
+        state.flags.pc = (state.flags.pc + 1) & 0xffff;
         break;
 
 
@@ -209,7 +209,7 @@ cpuCoreOverload.push(function() {
         cpu.writeByte(state, ((opCode[1] | (opCode[2] << 8)) & 0xffff), state.flags.a);
         state.cycles += 4;
         state.flags.pc += 2;
-        state.flags.pc &= 0xffff;
+        state.flags.pc = (state.flags.pc + 1) & 0xffff;
         break;
 
       case 0xeb: state.cycles += 4; break;                          // NOP
@@ -237,7 +237,7 @@ cpuCoreOverload.push(function() {
         state.flags.a = cpu.readByte(state, ((opCode[1] | (opCode[2] << 8)) & 0xffff));
         state.cycles += 7;
         state.flags.pc += 2;
-        state.flags.pc &= 0xffff;
+        state.flags.pc = (state.flags.pc + 1) & 0xffff;
         break;
 
       case 0xfc: state.cycles += 4; break;                          // NOP
@@ -255,6 +255,8 @@ cpuCoreOverload.push(function() {
     }
 
     state.db.totalCPUCycles += (state.cycles - preCycleChange);
+    state.lastOpCycle = (state.cycles - preCycleChange);
+    state.modeClock = (state.modeClock + 1) & 0xffff;
 
     return 0;
   };
@@ -555,6 +557,65 @@ cpuCoreOverload.push(function() {
 
     if (typeof(state.warningCb) === 'function') { state.warningCb('getFlags', state, ["Invalid flag combo selected: ", flagCombo, " at: ", cpu.disassemble8080OPOverwrte(state, state.flags.pc - 1)]); }
     return ;
+  };
+
+  cpu.getKeyBoardKeysText = function() {
+    return [
+      "Gameboy Game Keys:",
+      "     A - Left        D - Right",
+      "     Spacebar - Shoot",
+      "     1 - Player 1    2 - Player 2",
+      "     C - Insert Coin",
+      "     "
+    ];
+  };
+
+  cpu.getKeyBoardKeysHooks = function(event, eventType, cpuState) {
+    if (eventType === "down") {
+      if (cpuCanStart) {
+        if (event.key === 'a') {
+          cpuState.hwIntPorts[0x01] |= 0x20;
+        }
+  
+        if (event.key === 'd') {
+          cpuState.hwIntPorts[0x01] |= 0x40;
+        }
+  
+        if (event.key === ' ') {
+          cpuState.hwIntPorts[0x01] |= 0x10;;
+        }
+  
+        if (event.key === '1') {
+          cpuState.hwIntPorts[0x01] |= 0x04;;
+        }
+  
+        if (event.key === 'c') {
+          cpuState.hwIntPorts[0x01] |= 0x01;;
+        }
+      }
+    } else if (eventType === "up") {
+      if (cpuCanStart) {
+        if (event.key === 'a') {
+          cpuState.hwIntPorts[0x01] &= 0xff - 0x20;
+        }
+  
+        if (event.key === 'd') {
+          cpuState.hwIntPorts[0x01] &= 0xff - 0x40;
+        }
+  
+        if (event.key === ' ') {
+          cpuState.hwIntPorts[0x01] &= 0xff - 0x10;;
+        }
+  
+        if (event.key === '1') {
+          cpuState.hwIntPorts[0x01] &= 0xff - 0x04;;
+        }
+  
+        if (event.key === 'c') {
+          cpuState.hwIntPorts[0x01] &= 0xff - 0x01;;
+        }
+      }
+    }
   };
 
   return cpu;

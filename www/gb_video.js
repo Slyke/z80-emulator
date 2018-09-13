@@ -6,23 +6,21 @@ videoDriver.push(function() {
     name: "Gameboy",
     resolution: [160, 144],
     redrawing: false,
-    memoryMapRendering: false
+    memoryMapRendering: false,
+    videoMemory: []
   };
 
-  videoDriverRet.renderGameScreen = function(cpuState, updatedMemoryAddressList, screenImage, renderStateChangeCb) {
+  var gpuMode = 0;
+
+  videoDriverRet.renderGameScreen = function(cpuState, memoryAddressList, screenImage, renderStateChangeCb) {
     videoDriverRet.redrawing = true;
     if (typeof(renderStateChangeCb) === "function") {
       renderStateChangeCb(true);
     }
 
-    while((memoryIndex = updatedMemoryAddressList.pop()) != null) {
-      var normalizedPixelIndex = memoryIndex - 0x2400;
-      var x = normalizedPixelIndex >> 5;
-      var y = ~(((normalizedPixelIndex & 0x1f) * 8) & 0xff) & 0xff;
+    switch (gpuMode) {
+      case 2:
 
-      for(var k = 0; k < 8; ++k) {
-        videoDriverRet.writeGamePixel(screenImage, x, y, cpuState.memory[memoryIndex], k);
-      }
     }
 
     videoDriverRet.redrawing = false;
@@ -60,7 +58,11 @@ videoDriver.push(function() {
   };
 
   videoDriverRet.memoryUpdate = function(cpuState, memoryList, address, value,  fullMemorySync = false) {
-
+    if (address >= 0x2400) {
+      if (videoDriverRet.videoMemory.indexOf(address) === -1) {
+        videoDriverRet.videoMemory.push(address);
+      }
+    }
   };
 
   videoDriverRet.renderMemoryMap = function(cpuState, memoryList, memoryMapImageData, renderStateChangeCb, fullRender = false) {

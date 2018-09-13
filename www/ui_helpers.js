@@ -19,12 +19,6 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
   }
 
   var helpText = [
-    "Game Keys:",
-    "     A - Left        D - Right",
-    "     Spacebar - Shoot",
-    "     1 - Player 1    2 - Player 2",
-    "     C - Insert Coin",
-    "     ",
     "Emulator Keys:",
     "     P - Pause/Resume Emulator (Press this to start)",
     "     M - Show/Hide memory disassembly",
@@ -36,6 +30,16 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
     "     J - 100         K - 10 ",
     "     L - 1 (Step by step)"
   ];
+
+  if (runningCPUOverride) {
+    runningCPUOverride.getKeyBoardKeysText().reverse().forEach(function (text) {
+      helpText.unshift(text);
+    });
+  } else {
+    runningCPU.getKeyBoardKeysText().reverse().forEach(function (text) {
+      helpText.unshift(text);
+    });
+  }
 
   helpText.forEach(function(helpIndex, i) {
     var objHelpText = {
@@ -111,7 +115,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
   persistantObjects.debug.execCount = {
     "x": relToAbs(0.65, 0),
-    "y": relToAbs(0.03, 1),
+    "y": relToAbs(0.025, 1),
     "name":"lblCPUDebugExecCount",
     "text":"  Exec Count: " + execCount,
     "shape":"text",
@@ -133,10 +137,22 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
     }
   }
 
+  persistantObjects.debug.modeClock = {
+    "x": relToAbs(0.65, 0),
+    "y": relToAbs(0.04, 1),
+    "name":"lblCPUDebugModeClock",
+    "text":"  Mode Clock: " + pad(runningCPU.modeClock, 5),
+    "shape":"text",
+    "render":function(self) {
+      canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#00FFFF"});
+    },
+    "visible": true
+  };
+
   persistantObjects.debug.totalCycles = {
     "x": relToAbs(0.65, 0),
-    "y": relToAbs(0.05, 1),
-    "name":"lblCPUDebugCycles",
+    "y": relToAbs(0.06, 1),
+    "name":"lblCPUDebugCyclesTotal",
     "text":"  CPU Cycles: " + cpuCount + " Total",
     "shape":"text",
     "render":function(self) {
@@ -147,7 +163,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
   persistantObjects.debug.cycles = {
     "x": relToAbs(0.65, 0),
-    "y": relToAbs(0.07, 1),
+    "y": relToAbs(0.075, 1),
     "name":"lblCPUDebugCycles",
     "text":"  CPU Cycle : " + pad(runningCPU.cycles, 5),
     "shape":"text",
@@ -159,9 +175,9 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
   persistantObjects.debug.pendingScreenUpdates = {
     "x": relToAbs(0.65, 0),
-    "y": relToAbs(0.09, 1),
+    "y": relToAbs(0.095, 1),
     "name":"lblCPUDebugCycles",
-    "text":"  Penren    : " + pad(videoMemoryUpdated.length, 4),
+    "text":"  Penren    : " + pad(usingVideoDriver.videoMemory.length, 4),
     "shape":"text",
     "render":function(self) {
       canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#00FFFF"});
@@ -171,7 +187,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
   persistantObjects.debug.cpuType = {
     "x": relToAbs(0.65, 0),
-    "y": relToAbs(0.11, 1),
+    "y": relToAbs(0.115, 1),
     "name":"lblCPUDebugCpuType",
     "text":"  CPU Type  : " + runningCPU.name,
     "shape":"text",
@@ -183,7 +199,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
   persistantObjects.debug.cpuOverloadType = {
     "x": relToAbs(0.65, 0),
-    "y": relToAbs(0.13, 1),
+    "y": relToAbs(0.135, 1),
     "name":"lblCPUDebugCpuType",
     "text":"  CPU OVRLD : " + (runningCPUOverride ? runningCPUOverride.name : ''),
     "shape":"text",
@@ -195,7 +211,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
   persistantObjects.debug.displayDriver = {
     "x": relToAbs(0.65, 0),
-    "y": relToAbs(0.15, 1),
+    "y": relToAbs(0.155, 1),
     "name":"lblCPUDebugDisplayDriverMode",
     "text":"  DispDriver: " + usingVideoDriver.name,
     "shape":"text",
@@ -405,6 +421,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
   canvasControl.canvasObjects.push(persistantObjects.debug.label);
   canvasControl.canvasObjects.push(persistantObjects.debug.execCount);
+  canvasControl.canvasObjects.push(persistantObjects.debug.modeClock);
   canvasControl.canvasObjects.push(persistantObjects.debug.totalCycles);
   canvasControl.canvasObjects.push(persistantObjects.debug.cycles);
   canvasControl.canvasObjects.push(persistantObjects.debug.pendingScreenUpdates);

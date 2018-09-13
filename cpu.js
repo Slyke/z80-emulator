@@ -305,6 +305,8 @@ cpuCore.push(function() {
   cpu.flags = JSON.parse(JSON.stringify(cpuFlags));
   cpu.db = JSON.parse(JSON.stringify(debugFlags));
   cpu.cycles = 0;
+  cpu.lastOpCycle = 0;
+  cpu.modeClock = 0;
   cpu.pInterrupt = 0x10;
   cpu.memory = [];
   cpu.warningCb;
@@ -647,7 +649,7 @@ cpuCore.push(function() {
 
     var preCycleChange = state.cycles;
 
-    state.flags.pc++ & 0xffff;
+    state.flags.pc = (state.flags.pc + 1) & 0xffff;
 
     switch (opCode[0]) {
       case 0x00: state.cycles += 4; break;	                          // NOP
@@ -685,7 +687,7 @@ cpuCore.push(function() {
 
 		  case 0x06: 							                                        // LD2R B,byte
         state.flags.b = opCode[1] & 0xff;
-        state.flags.pc++ & 0xffff;
+        state.flags.pc = (state.flags.pc + 1) & 0xffff;
         state.cycles += 7;
         break;
 
@@ -749,7 +751,7 @@ cpuCore.push(function() {
 
       case 0x0e: 							                                      // LD2R C,byte
         state.flags.c = opCode[1] & 0xff;
-        state.flags.pc++ & 0xffff;
+        state.flags.pc = (state.flags.pc + 1) & 0xffff;
         state.cycles += 7;
         break;
 
@@ -800,7 +802,7 @@ cpuCore.push(function() {
 
       case 0x16:                                                    // LD2R	D,byte
         state.flags.d = opCode[1] & 0xff;
-        state.flags.pc++ & 0xffff;
+        state.flags.pc = (state.flags.pc + 1) & 0xffff;
         state.cycles += 7;
         break;
 
@@ -865,7 +867,7 @@ cpuCore.push(function() {
 
       case 0x1e: 							                                      // LD2R
         state.flags.e = opCode[1] & 0xff;
-        state.flags.pc++ & 0xffff;
+        state.flags.pc = (state.flags.pc + 1) & 0xffff;
         state.cycles += 7;
         break;
 
@@ -936,7 +938,7 @@ cpuCore.push(function() {
 
       case 0x26:                                                    // LD2R	H,byte
         state.flags.h = opCode[1] & 0xff;
-        state.flags.pc++ & 0xffff;
+        state.flags.pc = (state.flags.pc + 1) & 0xffff;
         state.cycles += 7;
         break;
 
@@ -997,7 +999,7 @@ cpuCore.push(function() {
 
       case 0x2e: 							                                      // LD2R L,byte
         state.flags.l = opCode[1] & 0xff;
-        state.flags.pc++ & 0xffff;
+        state.flags.pc = (state.flags.pc + 1) & 0xffff;
         state.cycles += 7;
         break;
 
@@ -1061,7 +1063,7 @@ cpuCore.push(function() {
         }
 
         cpu.writeByte(state, offset, opCode[1]);
-        state.flags.pc++ & 0xffff;
+        state.flags.pc = (state.flags.pc + 1) & 0xffff;
         state.cycles += 10;
         break;
 
@@ -1118,7 +1120,7 @@ cpuCore.push(function() {
 
       case 0x3e:                                       							// LD2R    A,byte
         state.flags.a = opCode[1];
-        state.flags.pc++ & 0xffff;
+        state.flags.pc = (state.flags.pc + 1) & 0xffff;
         state.cycles += 7;
         break;
 
@@ -1963,7 +1965,7 @@ cpuCore.push(function() {
 
       case 0xc6:      							                                // INXR   A,byte
         state.flags.a = cpu.addSubByte(state, state.flags.a, opCode[1]) & 0xff;
-        state.flags.pc++ & 0xffff;
+        state.flags.pc = (state.flags.pc + 1) & 0xffff;
         state.cycles += 7;
         break;
 
@@ -2028,7 +2030,7 @@ cpuCore.push(function() {
 
       case 0xce:      							                                // ICXR   A,byte
         state.flags.a = cpu.addSubWithCarryByte(state, state.flags.a, opCode[1]) & 0xff;
-        state.flags.pc++ & 0xffff;
+        state.flags.pc = (state.flags.pc + 1) & 0xffff;
         state.cycles += 4;
         break;
 
@@ -2070,7 +2072,7 @@ cpuCore.push(function() {
 
       case 0xd3:      							                                // HWOUT byte A
         cpu.writeHWPort(state, opCode[1], state.flags.a);
-        state.flags.pc++ & 0xffff;
+        state.flags.pc = (state.flags.pc + 1) & 0xffff;
         state.cycles += 10;
         break;
 
@@ -2097,7 +2099,7 @@ cpuCore.push(function() {
 
       case 0xd6:      							                                // DCXR   A,byte
         state.flags.a = cpu.addSubByte(state, state.flags.a, opCode[1], -1) & 0xff;
-        state.flags.pc++ & 0xffff;
+        state.flags.pc = (state.flags.pc + 1) & 0xffff;
         state.cycles += 7;
         break;
 
@@ -2133,7 +2135,7 @@ cpuCore.push(function() {
 
       case 0xdb:      							                                // HWIN byte
         state.flags.a = cpu.readHWPort(state, opCode[1]);
-        state.flags.pc++ & 0xffff;
+        state.flags.pc = (state.flags.pc + 1) & 0xffff;
         state.cycles += 10;
         break;
 
@@ -2160,7 +2162,7 @@ cpuCore.push(function() {
 
       case 0xde:      							                                // DEXR   A,byte
         state.flags.a = cpu.addSubWithCarryByte(state, state.flags.a, opCode[1], -1) & 0xff;
-        state.flags.pc++ & 0xffff;
+        state.flags.pc = (state.flags.pc + 1) & 0xffff;
         state.cycles += 7;
         break;
 
@@ -2247,7 +2249,7 @@ cpuCore.push(function() {
 
       case 0xe6:      							                                // ANDR   A,byte
         state.flags.a = cpu.operandByte(state, state.flags.a, opCode[1], "&") & 0xff;
-        state.flags.pc++ & 0xffff;
+        state.flags.pc = (state.flags.pc + 1) & 0xffff;
         state.cycles += 7;
         break;
 
@@ -2318,7 +2320,7 @@ cpuCore.push(function() {
 
       case 0xee:      							                                // XORR   A,byte
         state.flags.a = cpu.operandByte(state, state.flags.a, opCode[1], "^") & 0xff;
-        state.flags.pc++ & 0xffff;
+        state.flags.pc = (state.flags.pc + 1) & 0xffff;
         state.cycles += 7;
         break;
 
@@ -2386,7 +2388,7 @@ cpuCore.push(function() {
 
       case 0xf6:      							                                // ORR   A,byte
         state.flags.a = cpu.operandByte(state, state.flags.a, opCode[1], "|") & 0xff;
-        state.flags.pc++ & 0xffff;
+        state.flags.pc = (state.flags.pc + 1) & 0xffff;
         state.cycles += 7;
         break;
 
@@ -2437,7 +2439,7 @@ cpuCore.push(function() {
           state.flags.pc = jumpTo;
           state.cycles += 18;
         } else {
-          state.flags.pc = (state.flags.pc + 2) & 0xFFFF;
+          state.flags.pc = (state.flags.pc + 2) & 0xffff;
           state.cycles += 11;
         }
         break;
@@ -2450,7 +2452,7 @@ cpuCore.push(function() {
 
       case 0xfe:      							                                // DCXR   A,byte
         cpu.addSubByte(state, state.flags.a, opCode[1], -1) & 0xff;
-        state.flags.pc++ & 0xffff;
+        state.flags.pc = (state.flags.pc + 1) & 0xffff;
         state.cycles += 7;
         break;
 
@@ -2476,6 +2478,8 @@ cpuCore.push(function() {
     }
 
     state.db.totalCPUCycles += (state.cycles - preCycleChange);
+    state.lastOpCycle = (state.cycles - preCycleChange);
+    state.modeClock = (state.modeClock + 1) & 0xffff;
 
     cpu.interruptCheck(state);
 
@@ -2855,6 +2859,65 @@ cpuCore.push(function() {
       1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1
     ];
     return parityBits[value];
+  };
+
+  cpu.getKeyBoardKeysText = function() {
+    return [
+      "Z80 Game Keys:",
+      "     A - Left        D - Right",
+      "     Spacebar - Shoot",
+      "     1 - Player 1    2 - Player 2",
+      "     C - Insert Coin",
+      "     "
+    ];
+  };
+
+  cpu.getKeyBoardKeysHooks = function(event, eventType, cpuState) {
+    if (eventType === "down") {
+      if (cpuCanStart) {
+        if (event.key === 'a') {
+          cpuState.hwIntPorts[0x01] |= 0x20;
+        }
+  
+        if (event.key === 'd') {
+          cpuState.hwIntPorts[0x01] |= 0x40;
+        }
+  
+        if (event.key === ' ') {
+          cpuState.hwIntPorts[0x01] |= 0x10;;
+        }
+  
+        if (event.key === '1') {
+          cpuState.hwIntPorts[0x01] |= 0x04;;
+        }
+  
+        if (event.key === 'c') {
+          cpuState.hwIntPorts[0x01] |= 0x01;;
+        }
+      }
+    } else if (eventType === "up") {
+      if (cpuCanStart) {
+        if (event.key === 'a') {
+          cpuState.hwIntPorts[0x01] &= 0xff - 0x20;
+        }
+  
+        if (event.key === 'd') {
+          cpuState.hwIntPorts[0x01] &= 0xff - 0x40;
+        }
+  
+        if (event.key === ' ') {
+          cpuState.hwIntPorts[0x01] &= 0xff - 0x10;;
+        }
+  
+        if (event.key === '1') {
+          cpuState.hwIntPorts[0x01] &= 0xff - 0x04;;
+        }
+  
+        if (event.key === 'c') {
+          cpuState.hwIntPorts[0x01] &= 0xff - 0x01;;
+        }
+      }
+    }
   };
 
   return cpu;
