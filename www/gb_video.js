@@ -10,58 +10,139 @@ videoDriver.push(function() {
     videoMemory: []
   };
 
+  var memorySegments = Object.freeze({
+    vRamStart: 0x8000,
+    vRamEnd: 0x9fff,
+    extRamStart: 0xa000,
+    extRamEnd: 0xbfff,
+    oamStart: 0xfe00,
+    deviceStart: 0xff00,
+    deviceEnd: 0xff7f
+  });
+
+  var gpuLocs = Object.freeze({
+    lcdc:       0xff40,
+    stat:       0xff41,
+    scy:        0xff42,
+    scx:        0xff43,
+    ly:         0xff44,
+    lyc:         0xff45,
+    bgp:        0xff47,
+    obp0:       0xff48,
+    obp1:       0xff49,
+    wy:         0xff4a,
+    wx:         0xff4b,
+    oamStart:   0xfe00,
+    oamEnd:     0xff4b,
+    vBlankTime: 70224
+  });
+
+  var cpuInterrupts = Object.freeze({
+    vBlank: 0x40,
+    LCDC:   0x48,
+    timer:  0x50,
+    serial: 0x58,
+    HILO:   0x60
+  });
+
+  var gpuTileMap = Object.freeze({
+    height: 32,
+    width: 32,
+    start0: 0x9800,
+    start1: 0x9c00,
+    length: 0x0400
+  });
+
   var gpuMode = 0;
+  var gpuClock = 0;
+  var gpuScreenVLine = 0;
 
-  videoDriverRet.renderGameScreen = function(cpuState, memoryAddressList, screenImage, renderStateChangeCb) {
-    videoDriverRet.redrawing = true;
-    if (typeof(renderStateChangeCb) === "function") {
-      renderStateChangeCb(true);
-    }
+  var updateLY = function(cpuState, newLine) {
+    cpuState.memory[gpuLocs.ly] = newLine & 0xff;
+    var stat = cpuState.memory[gpuLocs.stat];
 
-    switch (gpuMode) {
-      case 2:
-
-    }
-
-    videoDriverRet.redrawing = false;
-    if (typeof(renderStateChangeCb) === "function") {
-      renderStateChangeCb(false);
+    if (cpuState.memory[gpuLocs.ly] === cpuState.memory[gpuLocs.lyc]) {
+      cpuState.memory[gpuLocs.stat] = (stat | (1 << 2));
+      if (statstat & (1 << 6)) {
+        cpuState.requestInterrupt(cpuInterrupts.LCDC);
+      }
+    } else {
+      cpuState.memory[gpuLocs.stat] = (stat & (0xff - (1 << 2)));
     }
   };
 
-  videoDriverRet.writeGamePixel = function(screenImage, x, y, v, c) {
-    y = y - c;
+  var drawFrame = function(cpuState) {
+    var lcdc = cpuState.memory[gpuLocs.lcdc];
 
-    var bt = (v >> c) & 1;
-    var r = 0;
-    var g = 0;
-    var b = 0;
-    var a = 0xff;
+    var drawEnabled = (lcdc >> 7) & 1;
 
-    if (bt) {
-      if ((y >= 0xb8 && y <= 0xee && x >= 0 && x <= 0xdf) || (y >= 0xf0 && y <= 0xf7 && x >= 0xf && x <= 0x85)) {
-        g = 0xff;
-      } else if (y >= (0xf7 - 0xd7) && y >= (0xf7 - 0xb8) && x >= 0 && x <= 0xe9) {
-        g = 0xff;
-        b = 0xff;
-        r = 0xff;
-      } else {
-        r = 0xff;
-      }
+    if (drawEnabled) {
+      updateFrameBuffer()
     }
-    var imageIndex = (x * 4) + (y * (4 * 0xe0));
 
-    screenImage.data[imageIndex] = r;
-    screenImage.data[imageIndex + 1] = g;
-    screenImage.data[imageIndex + 2] = b;
-    screenImage.data[imageIndex + 3] = a;
+  }
+
+  var updateFrameBuffer = function() {
+
+  }
+
+  videoDriverRet.renderGameScreen = function(cpuState, memoryAddressList, screenImage, renderStateChangeCb) {
+    gpuClock += cpuState.cycles;
+
+    var vBlank = false;
+
+    switch (gpuMode) {
+      case 0:
+        if (gpuClock >= 204) {
+          gpuClock -= 204;
+          gpuScreenVLine++;
+          updateLY(cpuState, gpuScreenVLine);
+        }
+
+        if (gpuScreenVLine == 144) {
+          gpuMode = 1;
+          vBlank = true;
+          cpuState.interrupt(cpuState, cpuInterrupts.vBlank);
+          // Output frame
+        } else {
+          gpuMode = 2;
+        }
+        break;
+
+      case 1:
+        if (gpuClock >= 456) {
+          gpuClock -= 456;
+          gpuScreenVLine++;
+          if (gpuScreenVLine > 153) {
+            gpuScreenVLine = 0;
+            gpuMode = 2;
+          }
+          updateLY(cpuState, gpuScreenVLine);
+        }
+        break;
+
+      case 2:
+        if (gpuClock >= 80) {
+          gpuClock -= 80;
+          gpuMode = 3;
+        }
+        break;
+
+      case 3:
+        if (gpuClock >= 172) {
+          gpuClock -= 172;
+          // Draw scanline
+          gpuMode = 0;
+        }
+      break;
+    }
+
+    return vBlank;
   };
 
   videoDriverRet.memoryUpdate = function(cpuState, memoryList, address, value,  fullMemorySync = false) {
-    if (address >= 0x2400) {
-      if (videoDriverRet.videoMemory.indexOf(address) === -1) {
-        videoDriverRet.videoMemory.push(address);
-      }
+    if (videoDriverRet.videoMemory.indexOf(address) === -1) {
+      videoDriverRet.videoMemory.push(address);
     }
   };
 

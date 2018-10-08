@@ -311,6 +311,7 @@ cpuCore.push(function() {
   cpu.memory = [];
   cpu.warningCb;
   cpu.memoryUpdateCb;
+  cpu.isHalted = false;
 
   cpu.disassemble8080OP = function(state, pc) {
     var memory = state.memory;
@@ -1972,8 +1973,7 @@ cpuCore.push(function() {
       case 0xc7:      							                                // RST 00
         state.flags.pc += 2;
         state.flags.pc &= 0xffff;
-        cpu.push(state, state.flags.pc);
-        state.flags.pc = 0;
+        resetN(state, 0);
         state.cycles += 11;
         break;
 
@@ -2037,8 +2037,7 @@ cpuCore.push(function() {
       case 0xcf:      							                                // RST 08
         state.flags.pc += 2;
         state.flags.pc &= 0xffff;
-        cpu.push(state, state.flags.pc);
-        state.flags.pc = (0x08 * 8);
+        resetN(state, 0x08 * 8);
         state.cycles += 11;
         break;
 
@@ -2106,8 +2105,7 @@ cpuCore.push(function() {
       case 0xd7:      							                                // RST 10
         state.flags.pc += 2;
         state.flags.pc &= 0xffff;
-        cpu.push(state, state.flags.pc);
-        state.flags.pc = (0x10 * 8);
+        resetN(state, 0x10 * 8);
         state.cycles += 11;
         break;
 
@@ -2170,8 +2168,7 @@ cpuCore.push(function() {
       case 0xdf:      							                                // RST 18
         state.flags.pc += 2;
         state.flags.pc &= 0xffff;
-        cpu.push(state, state.flags.pc);
-        state.flags.pc = (0x18 * 8);
+        resetN(state, 0x18 * 8);
         state.cycles += 11;
         break;
 
@@ -2256,8 +2253,7 @@ cpuCore.push(function() {
       case 0xe7:      							                                // RST 20
         state.flags.pc += 2;
         state.flags.pc &= 0xffff;
-        cpu.push(state, state.flags.pc);
-        state.flags.pc = (0x20 * 8);
+        resetN(state, 0x20 * 8);
         state.cycles += 11;
         break;
 
@@ -2327,8 +2323,7 @@ cpuCore.push(function() {
       case 0xef:      							                                // RST 28
         state.flags.pc += 2;
         state.flags.pc &= 0xffff;
-        cpu.push(state, state.flags.pc);
-        state.flags.pc = (0x28 * 8);
+        resetN(state, 0x28 * 8);
         state.cycles += 11;
         break;
 
@@ -2395,8 +2390,7 @@ cpuCore.push(function() {
       case 0xf7:      							                                // RST 30
         state.flags.pc += 2;
         state.flags.pc &= 0xffff;
-        cpu.push(state, state.flags.pc);
-        state.flags.pc = (0x30 * 8);
+        resetN(state, 0x30 * 8);
         state.cycles += 11;
         break;
 
@@ -2459,8 +2453,7 @@ cpuCore.push(function() {
       case 0xff:      							                                // RST 38
         state.flags.pc += 2;
         state.flags.pc &= 0xffff;
-        cpu.push(state, state.flags.pc);
-        state.flags.pc = (0x38 * 8);
+        resetN(state, 0x38 * 8);
         state.cycles += 11;
         break;
 
@@ -2563,6 +2556,11 @@ cpuCore.push(function() {
     // The emulate function returns 1 if the instruction is unimplemented upon execution.
     // We need to rollback the PC so the state can be correctly handled by the function calling emulate8080OP().
     cpuState.flags.pc--;
+  };
+
+  cpu.resetN = function(cpuState, location) {
+    cpu.push(cpuState, cpuState.flags.pc);
+    cpuState.flags.pc = location;
   };
 
   cpu.romWriteCheck = function(state, writeAddr) {

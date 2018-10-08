@@ -84,10 +84,6 @@ function animateLoop() {
 
   uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanStart, showMemoryInspector);
 
-  if (cpuCanStart && cpuRunning && !usingVideoDriver.redrawing) {
-    usingVideoDriver.renderGameScreen(runningCPU, usingVideoDriver.videoMemory, gameScreenImageData);
-  }
-
   if (cpuCanStart && cpuRunning && anyMemoryUpdated.length > 1 && !usingVideoDriver.memoryMapRendering) {
     usingVideoDriver.renderMemoryMap(runningCPU, anyMemoryUpdated, memoryMapImageData, null, true);
   }
@@ -211,6 +207,7 @@ function setupCPU() {
   runningCPU = usingCPUCore();
   if (runningCPUOverride) {
     runningCPUOverride = usingCPUCoreOverload();
+    runningCPU.interrupt = runningCPUOverride.interrupt;
   }
 
   runningCPU.memory = new Array(0x10000).fill(0);
@@ -273,6 +270,9 @@ function cpuExec() {
     console.error("Error: Unimplemented instruction.");
     printMemoryTrace(runningCPU);
   } else {
+    if (cpuCanStart && cpuRunning && !usingVideoDriver.redrawing) {
+      usingVideoDriver.renderGameScreen(runningCPU, usingVideoDriver.videoMemory, gameScreenImageData);
+    }
     previouslyExecInstructions.push(disassembleExec);
     if (previouslyExecInstructions.length > 10) {
       previouslyExecInstructions.shift();

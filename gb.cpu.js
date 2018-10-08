@@ -98,12 +98,21 @@ cpuCoreOverload.push(function() {
 
     var preCycleChange = state.cycles;
 
+    if (state.isHalted) {
+      state.cycles += 4;
+      state.db.totalCPUCycles += (state.cycles - preCycleChange);
+      state.lastOpCycle = (state.cycles - preCycleChange);
+      state.modeClock = (state.modeClock + 1) & 0xffff;
+
+      return 0;
+    }
+
     state.flags.pc++ & 0xffff;
     
     switch (opCode[0]) {
       case 0x08:      							                                // LD (word),SP
         cpu.writeByte(state, ((opCode[1] | (0xff << 8)) & 0xffff), state.flags.sp);
-        state.cycles += 4;
+        state.cycles += 20;
         break;
 
       case 0x10:      							                                // STOP
@@ -261,22 +270,18 @@ cpuCoreOverload.push(function() {
     return 0;
   };
 
-  cpu.interrupt = function(state, address) {
+  cpu.interrupt = function(state, address, interruptLoc = 0xff0f) {
     if (state.cycles > 16667) {
       state.db.cycleRollover = true;
       state.cycles -= 16667;
     }
 
-    if (state.pInterrupt === 0x01) {
-      state.pInterrupt = 0x00;
-      // We need to push the current PC to (SP) so we can return after executing the interrupt.
-      cpu.push(state, state.flags.pc);
+    var ifVal = state.memory[interruptLoc];
 
-      state.flags.pc = state.pInterrupt;
-      if (typeof(state.cInterrupt) === "function") {
-        state.cInterrupt(state, state.pInterrupt);
-      }
-    }
+    ifVal |= (1 << address);
+
+    state.memory[interruptLoc] = ifVal;
+    state.isHalted = false;
   }
 
   cpu.push = function(state, value) {

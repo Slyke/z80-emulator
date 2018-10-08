@@ -10,6 +10,10 @@ videoDriver.push(function() {
     videoMemory: []
   };
 
+  var colorRAM = new Uint8Array(0x20).fill(0xff);
+  var videoRAM = new Uint8Array(0x4000).fill(0x00);
+  var videoDisplayProcessoryRegisters = new Uint8Array(0x0f).fill(0xff);
+
   videoDriverRet.renderGameScreen = function(cpuState, memoryAddressList, screenImage, renderStateChangeCb) {
     videoDriverRet.redrawing = true;
     if (typeof(renderStateChangeCb) === "function") {
