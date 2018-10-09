@@ -10,7 +10,7 @@ videoDriver.push(function() {
     videoMemory: []
   };
 
-  var memorySegments = Object.freeze({
+  const memorySegments = Object.freeze({
     vRamStart: 0x8000,
     vRamEnd: 0x9fff,
     extRamStart: 0xa000,
@@ -20,13 +20,13 @@ videoDriver.push(function() {
     deviceEnd: 0xff7f
   });
 
-  var gpuLocs = Object.freeze({
+  const gpuLocs = Object.freeze({
     lcdc:       0xff40,
     stat:       0xff41,
     scy:        0xff42,
     scx:        0xff43,
     ly:         0xff44,
-    lyc:         0xff45,
+    lyc:        0xff45,
     bgp:        0xff47,
     obp0:       0xff48,
     obp1:       0xff49,
@@ -37,7 +37,7 @@ videoDriver.push(function() {
     vBlankTime: 70224
   });
 
-  var cpuInterrupts = Object.freeze({
+  const cpuInterrupts = Object.freeze({
     vBlank: 0x40,
     LCDC:   0x48,
     timer:  0x50,
@@ -45,7 +45,7 @@ videoDriver.push(function() {
     HILO:   0x60
   });
 
-  var gpuTileMap = Object.freeze({
+  const gpuTileMap = Object.freeze({
     height: 32,
     width: 32,
     start0: 0x9800,
@@ -63,7 +63,7 @@ videoDriver.push(function() {
 
     if (cpuState.memory[gpuLocs.ly] === cpuState.memory[gpuLocs.lyc]) {
       cpuState.memory[gpuLocs.stat] = (stat | (1 << 2));
-      if (statstat & (1 << 6)) {
+      if (stat & (1 << 6)) {
         cpuState.requestInterrupt(cpuInterrupts.LCDC);
       }
     } else {
@@ -71,20 +71,72 @@ videoDriver.push(function() {
     }
   };
 
-  var drawFrame = function(cpuState) {
+  var drawFrame = function(cpuState, screenImage) {
     var lcdc = cpuState.memory[gpuLocs.lcdc];
 
     var drawEnabled = (lcdc >> 7) & 1;
 
     if (drawEnabled) {
-      updateFrameBuffer()
+      updateFrameBuffer(cpuState, screenImage, lcdc);
+    }
+  };
+
+  var drawPixel = function(screenImage, x, y, c) {
+    screenImage[(y * 160) + x] = c;
+  }
+
+  var readTileData = function(cpuState, tileIndex, dataStart, tileSize = 0x10) {
+    var tileData = new Array().fill(0x00);
+
+    var tileAddressStart = (dataStart + (tileIndex * 0x10));
+    for (var i = tileAddressStart; i < tileAddressStart + tileSize; i++) {
+        tileData.push(cpuState.memory[i]);
+    };
+
+    return tileData;
+  };
+
+  var updateFrameBuffer = function(cpuState, screenImage, lcdc) {
+    if (!((lcdc >> 5) & 1)) {
+      return;
     }
 
-  }
+    var tileBuffer = new Array(256 * 256);
+    var tileMapStart = ((lcdc >> 5) & 1) ? gpuTileMap.start1 : gpuTileMap.start0;
 
-  var updateFrameBuffer = function() {
+    var screenDataStart;
+    var signedIndex = false;
 
-  }
+    if ((lcdc >> 4) & 1) {
+      screenDataStart = memorySegments.vRamStart;
+    } else {
+      screenDataStart = 0x8800;
+      signedIndex = true;
+    }
+
+    // for (var i = 0; i < gpuTileMap.length; i++) {
+    //   var tileIndex = cpuState.memory[(i + mapStart)];
+      
+    //   if (signedIndex) {
+    //     tileIndex = tileIndex & 0x80 ? tileIndex - 0xff : tileIndex;
+    //   }
+
+    //   var tileData = this.readTileData(cpuState, tileIndex, screenDataStart);
+    //   var xPos = (i % gpuTileMap.width);
+    //   var yPos = ((i / gpuTileMap.height) | 0);
+    //   // Draw Tile
+    // }
+
+    var windowX = cpuState.memory[gpuLocs.wx] - 7;
+    var windowY = cpuState.memory[gpuLocs.wy];
+
+    for (var x = Math.max(0, -windowX); x < Math.min(videoDriverRet.resolution[0], videoDriverRet.resolution[0] - windowX); x++) {
+      for (var y = Math.max(0, -windowY); y < Math.min(videoDriverRet.resolution[1], videoDriverRet.resolution[1] - windowY); y++) {
+        var pixelColor = buffer[(x & 255) + (y & 255) * 256];
+        drawPixel(screenImage, (x + windowX), (y + windowY), pixelColor);
+      }
+    }
+  };
 
   videoDriverRet.renderGameScreen = function(cpuState, memoryAddressList, screenImage, renderStateChangeCb) {
     gpuClock += cpuState.cycles;
@@ -102,8 +154,8 @@ videoDriver.push(function() {
         if (gpuScreenVLine == 144) {
           gpuMode = 1;
           vBlank = true;
-          cpuState.interrupt(cpuState, cpuInterrupts.vBlank);
-          // Output frame
+          cpuState.interruptCheck(cpuState, cpuInterrupts.vBlank);
+          drawFrame(cpuState, screenImage);
         } else {
           gpuMode = 2;
         }

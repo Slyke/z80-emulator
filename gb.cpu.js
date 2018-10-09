@@ -15,6 +15,14 @@ cpuCoreOverload.push(function() {
     sign: 0x80
   });
 
+  const cpuInterruptsBitToLoc = Object.freeze([
+    0x40, // vBlank
+    0x48, // LCDC
+    0x50, // timer
+    0x58, // serial
+    0x60  // HILO
+  ]);
+
   cpu.disassemble8080OPOverwrte = function(state, pc) {
     var memory = state.memory;
 
@@ -89,8 +97,7 @@ cpuCoreOverload.push(function() {
     output.error = false;
 
     return output;
-  }
-
+  };
 
   cpu.opCodeOverwrite = function(state) {
     var opCode = [state.memory[state.flags.pc], state.memory[state.flags.pc + 1], state.memory[state.flags.pc + 2]];
@@ -170,8 +177,9 @@ cpuCoreOverload.push(function() {
         state.flags.pc++ & 0xffff;
         break;
 
-        case 0x76:      							                                // STOP
+      case 0x76:      							                                // STOP
         if (state.pInterrupt === 0x01) {
+          state.isHalted = true;
           if (typeof(state.cStop) === "function") {
             state.cStop(state, state.pInterrupt);
           }
@@ -270,25 +278,38 @@ cpuCoreOverload.push(function() {
     return 0;
   };
 
-  cpu.interrupt = function(state, address, interruptLoc = 0xff0f) {
+  cpu.interruptCheck = function(state, interruptLoc = 0xff0f) {
     if (state.cycles > 16667) {
       state.db.cycleRollover = true;
       state.cycles -= 16667;
     }
 
+    for (var i = 0; i < 5; i++) {
+      var ifVal = state.memory[interruptLoc];
+
+      if (((interruptLoc << i) & 1) && state.pInterrupt === 0x00) {
+        ifVal &= (0xff - (1 << i));
+        state.memory[interruptLoc] = ifVal & 0xff;
+        state.cycles += 4;
+        state.pInterrupt === 0x01;
+        state.resetN(state, cpuInterruptsBitToLoc[i]);
+        break;
+      }
+    }
+  };
+
+  cpu.interruptRequest = function(state, iType, interruptLoc = 0xff0f) {
     var ifVal = state.memory[interruptLoc];
-
-    ifVal |= (1 << address);
-
-    state.memory[interruptLoc] = ifVal;
-    state.isHalted = false;
-  }
+    ifVal |= (1 << iType);
+    state.memory[interruptLoc] = ifVal & 0xff;
+    state.pInterrupt = 0x00;
+  };
 
   cpu.push = function(state, value) {
     state.flags.sp -= 2;
     state.flags.sp &= 0xffff;
     cpu.writeWord(state, state.flags.sp, value);
-  }
+  };
 
   cpu.pop = function(state, update = false) {
     var ret = cpu.readWord(state, state.flags.sp);
@@ -299,7 +320,7 @@ cpuCoreOverload.push(function() {
     }
 
     return ret;
-  }
+  };
 
   cpu.readHWPort = function(state, portCh) {
     if (typeof(state.hwPortHook) === 'function') {

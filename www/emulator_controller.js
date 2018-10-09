@@ -207,7 +207,8 @@ function setupCPU() {
   runningCPU = usingCPUCore();
   if (runningCPUOverride) {
     runningCPUOverride = usingCPUCoreOverload();
-    runningCPU.interrupt = runningCPUOverride.interrupt;
+    runningCPU.interruptCheck = runningCPUOverride.interruptCheck;
+    runningCPU.interruptRequest = runningCPUOverride.interruptRequest;
   }
 
   runningCPU.memory = new Array(0x10000).fill(0);
@@ -336,6 +337,8 @@ function init() {
   runningCPU = usingCPUCore();
   if (usingCPUCoreOverload) {
     runningCPUOverride = usingCPUCoreOverload();
+    runningCPU.interruptCheck = runningCPUOverride.interruptCheck;
+    runningCPU.interruptRequest = runningCPUOverride.interruptRequest;
   }
 
   setupCPU();

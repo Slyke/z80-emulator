@@ -5,7 +5,12 @@ function keyEvents(event, eventType) {
       cpuRunning = false;
       var currentMemory = runningCPU.memory.slice(0);
       runningCPU = usingCPUCore();
-
+      if (usingCPUCoreOverload) {
+        runningCPUOverride = usingCPUCoreOverload();
+        runningCPU.interruptCheck = runningCPUOverride.interruptCheck;
+        runningCPU.interruptRequest = runningCPUOverride.interruptRequest;
+      }
+      
       runningCPU.memory = currentMemory;
 
       setupCPUCallbacks();

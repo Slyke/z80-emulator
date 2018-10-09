@@ -1973,7 +1973,7 @@ cpuCore.push(function() {
       case 0xc7:      							                                // RST 00
         state.flags.pc += 2;
         state.flags.pc &= 0xffff;
-        resetN(state, 0);
+        cpu.resetN(state, 0);
         state.cycles += 11;
         break;
 
@@ -2037,7 +2037,7 @@ cpuCore.push(function() {
       case 0xcf:      							                                // RST 08
         state.flags.pc += 2;
         state.flags.pc &= 0xffff;
-        resetN(state, 0x08 * 8);
+        cpu.resetN(state, 0x08 * 8);
         state.cycles += 11;
         break;
 
@@ -2105,7 +2105,7 @@ cpuCore.push(function() {
       case 0xd7:      							                                // RST 10
         state.flags.pc += 2;
         state.flags.pc &= 0xffff;
-        resetN(state, 0x10 * 8);
+        cpu.resetN(state, 0x10 * 8);
         state.cycles += 11;
         break;
 
@@ -2168,7 +2168,7 @@ cpuCore.push(function() {
       case 0xdf:      							                                // RST 18
         state.flags.pc += 2;
         state.flags.pc &= 0xffff;
-        resetN(state, 0x18 * 8);
+        cpu.resetN(state, 0x18 * 8);
         state.cycles += 11;
         break;
 
@@ -2253,7 +2253,7 @@ cpuCore.push(function() {
       case 0xe7:      							                                // RST 20
         state.flags.pc += 2;
         state.flags.pc &= 0xffff;
-        resetN(state, 0x20 * 8);
+        cpu.resetN(state, 0x20 * 8);
         state.cycles += 11;
         break;
 
@@ -2323,7 +2323,7 @@ cpuCore.push(function() {
       case 0xef:      							                                // RST 28
         state.flags.pc += 2;
         state.flags.pc &= 0xffff;
-        resetN(state, 0x28 * 8);
+        cpu.resetN(state, 0x28 * 8);
         state.cycles += 11;
         break;
 
@@ -2390,7 +2390,7 @@ cpuCore.push(function() {
       case 0xf7:      							                                // RST 30
         state.flags.pc += 2;
         state.flags.pc &= 0xffff;
-        resetN(state, 0x30 * 8);
+        cpu.resetN(state, 0x30 * 8);
         state.cycles += 11;
         break;
 
@@ -2453,7 +2453,7 @@ cpuCore.push(function() {
       case 0xff:      							                                // RST 38
         state.flags.pc += 2;
         state.flags.pc &= 0xffff;
-        resetN(state, 0x38 * 8);
+        cpu.resetN(state, 0x38 * 8);
         state.cycles += 11;
         break;
 
@@ -2502,7 +2502,11 @@ cpuCore.push(function() {
         state.cInterrupt(state, state.pInterrupt);
       }
     }
-  }
+  };
+
+  cpu.interruptRequest = function() {
+
+  };
 
   cpu.push = function(state, value) {
     state.flags.sp -= 2;
