@@ -119,6 +119,7 @@ cpuCoreOverload.push(function() {
     switch (opCode[0]) {
       case 0x08:      							                                // LD (word),SP
         cpu.writeByte(state, ((opCode[1] | (0xff << 8)) & 0xffff), state.flags.sp);
+        state.flags.pc++ & 0xffff;
         state.cycles += 20;
         break;
 
@@ -138,7 +139,6 @@ cpuCoreOverload.push(function() {
         state.flags.h = ret[1];
         state.flags.l = ret[0];
         state.cycles += 7;
-        state.flags.pc++ & 0xffff;
         break;
 
       case 0x2a:      							                                // LD A,(HLI)
@@ -150,7 +150,6 @@ cpuCoreOverload.push(function() {
         state.flags.h = ret[1];
         state.flags.l = ret[0];
         state.cycles += 7;
-        state.flags.pc++ & 0xffff;
         break;
 
       case 0x32:      							                                // LD (HLD),A
@@ -162,7 +161,6 @@ cpuCoreOverload.push(function() {
         state.flags.h = ret[1];
         state.flags.l = ret[0];
         state.cycles += 7;
-        state.flags.pc++ & 0xffff;
         break;
 
       case 0x3a:      							                                // LD A,(HLD)
@@ -174,7 +172,6 @@ cpuCoreOverload.push(function() {
         state.flags.h = ret[1];
         state.flags.l = ret[0];
         state.cycles += 7;
-        state.flags.pc++ & 0xffff;
         break;
 
       case 0x76:      							                                // STOP
@@ -235,7 +232,7 @@ cpuCoreOverload.push(function() {
       case 0xf0:      							                                // LD A,(byte)
         state.flags.a = cpu.readByte(state, ((opCode[1] | (0xff << 8)) & 0xffff));
         state.cycles += 7;
-        state.flags.pc++ & 0xffff;
+        state.flags.pc = (state.flags.pc + 1) & 0xffff;
         break;
 
       case 0xf2: state.cycles += 4; break;                          // NOP
