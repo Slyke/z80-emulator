@@ -130,6 +130,20 @@ cpuCoreOverload.push(function() {
         state.cycles += 4;
         break;
 
+      case 0x20:      							                                // CALLNZ
+        if (state.flags.f & fFlags.zero) {
+          state.flags.pc += 1;
+          state.flags.pc &= 0xffff;
+          state.cycles += 8;
+        } else {
+          var signedOp = opCode[1];
+          signedOp = (signedOp >= 0x80) ? signedOp - 0xff : signedOp;
+          state.flags.pc += (signedOp + 1);
+          state.flags.pc &= 0xffff;
+          state.cycles += 12;
+        }
+        break;
+
       case 0x22:      							                                // LD (HLI),A
         var hl = cpu.getFlags(state, "hl");
         cpu.writeByte(state, hl, state.flags.a);
@@ -142,14 +156,18 @@ cpuCoreOverload.push(function() {
         break;
 
       case 0x2a:      							                                // LD A,(HLI)
-        var hl = cpu.getFlags(state, "hl");
-        state.flags.a = cpu.readByte(state, hl);
-        hl++ & 0xffff;
-        
-        var ret = cpu.splitBytes(hl);
-        state.flags.h = ret[1];
-        state.flags.l = ret[0];
-        state.cycles += 7;
+        state.flags.f = 0;
+        if (state.flags.d & 0x01) {
+          state.flags.f |= 0x10;
+        }
+
+        var msb = state.flags.d & 0x80;
+        state.flags.d = ((state.flags.d >> 1) | msb);
+
+        if (state.flags.d === 0) {
+          state.flags.f |= 0x80;
+        }
+        state.cycles += 4;
         break;
 
       case 0x32:      							                                // LD (HLD),A

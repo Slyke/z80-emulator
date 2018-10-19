@@ -1992,32 +1992,32 @@ cpuCore.push(function() {
         break;
 
       case 0xca:      							                                // JMPZ (word)
-      if (state.flags.f & fFlags.zero) {
-        state.flags.pc = (opCode[1] | (opCode[2] << 8)) & 0xffff;
-        state.cycles += 15;
-      } else {
-        state.flags.pc += 2;
-        state.flags.pc &= 0xffff;
-        state.cycles += 10;
-      }
-      break;
+        if (state.flags.f & fFlags.zero) {
+          state.flags.pc = (opCode[1] | (opCode[2] << 8)) & 0xffff;
+          state.cycles += 15;
+        } else {
+          state.flags.pc += 2;
+          state.flags.pc &= 0xffff;
+          state.cycles += 10;
+        }
+        break;
 
       case 0xcb: state.cycles += 4; break;	                    // NOP
 
       case 0xcc:      							                                  // CALLZ word
-      if (state.flags.f & fFlags.zero) {
-        var	ret = (opCode[1] | (opCode[2] << 8)) & 0xffff;
-        state.flags.pc += 2;
-        state.flags.pc &= 0xffff;
-        cpu.push(state, state.flags.pc);
-        state.flags.pc = ret;
-        state.cycles += 18;
-      } else {
-        state.flags.pc += 2;
-        state.flags.pc &= 0xffff;
-        state.cycles += 11;
-      }
-      break;
+        if (state.flags.f & fFlags.zero) {
+          var	ret = (opCode[1] | (opCode[2] << 8)) & 0xffff;
+          state.flags.pc += 2;
+          state.flags.pc &= 0xffff;
+          cpu.push(state, state.flags.pc);
+          state.flags.pc = ret;
+          state.cycles += 18;
+        } else {
+          state.flags.pc += 2;
+          state.flags.pc &= 0xffff;
+          state.cycles += 11;
+        }
+        break;
 
       case 0xcd:      							                                // CALL (word)
         var	ret = (opCode[1] | (opCode[2] << 8)) & 0xffff;
