@@ -821,7 +821,7 @@ cpuCore.push(function() {
 
       case 0x18: state.cycles += 4; break;                    // NOP
 
-      case 0x19: 							                                      // INXR HL, BC
+      case 0x19: 							                                      // INXR HL, DE
         var reg;
         if ((state.db.nextOpIReg === "IX") || (state.db.nextOpIReg === "IY")) {
           reg = cpu.getFlags(state, state.db.nextOpIReg.toLowerCase());
