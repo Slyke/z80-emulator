@@ -339,19 +339,19 @@ emu.decList.push(function() {
     0x34: function(s, idxReg = 'hl') {
       s.cpu.intst.deIncMemByte(s, s.cpu.getRegister(s, idxReg));
       s.cpu.addCycles(s, 10);
-      return arguments.callee.length;
+      return arguments.callee.length - 1;
     },
 
     0x35: function(s, idxReg = 'hl') {
       s.cpu.intst.deIncMemByte(s, s.cpu.getRegister(s, idxReg), -1);
       s.cpu.addCycles(s, 10);
-      return arguments.callee.length;
+      return arguments.callee.length - 1;
     },
 
     0x36: function(s, p1, idxReg = 'hl') {
       s.cpu.intst.setMemByte(s, s.cpu.getRegister(s, idxReg), p1);
       s.cpu.addCycles(s, 10);
-      return arguments.callee.length;
+      return arguments.callee.length - 1;
     },
 
     0x37: function(s) {
@@ -368,7 +368,7 @@ emu.decList.push(function() {
     0x39: function(s, idxReg = 'hl') {
       s.cpu.intst.deIncMultiReg(s, idxReg, s.cpu.getRegister(s, 'sp'));
       s.cpu.addCycles(s, 11);
-      return arguments.callee.length;
+      return arguments.callee.length - 1;
     },
 
     0x3a: function(s, p1, p2) {
@@ -446,7 +446,7 @@ emu.decList.push(function() {
     0x46: function(s, idxReg = 'hl') {
       s.cpu.intst.setRegFromMem(s, 'b', s.cpu.getRegister(s, idxReg));
       s.cpu.addCycles(s, 7);
-      return arguments.callee.length;
+      return arguments.callee.length - 1;
     },
 
     0x47: function(s) {
@@ -494,31 +494,689 @@ emu.decList.push(function() {
     0x4e: function(s, idxReg = 'hl') {
       s.cpu.intst.setRegFromMem(s, 'c', s.cpu.getRegister(s, idxReg));
       s.cpu.addCycles(s, 7);
+      return arguments.callee.length - 1;
+    },
+
+    0x4f: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'c', 'a');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x50: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'd', 'b');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x51: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'd', 'c');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x52: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'd', 'd');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x53: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'd', 'e');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x54: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'd', 'h');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x55: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'd', 'l');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x56: function(s, idxReg = 'hl') {
+      s.cpu.intst.setRegFromMem(s, 'd', s.cpu.getRegister(s, idxReg));
+      s.cpu.addCycles(s, 7);
+      return arguments.callee.length - 1;
+    },
+
+    0x57: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'd', 'a');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x58: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'e', 'b');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x59: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'e', 'c');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x5a: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'e', 'd');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x5b: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'e', 'e');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x5c: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'e', 'h');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x5d: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'e', 'l');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x5e: function(s, idxReg = 'hl') {
+      s.cpu.intst.setRegFromMem(s, 'e', s.cpu.getRegister(s, idxReg));
+      s.cpu.addCycles(s, 7);
+      return arguments.callee.length - 1;
+    },
+
+    0x5f: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'e', 'a');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x60: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'h', 'b');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x61: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'h', 'c');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x62: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'h', 'd');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x63: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'h', 'e');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x64: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'h', 'h');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x65: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'h', 'l');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x66: function(s, idxReg = 'hl') {
+      s.cpu.intst.setRegFromMem(s, 'h', s.cpu.getRegister(s, idxReg));
+      s.cpu.addCycles(s, 7);
+      return arguments.callee.length - 1;
+    },
+
+    0x67: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'h', 'a');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x68: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'l', 'b');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x69: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'l', 'c');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x6a: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'l', 'd');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x6b: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'l', 'e');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x6c: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'l', 'h');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x6d: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'l', 'l');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x6e: function(s, idxReg = 'hl') {
+      s.cpu.intst.setRegFromMem(s, 'e', s.cpu.getRegister(s, idxReg));
+      s.cpu.addCycles(s, 7);
+      return arguments.callee.length - 1;
+    },
+
+    0x6f: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'l', 'a');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x70: function(s, idxReg = 'hl') {
+      s.cpu.intst.setMemByte(s, idxReg, s.cpu.getRegister(s, 'b'));
+      s.cpu.addCycles(s, 7);
+      return arguments.callee.length - 1;
+    },
+
+    0x71: function(s, idxReg = 'hl') {
+      s.cpu.intst.setMemByte(s, idxReg, s.cpu.getRegister(s, 'c'));
+      s.cpu.addCycles(s, 7);
+      return arguments.callee.length - 1;
+    },
+
+    0x72: function(s, idxReg = 'hl') {
+      s.cpu.intst.setMemByte(s, idxReg, s.cpu.getRegister(s, 'd'));
+      s.cpu.addCycles(s, 7);
+      return arguments.callee.length - 1;
+    },
+
+    0x73: function(s, idxReg = 'hl') {
+      s.cpu.intst.setMemByte(s, idxReg, s.cpu.getRegister(s, 'e'));
+      s.cpu.addCycles(s, 7);
+      return arguments.callee.length - 1;
+    },
+
+    0x74: function(s, idxReg = 'hl') {
+      s.cpu.intst.setMemByte(s, idxReg, s.cpu.getRegister(s, 'h'));
+      s.cpu.addCycles(s, 7);
+      return arguments.callee.length - 1;
+    },
+
+    0x75: function(s, idxReg = 'hl') {
+      s.cpu.intst.setMemByte(s, idxReg, s.cpu.getRegister(s, 'l'));
+      s.cpu.addCycles(s, 7);
+      return arguments.callee.length - 1;
+    },
+
+    0x76: function(s) {
+      // STOP
+      s.cpu.halted = true;
+    },
+
+    0x77: function(s, idxReg = 'hl') {
+      s.cpu.intst.setMemByte(s, idxReg, s.cpu.getRegister(s, 'a'));
+      s.cpu.addCycles(s, 7);
+      return arguments.callee.length - 1;
+    },
+
+    0x78: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'a', 'b');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x79: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'a', 'c');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x7a: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'a', 'd');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x7b: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'a', 'e');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x7c: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'a', 'h');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x7d: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'a', 'l');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x7e: function(s, idxReg = 'hl') {
+      s.cpu.intst.setRegFromMem(s, 'a', s.cpu.getRegister(s, idxReg));
+      s.cpu.addCycles(s, 7);
+      return arguments.callee.length;
+    },
+
+    0x7f: function(s) {
+      s.cpu.intst.setRegFromReg(s, 'a', 'a');
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x80: function(s) {
+      s.cpu.intst.deIncRegFromReg(s, 'a', 'b');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0x81: function(s) {
+      s.cpu.intst.deIncRegFromReg(s, 'a', 'c');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0x82: function(s) {
+      s.cpu.intst.deIncRegFromReg(s, 'a', 'd');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0x83: function(s) {
+      s.cpu.intst.deIncRegFromReg(s, 'a', 'e');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0x84: function(s) {
+      s.cpu.intst.deIncRegFromReg(s, 'a', 'h');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0x85: function(s) {
+      s.cpu.intst.deIncRegFromReg(s, 'a', 'l');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0x86: function(s, idxReg = 'hl') {
+      s.cpu.intst.deIncRegFromMem(s, 'a', s.cpu.getRegister(s, idxReg));
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x87: function(s) {
+      s.cpu.intst.deIncRegFromReg(s, 'a', 'a');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0x88: function(s) {
+      s.cpu.intst.deIncRegFromRegWithCarry(s, 'a', 'b');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0x89: function(s) {
+      s.cpu.intst.deIncRegFromRegWithCarry(s, 'a', 'c');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0x8a: function(s) {
+      s.cpu.intst.deIncRegFromRegWithCarry(s, 'a', 'd');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0x8b: function(s) {
+      s.cpu.intst.deIncRegFromRegWithCarry(s, 'a', 'e');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0x8c: function(s) {
+      s.cpu.intst.deIncRegFromRegWithCarry(s, 'a', 'h');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0x8d: function(s) {
+      s.cpu.intst.deIncRegFromRegWithCarry(s, 'a', 'l');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0x8e: function(s, idxReg = 'hl') {
+      s.cpu.intst.deIncRegFromMemWithCarry(s, 'a', s.cpu.getRegister(s, idxReg));
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x8f: function(s) {
+      s.cpu.intst.deIncRegFromRegWithCarry(s, 'a', 'a');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0x90: function(s) {
+      s.cpu.intst.deIncRegFromReg(s, 'a', 'b', -1);
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0x91: function(s) {
+      s.cpu.intst.deIncRegFromReg(s, 'a', 'c', -1);
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0x92: function(s) {
+      s.cpu.intst.deIncRegFromReg(s, 'a', 'd', -1);
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0x93: function(s) {
+      s.cpu.intst.deIncRegFromReg(s, 'a', 'e', -1);
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0x94: function(s) {
+      s.cpu.intst.deIncRegFromReg(s, 'a', 'h', -1);
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0x95: function(s) {
+      s.cpu.intst.deIncRegFromReg(s, 'a', 'l', -1);
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0x96: function(s, idxReg = 'hl') {
+      s.cpu.intst.deIncRegFromMem(s, 'a', s.cpu.getRegister(s, idxReg), -1);
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x97: function(s) {
+      s.cpu.intst.deIncRegFromReg(s, 'a', 'a', -1);
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0x98: function(s) {
+      s.cpu.intst.deIncRegFromRegWithCarry(s, 'a', 'b', -1);
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0x99: function(s) {
+      s.cpu.intst.deIncRegFromRegWithCarry(s, 'a', 'c', -1);
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0x9a: function(s) {
+      s.cpu.intst.deIncRegFromRegWithCarry(s, 'a', 'd', -1);
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0x9b: function(s) {
+      s.cpu.intst.deIncRegFromRegWithCarry(s, 'a', 'e', -1);
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0x9c: function(s) {
+      s.cpu.intst.deIncRegFromRegWithCarry(s, 'a', 'h', -1);
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0x9d: function(s) {
+      s.cpu.intst.deIncRegFromRegWithCarry(s, 'a', 'l', -1);
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0x8e: function(s, idxReg = 'hl') {
+      s.cpu.intst.deIncRegFromMemWithCarry(s, 'a', s.cpu.getRegister(s, idxReg), -1);
+      s.cpu.addCycles(s, 5);
+      return arguments.callee.length;
+    },
+
+    0x9f: function(s) {
+      s.cpu.intst.deIncRegFromRegWithCarry(s, 'a', 'l', -1);
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0xa0: function(s) {
+      s.cpu.intst.operandRegWithReg(s, 'a', 'b', '&');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0xa1: function(s) {
+      s.cpu.intst.operandRegWithReg(s, 'a', 'c', '&');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0xa2: function(s) {
+      s.cpu.intst.operandRegWithReg(s, 'a', 'd', '&');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0xa3: function(s) {
+      s.cpu.intst.operandRegWithReg(s, 'a', 'e', '&');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0xa4: function(s) {
+      s.cpu.intst.operandRegWithReg(s, 'a', 'h', '&');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0xa5: function(s) {
+      s.cpu.intst.operandRegWithReg(s, 'a', 'l', '&');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0xa6: function(s, idxReg = 'hl') {
+      s.cpu.intst.operandRegWithAddress(s, 'a', s.cpu.getRegister(s, idxReg), '&');
+      s.cpu.addCycles(s, 7);
+      return arguments.callee.length;
+    },
+
+    0xa7: function(s) {
+      s.cpu.intst.operandRegWithReg(s, 'a', 'a', '&');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0xa8: function(s) {
+      s.cpu.intst.operandRegWithReg(s, 'a', 'b', '^');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0xa9: function(s) {
+      s.cpu.intst.operandRegWithReg(s, 'a', 'c', '^');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0xaa: function(s) {
+      s.cpu.intst.operandRegWithReg(s, 'a', 'd', '^');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0xab: function(s) {
+      s.cpu.intst.operandRegWithReg(s, 'a', 'e', '^');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0xac: function(s) {
+      s.cpu.intst.operandRegWithReg(s, 'a', 'h', '^');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0xad: function(s) {
+      s.cpu.intst.operandRegWithReg(s, 'a', 'l', '^');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0xae: function(s, idxReg = 'hl') {
+      s.cpu.intst.operandRegWithAddress(s, 'a', s.cpu.getRegister(s, idxReg), '^');
+      s.cpu.addCycles(s, 7);
+      return arguments.callee.length;
+    },
+
+    0xaf: function(s) {
+      s.cpu.intst.operandRegWithReg(s, 'a', 'a', '^');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0xb0: function(s) {
+      s.cpu.intst.operandRegWithReg(s, 'a', 'b', '|');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0xb1: function(s) {
+      s.cpu.intst.operandRegWithReg(s, 'a', 'c', '|');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0xb2: function(s) {
+      s.cpu.intst.operandRegWithReg(s, 'a', 'd', '|');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0xb3: function(s) {
+      s.cpu.intst.operandRegWithReg(s, 'a', 'e', '|');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0xb4: function(s) {
+      s.cpu.intst.operandRegWithReg(s, 'a', 'h', '|');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0xb5: function(s) {
+      s.cpu.intst.operandRegWithReg(s, 'a', 'l', '|');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0xb6: function(s, idxReg = 'hl') {
+      s.cpu.intst.operandRegWithAddress(s, 'a', s.cpu.getRegister(s, idxReg), '|');
+      s.cpu.addCycles(s, 7);
+      return arguments.callee.length;
+    },
+
+    0xb7: function(s) {
+      s.cpu.intst.operandRegWithReg(s, 'a', 'a', '|');
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0xb8: function(s) {
+      s.cpu.intst.deIncFromReg(s, 'a', 'b', -1);
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0xb9: function(s) {
+      s.cpu.intst.deIncFromReg(s, 'a', 'c', -1);
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0xba: function(s) {
+      s.cpu.intst.deIncFromReg(s, 'a', 'd', -1);
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0xbb: function(s) {
+      s.cpu.intst.deIncFromReg(s, 'a', 'e', -1);
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0xbc: function(s) {
+      s.cpu.intst.deIncFromReg(s, 'a', 'h', -1);
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0xbd: function(s) {
+      s.cpu.intst.deIncFromReg(s, 'a', 'l', -1);
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0xbe: function(s, idxReg = 'hl') {
+      s.cpu.intst.deIncFromRegAndMem(s, 'a', s.cpu.getRegister(s, idxReg), -1);
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+
+    0xbf: function(s) {
+      s.cpu.intst.deIncFromReg(s, 'a', 'a', -1);
+      s.cpu.addCycles(s, 4);
       return arguments.callee.length;
     }
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    
   };
 
   return decRet;

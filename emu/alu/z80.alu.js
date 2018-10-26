@@ -157,7 +157,7 @@ emu.aluList.push(function() {
 
     var byteRes;
 
-    if (emuState.cpu.getRegister(emuState, 'f') & aluRet.fFlags.carry) {
+    if (emuState.cpu.getRegister(emuState, fReg) & aluRet.fFlags.carry) {
       if (addSub === 1) {
         rhv++;
       } else {
@@ -171,11 +171,11 @@ emu.aluList.push(function() {
       byteRes = lhv - rhv;
     }
 
-    emuState.cpu.setRegister(emuState, 'f', aluRet.mod2ParityAluCheck(byteRes, emuState.cpu.getRegister(emuState, 'f'), aluRet.fFlags));
-    emuState.cpu.setRegister(emuState, 'f', aluRet.signedValueAluCheck(byteRes, emuState.cpu.getRegister(emuState, 'f'), aluRet.fFlags));
-    emuState.cpu.setRegister(emuState, 'f', aluRet.zeroValueAluCheck(byteRes, emuState.cpu.getRegister(emuState, 'f'), aluRet.fFlags));
-    emuState.cpu.setRegister(emuState, 'f', aluRet.halfCarryValueAluCheck(lhv, rhv, byteRes, emuState.cpu.getRegister(emuState, 'f'), aluRet.fFlags));
-    emuState.cpu.setRegister(emuState, 'f', aluRet.fullCarryValueAluCheck(byteRes, emuState.cpu.getRegister(emuState, 'f'), aluRet.fFlags));
+    emuState.cpu.setRegister(emuState, fReg, aluRet.mod2ParityAluCheck(byteRes, emuState.cpu.getRegister(emuState, fReg), aluRet.fFlags));
+    emuState.cpu.setRegister(emuState, fReg, aluRet.signedValueAluCheck(byteRes, emuState.cpu.getRegister(emuState, fReg), aluRet.fFlags));
+    emuState.cpu.setRegister(emuState, fReg, aluRet.zeroValueAluCheck(byteRes, emuState.cpu.getRegister(emuState, fReg), aluRet.fFlags));
+    emuState.cpu.setRegister(emuState, fReg, aluRet.halfCarryValueAluCheck(lhv, rhv, byteRes, emuState.cpu.getRegister(emuState, fReg), aluRet.fFlags));
+    emuState.cpu.setRegister(emuState, fReg, aluRet.fullCarryValueAluCheck(byteRes, emuState.cpu.getRegister(emuState, fReg), aluRet.fFlags));
 
     return (byteRes & 0xff);
   };
@@ -190,28 +190,28 @@ emu.aluList.push(function() {
     } else if (operand === "^") {
       operandRes = lhv ^ rhv;
     } else {
-      return ;
+      throw new Error("[ALU::operandByte()]: Unknown operand:", operand, emuState);
     }
 
-    emuState.cpu.setRegister(emuState, 'f', aluRet.mod2ParityAluCheck(operandRes, emuState.cpu.getRegister(emuState, 'f'), aluRet.fFlags));
-    emuState.cpu.setRegister(emuState, 'f', aluRet.signedValueAluCheck(operandRes, emuState.cpu.getRegister(emuState, 'f'), aluRet.fFlags));
-    emuState.cpu.setRegister(emuState, 'f', aluRet.zeroValueAluCheck(operandRes, emuState.cpu.getRegister(emuState, 'f'), aluRet.fFlags));
+    emuState.cpu.setRegister(emuState, fReg, aluRet.mod2ParityAluCheck(operandRes, emuState.cpu.getRegister(emuState, fReg), aluRet.fFlags));
+    emuState.cpu.setRegister(emuState, fReg, aluRet.signedValueAluCheck(operandRes, emuState.cpu.getRegister(emuState, fReg), aluRet.fFlags));
+    emuState.cpu.setRegister(emuState, fReg, aluRet.zeroValueAluCheck(operandRes, emuState.cpu.getRegister(emuState, fReg), aluRet.fFlags));
 
     if (operand === "&") {
       if (((lhv & 8) >> 3) | ((rhv & 8) >> 3)) {
-        emuState.cpu.setRegister(emuState, 'f', (emuState.cpu.getRegister(emuState, 'f') & ~aluRet.fFlags.halfcarry & 0xff));
+        emuState.cpu.setRegister(emuState, fReg, (emuState.cpu.getRegister(emuState, fReg) & ~aluRet.fFlags.halfcarry & 0xff));
         // emuState.cpu.registers[fReg] &= ~aluRet.fFlags.halfcarry & 0xff;
       } else {
-        emuState.cpu.setRegister(emuState, 'f', (emuState.cpu.getRegister(emuState, 'f') | aluRet.fFlags.halfcarry & 0xff));
+        emuState.cpu.setRegister(emuState, fReg, (emuState.cpu.getRegister(emuState, fReg) | aluRet.fFlags.halfcarry & 0xff));
         // emuState.cpu.registers[fReg] |= aluRet.fFlags.halfcarry;
       }
     }
 
-    emuState.cpu.setRegister(emuState, 'f', (emuState.cpu.getRegister(emuState, 'f') & ~aluRet.fFlags.carry & 0xff));
+    emuState.cpu.setRegister(emuState, fReg, (emuState.cpu.getRegister(emuState, fReg) & ~aluRet.fFlags.carry & 0xff));
     // emuState.cpu.registers[fReg] &= ~aluRet.fFlags.carry & 0xff;
 
     if (operand === "^" || operand === "|") {
-      emuState.cpu.setRegister(emuState, 'f', (emuState.cpu.getRegister(emuState, 'f') & ~aluRet.fFlags.halfcarry & 0xff));
+      emuState.cpu.setRegister(emuState, fReg, (emuState.cpu.getRegister(emuState, fReg) & ~aluRet.fFlags.halfcarry & 0xff));
       // emuState.cpu.registers[fReg] &= ~aluRet.fFlags.halfcarry & 0xff;
     }
 
@@ -227,11 +227,11 @@ emu.aluList.push(function() {
       byteRes = lhv - rhv;
     }
 
-    emuState.cpu.setRegister(emuState, 'f', aluRet.mod2ParityAluCheck(byteRes, emuState.cpu.getRegister(emuState, 'f'), aluRet.fFlags));
-    emuState.cpu.setRegister(emuState, 'f', aluRet.signedValueAluCheck(byteRes, emuState.cpu.getRegister(emuState, 'f'), aluRet.fFlags));
-    emuState.cpu.setRegister(emuState, 'f', aluRet.zeroValueAluCheck(byteRes, emuState.cpu.getRegister(emuState, 'f'), aluRet.fFlags));
-    emuState.cpu.setRegister(emuState, 'f', aluRet.halfCarryValueAluCheck(lhv, rhv, byteRes, emuState.cpu.getRegister(emuState, 'f'), aluRet.fFlags);
-    emuState.cpu.setRegister(emuState, 'f', aluRet.fullCarryValueAluCheck(byteRes, emuState.cpu.getRegister(emuState, 'f'), aluRet.fFlags));
+    emuState.cpu.setRegister(emuState, fReg, aluRet.mod2ParityAluCheck(byteRes, emuState.cpu.getRegister(emuState, fReg), aluRet.fFlags));
+    emuState.cpu.setRegister(emuState, fReg, aluRet.signedValueAluCheck(byteRes, emuState.cpu.getRegister(emuState, fReg), aluRet.fFlags));
+    emuState.cpu.setRegister(emuState, fReg, aluRet.zeroValueAluCheck(byteRes, emuState.cpu.getRegister(emuState, fReg), aluRet.fFlags));
+    emuState.cpu.setRegister(emuState, fReg, aluRet.halfCarryValueAluCheck(lhv, rhv, byteRes, emuState.cpu.getRegister(emuState, fReg), aluRet.fFlags);
+    emuState.cpu.setRegister(emuState, fReg, aluRet.fullCarryValueAluCheck(byteRes, emuState.cpu.getRegister(emuState, fReg), aluRet.fFlags));
 
     return (byteRes & 0xff);
   };
@@ -245,10 +245,10 @@ emu.aluList.push(function() {
       valueChange--;
     }
 
-    emuState.cpu.setRegister(emuState, 'f', aluRet.mod2ParityAluCheck(value, emuState.cpu.getRegister(emuState, 'f'), aluRet.fFlags));
-    emuState.cpu.setRegister(emuState, 'f', aluRet.signedValueAluCheck(value, emuState.cpu.getRegister(emuState, 'f'), aluRet.fFlags));
-    emuState.cpu.setRegister(emuState, 'f', aluRet.zeroValueAluCheck(value, emuState.cpu.getRegister(emuState, 'f'), aluRet.fFlags));
-    emuState.cpu.setRegister(emuState, 'f', aluRet.halfCarryValueAluCheck(value, 1, valueChange, emuState.cpu.getRegister(emuState, 'f'), aluRet.fFlags));
+    emuState.cpu.setRegister(emuState, fReg, aluRet.mod2ParityAluCheck(value, emuState.cpu.getRegister(emuState, fReg), aluRet.fFlags));
+    emuState.cpu.setRegister(emuState, fReg, aluRet.signedValueAluCheck(value, emuState.cpu.getRegister(emuState, fReg), aluRet.fFlags));
+    emuState.cpu.setRegister(emuState, fReg, aluRet.zeroValueAluCheck(value, emuState.cpu.getRegister(emuState, fReg), aluRet.fFlags));
+    emuState.cpu.setRegister(emuState, fReg, aluRet.halfCarryValueAluCheck(value, 1, valueChange, emuState.cpu.getRegister(emuState, fReg), aluRet.fFlags));
 
     return (valueChange & 0xff);
   };

@@ -255,6 +255,30 @@ emu.cpuList.push(function() {
     deIncReg: function(emuState, register, value = 1) {
       emuState.cpu.setRegisters(emuState, register, emuState.alu.indecrementByte(emuState, emuState.cpu.getRegisters(emuState, register), value));
     },
+    deIncRegFromReg: function(emuState, reg1, reg2) {
+      emuState.cpu.setRegisters(emuState, reg1, emuState.alu.addSubByte(emuState, emuState.cpu.getRegisters(emuState, reg1), emuState.cpu.getRegisters(emuState, reg2)));
+    },
+    deIncFromReg: function(emuState, reg1, reg2) {
+      emuState.alu.addSubByte(emuState, emuState.cpu.getRegisters(emuState, reg1), emuState.cpu.getRegisters(emuState, reg2));
+    },
+    deIncFromRegAndMem: function(emuState, reg1, address) {
+      emuState.alu.addSubByte(emuState, emuState.cpu.getRegisters(emuState, reg1), emuState.mmu.readByte(emuState, address));
+    },
+    deIncRegFromRegWithCarry: function(emuState, reg1, reg2) {
+      emuState.cpu.setRegisters(emuState, reg1, emuState.alu.addSubWithCarryByte(emuState, emuState.cpu.getRegisters(emuState, reg1), emuState.cpu.getRegisters(emuState, reg2)));
+    },
+    deIncRegFromMem: function(emuState, reg1, address) {
+      emuState.cpu.setRegisters(emuState, reg1, emuState.alu.addSubByte(emuState, emuState.cpu.getRegisters(emuState, reg1), emuState.mmu.readByte(emuState, address)));
+    },
+    deIncRegFromMemWithCarry: function(emuState, reg1, address) {
+      emuState.cpu.setRegisters(emuState, reg1, emuState.alu.addSubWithCarryByte(emuState, emuState.cpu.getRegisters(emuState, reg1), emuState.mmu.readByte(emuState, address)));
+    },
+    operandRegWithReg: function(emuState, reg1, reg2, op) {
+      emuState.cpu.setRegisters(emuState, reg1, emuState.alu.operandByte(emuState, emuState.cpu.getRegisters(emuState, reg1), emuState.cpu.getRegisters(emuState, reg2), op));
+    },
+    operandRegWithAddress: function(emuState, reg1, address, op) {
+      emuState.cpu.setRegisters(emuState, reg1, emuState.alu.operandByte(emuState, emuState.cpu.getRegisters(emuState, reg1), emuState.mmu.readByte(emuState, address), op));
+    },
     rlc: function(emuState) {
       emuState.alu.rlc(emuState);
     },
@@ -275,6 +299,13 @@ emu.cpuList.push(function() {
     },
     crf: function(emuState, rFlag, aluFlag) {
       emuState.cpu.registers[rFlag] &= ~emuState.alu.fFlags[aluFlag];
+    },
+    pcPop: function(emuState, condition) {
+      if (condition) {
+        emuState.alu.pop(emuState, true);
+      } else {
+        emuState.alu.pop(emuState, true);
+      }
     }
   };
 
