@@ -78,7 +78,7 @@ emu.aluList.push(function() {
     }
   };
 
-  aluRet.call = function(emuState, location, spReg = 'sp', pcReg = 'pc') {
+  aluRet.call = function(emuState, location, pcReg = 'pc') {
     var newLocation = location;
     if (typeof(newLocation) === 'object') {
       newLocation = ((location[1] << 8) | location[0]) & 0xffff;
@@ -96,12 +96,14 @@ emu.aluList.push(function() {
       newLocation = ((location[1] << 8) | location[0]) & 0xffff;
     }
     emuState.cpu.registers[pcReg] = newLocation & 0xffff;
+    return emuState.cpu.registers[pcReg];
   };
 
   aluRet.push = function(emuState, value, spReg = 'sp') {
     emuState.cpu.registers[spReg] -= 2;
     emuState.cpu.registers[spReg] &= 0xffff;
     emuState.mmu.writeWord(emuState, emuState.cpu.registers[spReg], value);
+    return emuState.cpu.registers[spReg];
   };
 
   aluRet.pop = function(emuState, jumpPc = false, spReg = 'sp', pcReg = 'pc') {

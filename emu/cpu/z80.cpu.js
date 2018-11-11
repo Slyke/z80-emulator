@@ -255,22 +255,31 @@ emu.cpuList.push(function() {
     deIncReg: function(emuState, register, value = 1) {
       emuState.cpu.setRegisters(emuState, register, emuState.alu.indecrementByte(emuState, emuState.cpu.getRegisters(emuState, register), value));
     },
-    deIncRegFromReg: function(emuState, reg1, reg2) {
-      emuState.cpu.setRegisters(emuState, reg1, emuState.alu.addSubByte(emuState, emuState.cpu.getRegisters(emuState, reg1), emuState.cpu.getRegisters(emuState, reg2)));
+    deIncRegFromReg: function(emuState, reg1, reg2, value = 1) {
+      emuState.cpu.setRegisters(emuState, reg1, emuState.alu.addSubByte(emuState, emuState.cpu.getRegisters(emuState, reg1), emuState.cpu.getRegisters(emuState, reg2), value));
     },
-    deIncFromReg: function(emuState, reg1, reg2) {
-      emuState.alu.addSubByte(emuState, emuState.cpu.getRegisters(emuState, reg1), emuState.cpu.getRegisters(emuState, reg2));
+    deIncFromReg: function(emuState, reg1, reg2, value = 1) {
+      emuState.alu.addSubByte(emuState, emuState.cpu.getRegisters(emuState, reg1), emuState.cpu.getRegisters(emuState, reg2), value);
     },
-    deIncFromRegAndMem: function(emuState, reg1, address) {
-      emuState.alu.addSubByte(emuState, emuState.cpu.getRegisters(emuState, reg1), emuState.mmu.readByte(emuState, address));
+    deIncFromRegAndMem: function(emuState, reg1, address, value = 1) {
+      emuState.cpu.setRegisters(emuState, reg1, emuState.alu.addSubByte(emuState, emuState.cpu.getRegisters(emuState, reg1), emuState.mmu.readByte(emuState, address), value));
     },
-    deIncRegFromRegWithCarry: function(emuState, reg1, reg2) {
-      emuState.cpu.setRegisters(emuState, reg1, emuState.alu.addSubWithCarryByte(emuState, emuState.cpu.getRegisters(emuState, reg1), emuState.cpu.getRegisters(emuState, reg2)));
+    deIncFromRegAndParamWithCarry: function(emuState, reg1, value, value = 1) {
+      emuState.cpu.setRegisters(emuState, reg1, emuState.alu.addSubWithCarryByte(emuState, emuState.cpu.getRegisters(emuState, reg1), value, value));
     },
-    deIncRegFromMem: function(emuState, reg1, address) {
-      emuState.cpu.setRegisters(emuState, reg1, emuState.alu.addSubByte(emuState, emuState.cpu.getRegisters(emuState, reg1), emuState.mmu.readByte(emuState, address)));
+    deIncFromRegAndParam: function(emuState, reg1, value = 1) {
+      emuState.cpu.setRegisters(emuState, reg1, emuState.alu.addSubByte(emuState, emuState.cpu.getRegisters(emuState, reg1), value));
     },
-    deIncRegFromMemWithCarry: function(emuState, reg1, address) {
+    deIncRegFromRegWithCarry: function(emuState, reg1, reg2, value = 1) {
+      emuState.cpu.setRegisters(emuState, reg1, emuState.alu.addSubWithCarryByte(emuState, emuState.cpu.getRegisters(emuState, reg1), emuState.cpu.getRegisters(emuState, reg2), value));
+    },
+    deIncRegFromMem: function(emuState, reg1, address, value = 1) {
+      emuState.cpu.setRegisters(emuState, reg1, emuState.alu.addSubByte(emuState, emuState.cpu.getRegisters(emuState, reg1), emuState.mmu.readByte(emuState, address), value));
+    },
+    deIncRegFromParam: function(emuState, reg1, p1, value = 1) {
+      emuState.cpu.setRegisters(emuState, reg1, emuState.alu.addSubByte(emuState, emuState.cpu.getRegisters(emuState, reg1), p1), value);
+    },
+    deIncRegFromMemWithCarry: function(emuState, reg1, address, value = 1) {
       emuState.cpu.setRegisters(emuState, reg1, emuState.alu.addSubWithCarryByte(emuState, emuState.cpu.getRegisters(emuState, reg1), emuState.mmu.readByte(emuState, address)));
     },
     operandRegWithReg: function(emuState, reg1, reg2, op) {
@@ -278,6 +287,9 @@ emu.cpuList.push(function() {
     },
     operandRegWithAddress: function(emuState, reg1, address, op) {
       emuState.cpu.setRegisters(emuState, reg1, emuState.alu.operandByte(emuState, emuState.cpu.getRegisters(emuState, reg1), emuState.mmu.readByte(emuState, address), op));
+    },
+    operandRegWithParam: function(emuState, reg1, p1, op) {
+      emuState.cpu.setRegisters(emuState, reg1, emuState.alu.operandByte(emuState, emuState.cpu.getRegisters(emuState, reg1), p1, op));
     },
     rlc: function(emuState) {
       emuState.alu.rlc(emuState);
@@ -291,6 +303,9 @@ emu.cpuList.push(function() {
     rrcc: function(emuState) {
       emuState.alu.rrcc(emuState);
     },
+    reset: function(emuState, address) {
+      emuState.alu.reset(emuState, address);
+    },
     cpl: function(emuState) {
       emuState.alu.cpl(emuState);
     },
@@ -300,13 +315,55 @@ emu.cpuList.push(function() {
     crf: function(emuState, rFlag, aluFlag) {
       emuState.cpu.registers[rFlag] &= ~emuState.alu.fFlags[aluFlag];
     },
-    pcPop: function(emuState, condition) {
+    xchm: function(emuState, reg1) {
+      var tmp  = emuState.cpu.getRegisters(emuState, reg1);
+      emuState.cpu.setRegisters(emuState, reg1, emuState.mmu.readWord(emuState, emuState.cpu.getRegisters(emuState, 'sp')));
+      emuState.mmu.writeWord(emuState, emuState.cpu.getRegisters(emuState, 'sp'), tmp);
+    },
+    pop: function(emuState, condition) {
       if (condition) {
-        emuState.alu.pop(emuState, true);
+        if (emuState.alu.checkAluFlags(emuState, condition)) {
+          return emuState.alu.pop(emuState, true);
+        }
+        return false;
       } else {
-        emuState.alu.pop(emuState, true);
+        return emuState.alu.pop(emuState, true);
+      }
+    },
+    jump: function(emuState, location, condition) {
+      if (condition) {
+        if (emuState.alu.checkAluFlags(emuState, condition)) {
+          return emuState.alu.jump(emuState, location);
+        }
+        return false;
+      } else {
+        return emuState.alu.jump(emuState, location);
+      }
+    },
+    push: function(emuState, location, condition) {
+      if (condition) {
+        if (emuState.alu.checkAluFlags(emuState, condition)) {
+          return emuState.alu.push(emuState, location);
+        }
+        return false;
+      } else {
+        return emuState.alu.push(emuState, location);
+      }
+    },
+    call: function(emuState, location, condition) {
+      if (condition) {
+        if (emuState.alu.checkAluFlags(emuState, condition)) {
+          return emuState.alu.call(emuState, location);
+        }
+        return false;
+      } else {
+        return emuState.alu.call(emuState, location);
       }
     }
+
+
+
+
   };
 
   return cpuRet;

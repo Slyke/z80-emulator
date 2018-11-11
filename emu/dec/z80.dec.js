@@ -269,11 +269,6 @@ emu.decList.push(function() {
 
     0x29: function(s, idxReg = 'hl') {
       s.cpu.intst.deIncMultiReg(s, idxReg, s.cpu.getRegister(s, idxReg));
-      return arguments.callee.length - 1;
-    },
-
-    0x29: function(s, idxReg = 'hl') {
-      s.cpu.intst.deIncMultiReg(s, idxReg, s.cpu.getRegister(s, idxReg));
       s.cpu.addCycles(s, 11);
       return arguments.callee.length - 1;
     },
@@ -781,7 +776,7 @@ emu.decList.push(function() {
     0x7e: function(s, idxReg = 'hl') {
       s.cpu.intst.setRegFromMem(s, 'a', s.cpu.getRegister(s, idxReg));
       s.cpu.addCycles(s, 7);
-      return arguments.callee.length;
+      return arguments.callee.length - 1;
     },
 
     0x7f: function(s) {
@@ -829,7 +824,7 @@ emu.decList.push(function() {
     0x86: function(s, idxReg = 'hl') {
       s.cpu.intst.deIncRegFromMem(s, 'a', s.cpu.getRegister(s, idxReg));
       s.cpu.addCycles(s, 5);
-      return arguments.callee.length;
+      return arguments.callee.length - 1;
     },
 
     0x87: function(s) {
@@ -877,7 +872,7 @@ emu.decList.push(function() {
     0x8e: function(s, idxReg = 'hl') {
       s.cpu.intst.deIncRegFromMemWithCarry(s, 'a', s.cpu.getRegister(s, idxReg));
       s.cpu.addCycles(s, 5);
-      return arguments.callee.length;
+      return arguments.callee.length - 1;
     },
 
     0x8f: function(s) {
@@ -925,7 +920,7 @@ emu.decList.push(function() {
     0x96: function(s, idxReg = 'hl') {
       s.cpu.intst.deIncRegFromMem(s, 'a', s.cpu.getRegister(s, idxReg), -1);
       s.cpu.addCycles(s, 5);
-      return arguments.callee.length;
+      return arguments.callee.length - 1;
     },
 
     0x97: function(s) {
@@ -973,7 +968,7 @@ emu.decList.push(function() {
     0x8e: function(s, idxReg = 'hl') {
       s.cpu.intst.deIncRegFromMemWithCarry(s, 'a', s.cpu.getRegister(s, idxReg), -1);
       s.cpu.addCycles(s, 5);
-      return arguments.callee.length;
+      return arguments.callee.length - 1;
     },
 
     0x9f: function(s) {
@@ -1021,7 +1016,7 @@ emu.decList.push(function() {
     0xa6: function(s, idxReg = 'hl') {
       s.cpu.intst.operandRegWithAddress(s, 'a', s.cpu.getRegister(s, idxReg), '&');
       s.cpu.addCycles(s, 7);
-      return arguments.callee.length;
+      return arguments.callee.length - 1;
     },
 
     0xa7: function(s) {
@@ -1069,7 +1064,7 @@ emu.decList.push(function() {
     0xae: function(s, idxReg = 'hl') {
       s.cpu.intst.operandRegWithAddress(s, 'a', s.cpu.getRegister(s, idxReg), '^');
       s.cpu.addCycles(s, 7);
-      return arguments.callee.length;
+      return arguments.callee.length - 1;
     },
 
     0xaf: function(s) {
@@ -1117,7 +1112,7 @@ emu.decList.push(function() {
     0xb6: function(s, idxReg = 'hl') {
       s.cpu.intst.operandRegWithAddress(s, 'a', s.cpu.getRegister(s, idxReg), '|');
       s.cpu.addCycles(s, 7);
-      return arguments.callee.length;
+      return arguments.callee.length - 1;
     },
 
     0xb7: function(s) {
@@ -1165,18 +1160,477 @@ emu.decList.push(function() {
     0xbe: function(s, idxReg = 'hl') {
       s.cpu.intst.deIncFromRegAndMem(s, 'a', s.cpu.getRegister(s, idxReg), -1);
       s.cpu.addCycles(s, 4);
-      return arguments.callee.length;
+      return arguments.callee.length - 1;
     },
 
     0xbf: function(s) {
       s.cpu.intst.deIncFromReg(s, 'a', 'a', -1);
       s.cpu.addCycles(s, 4);
       return arguments.callee.length;
-    }
+    },
 
+    0xc0: function(s) {
+      var pcPop = s.cpu.intst.pop(s, 'NZ');
+      s.cpu.setRegister(s, 'pc', pcPop);
+      s.cpu.addCycles(s, pcPop ? 5 : 11);
+      return arguments.callee.length;
+    },
 
+    0xc1: function(s) {
+      s.cpu.setRegister(s, 'bc', s.cpu.intst.pop(s));
+      s.cpu.addCycles(s, 10);
+      return arguments.callee.length;
+    },
 
+    0xc2: function(s, p1, p2) {
+      var pcJump = s.cpu.intst.jump(s, s.utils.combineBytes(p1, p2), 'NZ');
+      s.cpu.setRegister(s, 'pc', pcJump);
+      s.cpu.addCycles(s, pcJump ? 10 : 15);
+      return arguments.callee.length;
+    },
+
+    0xc3: function(s, p1, p2) {
+      s.cpu.setRegister(s, 'pc', s.cpu.intst.jump(s, s.utils.combineBytes(p1, p2)));
+      s.cpu.addCycles(s, 10);
+      return arguments.callee.length;
+    },
+
+    0xc4: function(s, p1, p2) {
+      var pcPush = s.cpu.intst.push(s, s.utils.combineBytes(p1, p2), 'NZ');
+      s.cpu.addCycles(s, pcPush ? 18 : 11);
+      return arguments.callee.length;
+    },
+
+    0xc5: function(s) {
+      s.cpu.intst.push(s, s.cpu.getRegister(s, 'bc'));
+      s.cpu.addCycles(s, 11);
+      return arguments.callee.length;
+    },
     
+    0xc6: function(s, p1) {
+      s.cpu.intst.deIncFromRegAndParam(s, 'a', p1);
+      s.cpu.addCycles(s, 7);
+      return arguments.callee.length;
+    },
+    
+    0xc7: function(s) {
+      s.cpu.intst.reset(s, 0);
+      s.cpu.addCycles(s, 11);
+      return arguments.callee.length;
+    },
+
+    0xc8: function(s) {
+      var pcPop = s.cpu.intst.pop(s, 'Z');
+      s.cpu.setRegister(s, 'pc', pcPop);
+      s.cpu.addCycles(s, pcPop ? 11 : 5);
+      return arguments.callee.length;
+    },
+
+    0xc9: function(s) {
+      var pcPop = s.cpu.intst.pop(s);
+      s.cpu.setRegister(s, 'pc', pcPop);
+      s.cpu.addCycles(s, 10);
+      return arguments.callee.length;
+    },
+
+    0xca: function(s, p1, p2) {
+      var pcJump = s.cpu.intst.jump(s, s.utils.combineBytes(p1, p2), 'Z');
+      s.cpu.setRegister(s, 'pc', pcJump);
+      s.cpu.addCycles(s, pcJump ? 10 : 15);
+      return arguments.callee.length;
+    },
+
+    0xcb: function(s) {
+      s.cpu.intst.nop(s);
+      return arguments.callee.length;
+    },
+
+    0xcc: function(s, p1, p2) {
+      var pcCall = s.cpu.intst.call(s, 'Z');
+      s.cpu.setRegister(s, 'pc', s.utils.combineBytes(p1, p2));
+      s.cpu.addCycles(s, pcCall ? 18 : 11);
+      return arguments.callee.length;
+    },
+
+    0xcd: function(s, p1, p2) {
+      s.cpu.intst.call(s);
+      s.cpu.setRegister(s, 'pc', s.utils.combineBytes(p1, p2));
+      return arguments.callee.length;
+    },
+
+    0xce: function(s, p1) {
+      s.cpu.intst.deIncFromRegAndParamWithCarry(s, 'a', p1);
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+    
+    0xcf: function(s) {
+      s.cpu.intst.reset(s, 0x08 * 8);
+      s.cpu.addCycles(s, 11);
+      return arguments.callee.length;
+    },
+
+    0xd0: function(s) {
+      var pcPop = s.cpu.intst.pop(s, 'NC');
+      s.cpu.setRegister(s, 'pc', pcPop);
+      s.cpu.addCycles(s, pcPop ? 5 : 11);
+      return arguments.callee.length;
+    },
+
+    0xd1: function(s) {
+      s.cpu.setRegister(s, 'de', s.cpu.intst.pop(s));
+      s.cpu.addCycles(s, 10);
+      return arguments.callee.length;
+    },
+
+    0xd2: function(s, p1, p2) {
+      var pcJump = s.cpu.intst.jump(s, s.utils.combineBytes(p1, p2), 'NC');
+      s.cpu.setRegister(s, 'pc', pcJump);
+      s.cpu.addCycles(s, pcJump ? 10 : 15);
+      return arguments.callee.length;
+    },
+
+    0xd3: function(s) {
+      // HW WRITE
+      debugger;
+      s.cpu.addCycles(s, 10);
+      return arguments.callee.length;
+    },
+
+    0xd4: function(s, p1, p2) {
+      var pcCall = s.cpu.intst.call(s, 'NZ');
+      s.cpu.setRegister(s, 'pc', s.utils.combineBytes(p1, p2));
+      s.cpu.addCycles(s, pcCall ? 18 : 11);
+      return arguments.callee.length;
+    },
+
+    0xd5: function(s) {
+      s.cpu.intst.push(s, s.cpu.getRegister(s, 'de'));
+      s.cpu.addCycles(s, 11);
+      return arguments.callee.length;
+    },
+
+    0xd6: function(s, p1) {
+      s.cpu.intst.deIncFromRegAndParamWithCarry(s, 'a', p1, -1);
+      s.cpu.addCycles(s, 7);
+      return arguments.callee.length;
+    },
+    
+    0xd7: function(s) {
+      s.cpu.intst.reset(s, 0x10 * 8);
+      s.cpu.addCycles(s, 11);
+      return arguments.callee.length;
+    },
+
+    0xd8: function(s) {
+      var pcPop = s.cpu.intst.pop(s, 'C');
+      s.cpu.setRegister(s, 'pc', pcPop);
+      s.cpu.addCycles(s, pcPop ? 11 : 5);
+      return arguments.callee.length;
+    },
+
+    0xd9: function(s) {
+      s.cpu.intst.nop(s);
+      return arguments.callee.length;
+    },
+
+    0xda: function(s, p1, p2) {
+      var pcJump = s.cpu.intst.jump(s, s.utils.combineBytes(p1, p2), 'C');
+      s.cpu.setRegister(s, 'pc', pcJump);
+      s.cpu.addCycles(s, pcJump ? 10 : 15);
+      return arguments.callee.length;
+    },
+
+    0xcb: function(s) {
+      // HW READ
+      debugger;
+      s.cpu.addCycles(s, 10);
+      return arguments.callee.length;
+    },
+
+    0xdc: function(s, p1, p2) {
+      var pcCall = s.cpu.intst.call(s, 'C');
+      s.cpu.setRegister(s, 'pc', s.utils.combineBytes(p1, p2));
+      s.cpu.addCycles(s, pcCall ? 18 : 10);
+      return arguments.callee.length;
+    },
+
+    0xdd: function(s, op, p1, p2) {
+      // NEXTOP IX
+      if (decRet.indexRegOpParams[op] === 1) {
+        return decRet.decode[op](s, 'IX');
+      } else if (decRet.indexRegOpParams[op] === 2) {
+        return decRet.decode[op](s, p1, 'IX');
+      } else if (decRet.indexRegOpParams[op] === 3) {
+        return decRet.decode[op](s, p1, p2, 'IX');
+      }
+      throw new Error("[DECODER::0xdd()]: Unknown parameter for index register IX:", op, emuState);
+    },
+
+    0xde: function(s, p1) {
+      s.cpu.intst.deIncFromRegAndParamWithCarry(s, 'a', p1, -1);
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length;
+    },
+    
+    0xdf: function(s) {
+      s.cpu.intst.reset(s, 0x18 * 8);
+      s.cpu.addCycles(s, 11);
+      return arguments.callee.length;
+    },
+
+    0xe0: function(s) {
+      var pcPop = s.cpu.intst.pop(s, 'NP');
+      s.cpu.setRegister(s, 'pc', pcPop);
+      s.cpu.addCycles(s, pcPop ? 5 : 11);
+      return arguments.callee.length;
+    },
+
+    0xe1: function(s, idxReg = 'hl') {
+      s.cpu.setRegister(s, idxReg, s.cpu.intst.pop(s));
+      s.cpu.addCycles(s, 10);
+      return arguments.callee.length - 1;
+    },
+
+    0xe2: function(s, p1, p2) {
+      var pcJump = s.cpu.intst.jump(s, s.utils.combineBytes(p1, p2), 'NP');
+      s.cpu.setRegister(s, 'pc', pcJump);
+      s.cpu.addCycles(s, pcJump ? 10 : 15);
+      return arguments.callee.length;
+    },
+
+    0xe3: function(s, idxReg = 'hl') {
+      s.cpu.intst.xchm(s, idxReg);
+      return arguments.callee.length - 1;
+    },
+
+    0xe4: function(s, p1, p2) {
+      var pcCall = s.cpu.intst.call(s, 'NP');
+      s.cpu.setRegister(s, 'pc', s.utils.combineBytes(p1, p2));
+      s.cpu.addCycles(s, pcCall ? 18 : 11);
+      return arguments.callee.length;
+    },
+
+    0xe5: function(s, idxReg = 'hl') {
+      s.cpu.intst.push(s, s.cpu.getRegister(s, idxReg));
+      s.cpu.addCycles(s, 11);
+      return arguments.callee.length - 1;
+    },
+
+    0xe6: function(s, p1) {
+      s.cpu.intst.operandRegWithParam(s, 'a', p1, '&');
+      s.cpu.addCycles(s, 7);
+      return arguments.callee.length;
+    },
+    
+    0xe7: function(s) {
+      s.cpu.intst.reset(s, 0x20 * 8);
+      s.cpu.addCycles(s, 11);
+      return arguments.callee.length;
+    },
+
+    0xe8: function(s) {
+      var pcPop = s.cpu.intst.pop(s, 'P');
+      s.cpu.setRegister(s, 'pc', pcPop);
+      s.cpu.addCycles(s, pcPop ? 11 : 5);
+      return arguments.callee.length;
+    },
+
+    0xe9: function(s, idxReg = 'hl') {
+      var pcJump = s.cpu.intst.jump(s, s.cpu.getRegister(s, idxReg));
+      s.cpu.setRegister(s, 'pc', pcJump);
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length - 1;
+    },
+
+    0xea: function(s, p1, p2) {
+      var pcJump = s.cpu.intst.jump(s, s.utils.combineBytes(p1, p2), 'P');
+      s.cpu.setRegister(s, 'pc', pcJump);
+      s.cpu.addCycles(s, pcJump ? 10 : 15);
+      return arguments.callee.length;
+    },
+
+    0xeb: function(s, idxReg = 'hl') {
+      var tmp = s.cpu.getRegister(s, idxReg);
+      s.cpu.setRegister(s, idxReg, s.cpu.getRegister(s, 'de'));
+      s.cpu.setRegister(s, 'de', tmp);
+      s.cpu.addCycles(s, 4);
+      return arguments.callee.length - 1;
+    },
+
+    0xec: function(s) {
+      var pcCall = s.cpu.intst.call(s, 'P');
+      s.cpu.setRegister(s, 'pc', s.utils.combineBytes(p1, p2));
+      s.cpu.addCycles(s, pcCall ? 18 : 10);
+      return arguments.callee.length;
+    },
+
+    0xed: function(s) {
+      s.cpu.intst.nop(s);
+      return arguments.callee.length;
+    },
+
+    0xee: function(s, p1) {
+      s.cpu.intst.operandRegWithParam(s, 'a', p1, '^');
+      s.cpu.addCycles(s, 7);
+      return arguments.callee.length;
+    },
+
+    0xef: function(s) {
+      s.cpu.intst.reset(s, 0x28 * 8);
+      s.cpu.addCycles(s, 11);
+      return arguments.callee.length;
+    },
+
+    0xf0: function(s) {
+      var pcPop = s.cpu.intst.pop(s, 'NS');
+      s.cpu.setRegister(s, 'pc', pcPop);
+      s.cpu.addCycles(s, pcPop ? 5 : 11);
+      return arguments.callee.length;
+    },
+
+    0xf1: function(s) {
+      s.cpu.setRegister(s, 'af', s.cpu.intst.pop(s));
+      s.cpu.addCycles(s, 10);
+      return arguments.callee.length;
+    },
+
+    0xf2: function(s, p1, p2) {
+      var pcJump = s.cpu.intst.jump(s, s.utils.combineBytes(p1, p2), 'NS');
+      s.cpu.setRegister(s, 'pc', pcJump);
+      s.cpu.addCycles(s, pcJump ? 10 : 15);
+      return arguments.callee.length;
+    },
+
+    0xf3: function(s) {
+      // DIF
+      return arguments.callee.length;
+    },
+
+    0xf4: function(s, p1, p2) {
+      var pcCall = s.cpu.intst.call(s, 'S');
+      s.cpu.setRegister(s, 'pc', s.utils.combineBytes(p1, p2));
+      s.cpu.addCycles(s, pcCall ? 18 : 11);
+      return arguments.callee.length;
+    },
+
+    0xf5: function(s) {
+      s.cpu.intst.push(s, s.cpu.getRegister(s, 'af'));
+      s.cpu.addCycles(s, 11);
+      return arguments.callee.length;
+    },
+
+    0xf6: function(s, p1) {
+      s.cpu.intst.operandRegWithParam(s, 'a', p1, '|');
+      s.cpu.addCycles(s, 7);
+      return arguments.callee.length;
+    },
+
+    0xf7: function(s) {
+      s.cpu.intst.reset(s, 0x30 * 8);
+      s.cpu.addCycles(s, 11);
+      return arguments.callee.length;
+    },
+
+    0xf8: function(s) {
+      var pcPop = s.cpu.intst.pop(s, 'S');
+      s.cpu.setRegister(s, 'pc', pcPop);
+      s.cpu.addCycles(s, pcPop ? 11 : 5);
+      return arguments.callee.length;
+    },
+
+    0xf9: function(s, idxReg = 'hl') {
+      s.cpu.setRegister(s, 'sp', s.cpu.getRegister(s, idxReg));
+      s.cpu.addCycles(s, 6);
+      return arguments.callee.length - 1;
+    },
+
+    0xfa: function(s, p1, p2) {
+      var pcJump = s.cpu.intst.jump(s, s.cpu.getRegister(s, s.utils.combineBytes(p1, p2), 'S'));
+      s.cpu.setRegister(s, 'pc', pcJump);
+      s.cpu.addCycles(s, pcJump ? 15 : 10);
+      return arguments.callee.length;
+    },
+
+    0xfb: function(s) {
+      // SIF
+      return arguments.callee.length;
+    },
+
+    0xfc: function(s) {
+      var pcCall = s.cpu.intst.call(s, 'S');
+      s.cpu.setRegister(s, 'pc', s.utils.combineBytes(p1, p2));
+      s.cpu.addCycles(s, pcCall ? 18 : 10);
+      return arguments.callee.length;
+    },
+
+    0xfd: function(s, op, p1, p2) {
+      // NEXTOP IY
+      if (decRet.indexRegOpParams[op] === 1) {
+        return decRet.decode[op](s, 'IY');
+      } else if (decRet.indexRegOpParams[op] === 2) {
+        return decRet.decode[op](s, p1, 'IY');
+      } else if (decRet.indexRegOpParams[op] === 3) {
+        return decRet.decode[op](s, p1, p2, 'IY');
+      }
+      throw new Error("[DECODER::0xfd()]: Unknown parameter for index register IY:", op, emuState);
+    },
+
+    0xfe: function(s, p1) {
+      s.cpu.intst.deIncFromRegAndMem(s, 'a', p1, -1);
+      s.cpu.addCycles(s, 7);
+      return arguments.callee.length;
+    },
+
+    0xff: function(s) {
+      s.cpu.intst.reset(s, 0x38 * 8);
+      s.cpu.addCycles(s, 11);
+      return arguments.callee.length;
+    }
+    
+  };
+
+  decRet.indexRegOpParams = {
+    0x09: 1,
+    0x19: 1,
+    0x21: 3,
+    0x22: 3,
+    0x23: 1,
+    0x29: 1,
+    0x2a: 3,
+    0x2b: 1,
+    0x34: 1,
+    0x35: 1,
+    0x36: 2,
+    0x39: 1,
+    0x46: 1,
+    0x4e: 1,
+    0x56: 1,
+    0x5e: 1,
+    0x66: 1,
+    0x6e: 1,
+    0x70: 1,
+    0x71: 1,
+    0x72: 1,
+    0x73: 1,
+    0x74: 1,
+    0x75: 1,
+    0x77: 1,
+    0x7e: 1,
+    0x86: 1,
+    0x8e: 1,
+    0x96: 1,
+    0x8e: 1,
+    0xa6: 1,
+    0xae: 1,
+    0xb6: 1,
+    0xbe: 1,
+    0xe1: 1,
+    0xe3: 1,
+    0xe5: 1,
+    0xe9: 1,
+    0xeb: 1,
+    0xf9: 1
   };
 
   return decRet;
