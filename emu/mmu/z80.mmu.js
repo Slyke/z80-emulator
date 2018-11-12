@@ -23,6 +23,8 @@ emu.mmuList.push(function() {
   });
 
   mmuRet.writeByte = function(emuState, address, value) {
+    emuState.cpu.pins.mreq = true;
+    emuState.cpu.pins.wr = true;
     if (typeof(emuState.mmu.cbs.memoryUpdateCb) === "function") {
       emuState.mmu.cbs.memoryUpdateCb(emuState, address, value);
     }
@@ -40,9 +42,14 @@ emu.mmuList.push(function() {
     }
 
     emuState.mmu.memory[address] = value & 0xff;
+    emuState.cpu.pins.mreq = false;
+    emuState.cpu.pins.wr = false;
   };
 
   mmuRet.readByte = function(emuState, address) {
+    emuState.cpu.pins.mreq = true;
+    emuState.cpu.pins.rd = true;
+    
     if (typeof(emuState.mmu.cbs.memoryUpdateCb) === "function") {
       emuState.mmu.cbs.memoryReadCb(emuState, address);
     }
@@ -52,6 +59,9 @@ emu.mmuList.push(function() {
         emuState.mmu.cbs.memoryWarningCb(emuState, address, value, 'OOB_READ');
       }
     }
+
+    emuState.cpu.pins.mreq = false;
+    emuState.cpu.pins.rd = false;
 
     return emuState.mmu.memory[address] & 0xff;
   };

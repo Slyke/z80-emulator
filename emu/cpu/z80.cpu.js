@@ -10,14 +10,14 @@ emu.cpuList.push(function() {
   var cpuRet = {
     name: "z80",
     type: "cpu",
-    halted: false,
     cbs: {},
     pins: {
       m1: false,
       mreq: false,
       iorq: false,
       rd: false,
-      wr: false
+      wr: false,
+      hlt: false
     },
     counts: {
       exec: 0,
@@ -314,6 +314,13 @@ emu.cpuList.push(function() {
     },
     crf: function(emuState, rFlag, aluFlag) {
       emuState.cpu.registers[rFlag] &= ~emuState.alu.fFlags[aluFlag];
+    },
+    intrpt: function(emuState, state) {
+      if (state === 0) {
+        emuState.cpu.setRegisters(emuState, 'f', (emuState.cpu.getRegisters(emuState, 'f') & ~emuState.alu.fFlags.interrupt));
+      } else {
+        emuState.cpu.setRegisters(emuState, 'f', (emuState.cpu.getRegisters(emuState, 'f') | emuState.alu.fFlags.interrupt));
+      }
     },
     xchm: function(emuState, reg1) {
       var tmp  = emuState.cpu.getRegisters(emuState, reg1);

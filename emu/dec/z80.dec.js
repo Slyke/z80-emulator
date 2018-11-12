@@ -728,7 +728,7 @@ emu.decList.push(function() {
 
     0x76: function(s) {
       // STOP
-      s.cpu.halted = true;
+      s.cpu.pins.hlt = true;
     },
 
     0x77: function(s, idxReg = 'hl') {
@@ -1290,9 +1290,8 @@ emu.decList.push(function() {
       return arguments.callee.length;
     },
 
-    0xd3: function(s) {
-      // HW WRITE
-      debugger;
+    0xd3: function(s, p1) {
+      s.cpu.hwio.writePort(s, p1, s.cpu.getRegister(s, 'a');
       s.cpu.addCycles(s, 10);
       return arguments.callee.length;
     },
@@ -1341,11 +1340,10 @@ emu.decList.push(function() {
       return arguments.callee.length;
     },
 
-    0xcb: function(s) {
-      // HW READ
-      debugger;
-      s.cpu.addCycles(s, 10);
-      return arguments.callee.length;
+    0xdb: function(s, p1) {
+    s.cpu.setRegister(s, 'a', s.cpu.hwio.readPort(s, p1));
+    s.cpu.addCycles(s, 10);
+    return arguments.callee.length;
     },
 
     0xdc: function(s, p1, p2) {
@@ -1503,7 +1501,8 @@ emu.decList.push(function() {
     },
 
     0xf3: function(s) {
-      // DIF
+      s.cpu.intst.intrpt(s, 0);
+      s.cpu.addCycles(s, 4);
       return arguments.callee.length;
     },
 
@@ -1553,7 +1552,8 @@ emu.decList.push(function() {
     },
 
     0xfb: function(s) {
-      // SIF
+      s.cpu.intst.intrpt(s, 1);
+      s.cpu.addCycles(s, 4);
       return arguments.callee.length;
     },
 
