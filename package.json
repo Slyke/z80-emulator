@@ -5,6 +5,7 @@
   "main": "canvas_controller.js",
   "scripts": {
     "start": "http-server -o http://localhost:8080/www/index.html",
+    "ref": "http-server -o http://localhost:8080/www_ref/index.html",
     "decom": "node ./cli/decompile.js",
     "cli": "node ./cli/cmd_run.js",
     "bin2json": "node ./cli/bin2json.js",
