@@ -19,7 +19,8 @@ if (!objEmulatorFactory) {
       hwio: {},   // Hardware Input/Output
       mmu: {},    // Memory Management Unit
       utils: {},  // Util functions
-      gpu: {}     // Graphical Processing Unit
+      gpu: {},    // Graphical Processing Unit
+      dis: {}     // Byte Code Disassembler
     };
 
     ctrlRet.ctrl = ctrlRet;
@@ -41,6 +42,7 @@ if (!objEmulatorFactory) {
       ctrlRet.mmu = ctrlRet.getSys(systemsList.mmuList, ctrlRet.systemType)();
       ctrlRet.utils = ctrlRet.getSys(systemsList.utilsList, ctrlRet.systemType)();
       ctrlRet.gpu = ctrlRet.getSys(systemsList.gpuList, ctrlRet.systemType)();
+      ctrlRet.dis = ctrlRet.getSys(systemsList.disList, ctrlRet.systemType)();
 
       ctrlRet.setupCheck(ctrlRet, 'alu', ctrlRet.systemType);
       ctrlRet.setupCheck(ctrlRet, 'ctrl', ctrlRet.systemType);
@@ -49,6 +51,7 @@ if (!objEmulatorFactory) {
       ctrlRet.setupCheck(ctrlRet, 'mmu', ctrlRet.systemType);
       ctrlRet.setupCheck(ctrlRet, 'utils', ctrlRet.systemType);
       ctrlRet.setupCheck(ctrlRet, 'gpu', ctrlRet.systemType);
+      ctrlRet.setupCheck(ctrlRet, 'dis', ctrlRet.systemType);
     };
 
     ctrlRet.resetSubsystem = function(subsystem, subsystemList) {
@@ -61,6 +64,7 @@ if (!objEmulatorFactory) {
       ctrlRet.resetSubsystem('alu', systemsList.aluList);
       ctrlRet.resetSubsystem('utils', systemsList.utilsList);
       ctrlRet.resetSubsystem('gpu', systemsList.gpuList);
+      ctrlRet.resetSubsystem('dis', systemsList.disList);
 
       if (memory) {
         ctrlRet.resetSubsystem('mmu', systemsList.mmuList);
@@ -80,6 +84,14 @@ if (!objEmulatorFactory) {
         throw { type: "Error", moduleName: ctrlRet.type, functionName: "setupCheck", reason: "Could not find subsystem", args: arguments };
       }
     };
+
+    ctrlRet.cpuRunUntilInterruptCheck = function(emu) {
+      while (!ctrlRet.cpuEval(emu)) {
+        // Do nothing
+      }
+
+      return;
+    }
 
     ctrlRet.cpuEval = function(emu) {
 
@@ -109,11 +121,19 @@ if (!objEmulatorFactory) {
 
       emu.cpu.pcInc(emu, emu.dec.decoderParams[currentInstruction[0]]);
 
-      var execRet = emu.dec.decode[currentInstruction[0]](emu, currentInstruction[1], currentInstruction[2]);
+      var execRet = emu.dec.decode[currentInstruction[0]](
+        emu,
+        emu.dec.decoderParams[currentInstruction[0]] > 1 ? currentInstruction[1] : undefined,
+        emu.dec.decoderParams[currentInstruction[0]] > 2 ? currentInstruction[2] : undefined
+        );
 
       if (opCost === 0) { // For special IX and IY registers
         emu.cpu.pcInc(emu, execRet + 1);
       }
+
+      emu.cpu.counts.tCycles += (emu.cpu.counts.cycles - preCycleChange);
+      emu.cpu.counts.modeClock = ((emu.cpu.counts.modeClock + 1) & 0xffff);
+      emu.cpu.counts.exec++;
 
       if (execRet < 1) {
         throw {
@@ -122,7 +142,7 @@ if (!objEmulatorFactory) {
           functionName: "cpuEval",
           reason: "CPU failed to decode OP Code",
           args: arguments,
-          emulatorState: emuState,
+          emulatorState: emu,
           opCodes: currentInstruction
         };
       }
@@ -134,7 +154,7 @@ if (!objEmulatorFactory) {
           functionName: "cpuEval",
           reason: "CPU failed to increase PC",
           args: arguments,
-          emulatorState: emuState,
+          emulatorState: emu,
           opCodes: currentInstruction
         };
       }
@@ -146,10 +166,12 @@ if (!objEmulatorFactory) {
           functionName: "cpuEval",
           reason: "CPU failed to increase clock count",
           args: arguments,
-          emulatorState: emuState,
+          emulatorState: emu,
           opCodes: currentInstruction
         };
       }
+
+      return emu.hwio.interruptCheck(emu);
     };
 
     return ctrlRet;

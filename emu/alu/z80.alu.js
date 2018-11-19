@@ -86,7 +86,7 @@ if (!objEmulatorFactory) {
       }
 
       emuState.cpu.pcInc(emuState, 2);
-      cpu.push(emuState, emuState.cpu.registers[pcReg]);
+      emuState.alu.push(emuState, emuState.cpu.registers[pcReg]);
 
       emuState.cpu.registers[pcReg] = newLocation & 0xffff;
     };

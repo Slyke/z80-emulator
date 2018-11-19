@@ -24,10 +24,8 @@ var emuCtrlList = [];
 var objEmu;
 var loadedMemoryFilesList = [];
 var romLoaded = 0;
-var cpuCanStart = false;
 var cpuRunning = false;
 var previouslyExecInstructions = [];
-var anyMemoryUpdated = [];
 
 var usingVideoDriver;
 var usingCPUCore;
@@ -93,10 +91,10 @@ function animateLoop() {
 
   canvasControl.canvasObjects = [];
 
-  uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanStart, showMemoryInspector);
+  uiPreframeSetup(canvasControl, objEmu, persistantObjects, showMemoryInspector);
 
-  if (cpuCanStart && cpuRunning && anyMemoryUpdated.length > 1 && !usingVideoDriver.memoryMapRendering) {
-    usingVideoDriver.renderMemoryMap(runningCPU, anyMemoryUpdated, memoryMapImageData, null, true);
+  if (cpuRunning && objEmu.gpu.memoryMapDiffFrameBuffer.length > 1) {
+    objEmu.gpu.renderMemoryMap(objEmu, memoryMapImageData);
   }
   
   if (showFPS) {
@@ -237,22 +235,6 @@ function setupCpu() {
 
 function relToAbs(relCoord, dimension) {
   return (relCoord * (dimension === 0 ? objCanvas.width : objCanvas.height));
-}
-
-function printMemoryTrace(cpuState) {
-  console.warn(" ");
-  console.log("Last instruction executed: ");
-  console.log(cpuState.disassemble8080OP(cpuState, cpuState.flags.pc))
-  console.log("CPU Registers: ");
-  console.log(cpuState);
-  console.log(" ");
-  console.log("Debug Helpers: ");
-  console.log(cpuState.db);
-  console.log(" ");
-  console.log("Memory around this address: (-6, +6)");
-  var memoryOutput = printMemorySlice(cpuState, cpuState.flags.pc, 6, 6);
-  console.log(memoryOutput);
-  console.log(" ");
 }
 
 function printMemorySlice(cpuState, pc, lower, upper) {

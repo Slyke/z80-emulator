@@ -27,6 +27,17 @@ if (!objEmulatorFactory) {
       return ret;
     };
 
+    utilsRet.getKeyBoardKeysText = function() {
+      return [
+        "Z80 Game Keys:",
+        "     A - Left        D - Right",
+        "     Spacebar - Shoot",
+        "     1 - Player 1    2 - Player 2",
+        "     C - Insert Coin",
+        "     "
+      ];
+    };
+
     return utilsRet;
   });
 

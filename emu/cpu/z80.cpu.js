@@ -11,7 +11,6 @@ if (!objEmulatorFactory) {
     var cpuRet = {
       name: "z80",
       type: "cpu",
-      cbs: {},
       pins: {
         m1: false,
         mreq: false,
@@ -23,7 +22,8 @@ if (!objEmulatorFactory) {
       counts: {
         exec: 0,
         cycles: 0,
-        tCycles: 0
+        tCycles: 0,
+        modeClock: 0
       },
       registers: {
         pc: 0,
@@ -33,6 +33,8 @@ if (!objEmulatorFactory) {
         c: 0,
         d: 0,
         e: 0,
+        h: 0,
+        l: 0,
         f: 0,
         ix: 0,
         iy: 0
@@ -119,18 +121,6 @@ if (!objEmulatorFactory) {
 
     cpuRet.cancelInterruptRequest = function(emuState, fReg = 'f') {
       emuState.cpu.registers[fReg] &= ~fFlags.interrupt & 0xff;
-    };
-
-    cpuRet.handleInterrupt = function(emuState) {
-      if (emuState.alu.checkAluFlags(emuState.cpu.registers.f, "I")) {
-        // We need to push the current PC to (SP) so we can return after executing the interrupt.
-        // emuState.cpu.push(emuState, emuState.cpu.registers.pc); // Handled by arcade machine hardware.
-
-        // cpuRet.setRegister(emuState, 'pc', state.pInterrupt); // Handled by arcade machine hardware.
-        if (typeof(emuState.cpu.cbs.handleInterrupt) === "function") {
-          emuState.cpu.cbs.handleInterrupt(emuState);
-        }
-      }
     };
 
     cpuRet.pcInc = function(emuState, count = 1) {

@@ -11,7 +11,10 @@ if (!objEmulatorFactory) {
     var mmuRet = {
       name: "z80",
       type: "mmu",
-      cbs: {},
+      cbs: {
+        memoryWarningCb: undefined,
+        memoryUpdateCb: undefined
+      },
       memory: new Array(0x10000).fill(0)
     };
 
