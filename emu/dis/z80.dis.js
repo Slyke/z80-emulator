@@ -909,8 +909,8 @@ if (!objEmulatorFactory) {
           z80OPCode: "LD",
           cycleCost: 5,
           cycleConditional: [],
-          iReg: "B",
-          oReg: "C",
+          iReg: "C",
+          oReg: "B",
           param1: undefined,
           param2: undefined,
           opBytes: 1,
@@ -924,8 +924,8 @@ if (!objEmulatorFactory) {
           z80OPCode: "LD",
           cycleCost: 5,
           cycleConditional: [],
-          iReg: "B",
-          oReg: "D",
+          iReg: "D",
+          oReg: "B",
           param1: undefined,
           param2: undefined,
           opBytes: 1,
@@ -939,8 +939,8 @@ if (!objEmulatorFactory) {
           z80OPCode: "LD",
           cycleCost: 5,
           cycleConditional: [],
-          iReg: "B",
-          oReg: "E",
+          iReg: "E",
+          oReg: "B",
           param1: undefined,
           param2: undefined,
           opBytes: 1,
@@ -954,8 +954,8 @@ if (!objEmulatorFactory) {
           z80OPCode: "LD",
           cycleCost: 5,
           cycleConditional: [],
-          iReg: "B",
-          oReg: "H",
+          iReg: "H",
+          oReg: "B",
           param1: undefined,
           param2: undefined,
           opBytes: 1,
@@ -969,8 +969,8 @@ if (!objEmulatorFactory) {
           z80OPCode: "LD",
           cycleCost: 5,
           cycleConditional: [],
-          iReg: "B",
-          oReg: "L",
+          iReg: "L",
+          oReg: "B",
           param1: undefined,
           param2: undefined,
           opBytes: 1,
@@ -982,10 +982,10 @@ if (!objEmulatorFactory) {
         return {
           opCode: "LD2R",
           z80OPCode: "LD",
-          cycleCost: 5,
+          cycleCost: 7,
           cycleConditional: [],
-          iReg: "B",
-          oReg: idxReg ? idxReg : "HL",
+          iReg: idxReg ? idxReg : "HL",
+          oReg: "B",
           param1: undefined,
           param2: undefined,
           opBytes: 1,
@@ -999,8 +999,8 @@ if (!objEmulatorFactory) {
           z80OPCode: "LD",
           cycleCost: 5,
           cycleConditional: [],
-          iReg: "B",
-          oReg: "A",
+          iReg: "A",
+          oReg: "B",
           param1: undefined,
           param2: undefined,
           opBytes: 1,
@@ -1014,8 +1014,8 @@ if (!objEmulatorFactory) {
           z80OPCode: "LD",
           cycleCost: 5,
           cycleConditional: [],
-          iReg: "C",
-          oReg: "B",
+          iReg: "B",
+          oReg: "C",
           param1: undefined,
           param2: undefined,
           opBytes: 1,
@@ -1044,8 +1044,8 @@ if (!objEmulatorFactory) {
           z80OPCode: "LD",
           cycleCost: 5,
           cycleConditional: [],
-          iReg: "C",
-          oReg: "D",
+          iReg: "D",
+          oReg: "C",
           param1: undefined,
           param2: undefined,
           opBytes: 1,
@@ -1059,8 +1059,8 @@ if (!objEmulatorFactory) {
           z80OPCode: "LD",
           cycleCost: 5,
           cycleConditional: [],
-          iReg: "C",
-          oReg: "E",
+          iReg: "E",
+          oReg: "C",
           param1: undefined,
           param2: undefined,
           opBytes: 1,
@@ -1074,8 +1074,8 @@ if (!objEmulatorFactory) {
           z80OPCode: "LD",
           cycleCost: 5,
           cycleConditional: [],
-          iReg: "C",
-          oReg: "H",
+          iReg: "H",
+          oReg: "C",
           param1: undefined,
           param2: undefined,
           opBytes: 1,
@@ -1089,8 +1089,8 @@ if (!objEmulatorFactory) {
           z80OPCode: "LD",
           cycleCost: 5,
           cycleConditional: [],
-          iReg: "C",
-          oReg: "L",
+          iReg: "L",
+          oReg: "C",
           param1: undefined,
           param2: undefined,
           opBytes: 1,
@@ -1102,10 +1102,10 @@ if (!objEmulatorFactory) {
         return {
           opCode: "LD2R",
           z80OPCode: "LD",
-          cycleCost: 5,
+          cycleCost: 7,
           cycleConditional: [],
-          iReg: "C",
-          oReg: idxReg ? idxReg : "HL",
+          iReg: idxReg ? idxReg : "HL",
+          oReg: "C",
           param1: undefined,
           param2: undefined,
           opBytes: 1,
@@ -1119,8 +1119,8 @@ if (!objEmulatorFactory) {
           z80OPCode: "LD",
           cycleCost: 5,
           cycleConditional: [],
-          iReg: "C",
-          oReg: "A",
+          iReg: "A",
+          oReg: "C",
           param1: undefined,
           param2: undefined,
           opBytes: 1,
@@ -1136,8 +1136,8 @@ if (!objEmulatorFactory) {
           z80OPCode: "LD",
           cycleCost: 5,
           cycleConditional: [],
-          iReg: "D",
-          oReg: "B",
+          iReg: "B",
+          oReg: "D",
           param1: undefined,
           param2: undefined,
           opBytes: 1,
@@ -1151,8 +1151,8 @@ if (!objEmulatorFactory) {
           z80OPCode: "LD",
           cycleCost: 5,
           cycleConditional: [],
-          iReg: "D",
-          oReg: "C",
+          iReg: "C",
+          oReg: "D",
           param1: undefined,
           param2: undefined,
           opBytes: 1,
@@ -1181,6 +1181,111 @@ if (!objEmulatorFactory) {
           z80OPCode: "LD",
           cycleCost: 5,
           cycleConditional: [],
+          iReg: "E",
+          oReg: "D",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x54: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 5,
+          cycleConditional: [],
+          iReg: "H",
+          oReg: "D",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x55: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 5,
+          cycleConditional: [],
+          iReg: "L",
+          oReg: "D",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x56: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 7,
+          cycleConditional: [],
+          iReg: idxReg ? idxReg : "HL",
+          oReg: "D",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: "$",
+          indexRegisters: idxReg
+        };
+      },
+      0x57: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 5,
+          cycleConditional: [],
+          iReg: "A",
+          oReg: "D",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x58: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 5,
+          cycleConditional: [],
+          iReg: "B",
+          oReg: "E",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x59: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 5,
+          cycleConditional: [],
+          iReg: "C",
+          oReg: "E",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x5a: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 5,
+          cycleConditional: [],
           iReg: "D",
           oReg: "E",
           param1: undefined,
@@ -1190,7 +1295,114 @@ if (!objEmulatorFactory) {
           indexRegisters: undefined
         };
       },
-      0x54: function(s, p1, p2, idxReg) {
+      0x5b: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 5,
+          cycleConditional: [],
+          iReg: "E",
+          oReg: "E",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x5c: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 5,
+          cycleConditional: [],
+          iReg: "H",
+          oReg: "E",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x5d: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 5,
+          cycleConditional: [],
+          iReg: "L",
+          oReg: "E",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x5e: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 7,
+          cycleConditional: [],
+          iReg: idxReg ? idxReg : "HL",
+          oReg: "E",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: "$",
+          indexRegisters: idxReg
+        };
+      },
+      0x5f: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 5,
+          cycleConditional: [],
+          iReg: "A",
+          oReg: "E",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+
+
+      0x60: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 5,
+          cycleConditional: [],
+          iReg: "B",
+          oReg: "H",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x61: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 5,
+          cycleConditional: [],
+          iReg: "C",
+          oReg: "H",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x62: function(s, p1, p2, idxReg) {
         return {
           opCode: "LD2R",
           z80OPCode: "LD",
@@ -1205,7 +1417,112 @@ if (!objEmulatorFactory) {
           indexRegisters: undefined
         };
       },
-      0x55: function(s, p1, p2, idxReg) {
+      0x63: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 5,
+          cycleConditional: [],
+          iReg: "E",
+          oReg: "H",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x64: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 5,
+          cycleConditional: [],
+          iReg: "H",
+          oReg: "H",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x65: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 5,
+          cycleConditional: [],
+          iReg: "L",
+          oReg: "H",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x66: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 7,
+          cycleConditional: [],
+          iReg: idxReg ? idxReg : "HL",
+          oReg: "H",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: "$",
+          indexRegisters: idxReg
+        };
+      },
+      0x67: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 5,
+          cycleConditional: [],
+          iReg: "A",
+          oReg: "H",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x68: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 5,
+          cycleConditional: [],
+          iReg: "B",
+          oReg: "L",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x69: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 5,
+          cycleConditional: [],
+          iReg: "C",
+          oReg: "L",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x6a: function(s, p1, p2, idxReg) {
         return {
           opCode: "LD2R",
           z80OPCode: "LD",
@@ -1219,8 +1536,808 @@ if (!objEmulatorFactory) {
           pointer: undefined,
           indexRegisters: undefined
         };
-      }
+      },
+      0x6b: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 5,
+          cycleConditional: [],
+          iReg: "E",
+          oReg: "L",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x6c: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 5,
+          cycleConditional: [],
+          iReg: "H",
+          oReg: "L",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x6d: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 5,
+          cycleConditional: [],
+          iReg: "L",
+          oReg: "L",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x6e: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 7,
+          cycleConditional: [],
+          iReg: idxReg ? idxReg : "HL",
+          oReg: "L",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: "$",
+          indexRegisters: idxReg
+        };
+      },
+      0x6f: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 5,
+          cycleConditional: [],
+          iReg: "L",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
 
+
+      0x70: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 7,
+          cycleConditional: [],
+          iReg: "B",
+          oReg: idxReg ? idxReg : "HL",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: "#",
+          indexRegisters: idxReg
+        };
+      },
+      0x71: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 7,
+          cycleConditional: [],
+          iReg: "C",
+          oReg: idxReg ? idxReg : "HL",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: "#",
+          indexRegisters: idxReg
+        };
+      },
+      0x72: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 7,
+          cycleConditional: [],
+          iReg: "D",
+          oReg: idxReg ? idxReg : "HL",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: "#",
+          indexRegisters: idxReg
+        };
+      },
+      0x73: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 7,
+          cycleConditional: [],
+          iReg: "E",
+          oReg: idxReg ? idxReg : "HL",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: "#",
+          indexRegisters: idxReg
+        };
+      },
+      0x74: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 7,
+          cycleConditional: [],
+          iReg: "H",
+          oReg: idxReg ? idxReg : "HL",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: "#",
+          indexRegisters: idxReg
+        };
+      },
+      0x75: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 7,
+          cycleConditional: [],
+          iReg: "L",
+          oReg: idxReg ? idxReg : "HL",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: "#",
+          indexRegisters: idxReg
+        };
+      },
+      0x76: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "HLT",
+          z80OPCode: "HLT",
+          cycleCost: 7,
+          cycleConditional: [],
+          iReg: undefined,
+          oReg: undefined,
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: idxReg
+        };
+      },
+      0x77: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 7,
+          cycleConditional: [],
+          iReg: "A",
+          oReg: idxReg ? idxReg : "HL",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: "#",
+          indexRegisters: idxReg
+        };
+      },
+      0x78: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 7,
+          cycleConditional: [],
+          iReg: "B",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x79: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 7,
+          cycleConditional: [],
+          iReg: "C",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x7a: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 7,
+          cycleConditional: [],
+          iReg: "D",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x7b: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 7,
+          cycleConditional: [],
+          iReg: "E",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x7c: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 7,
+          cycleConditional: [],
+          iReg: "H",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x7d: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 7,
+          cycleConditional: [],
+          iReg: "L",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x7e: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 7,
+          cycleConditional: [],
+          iReg: idxReg ? idxReg : "HL",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: "$",
+          indexRegisters: idxReg
+        };
+      },
+      0x7f: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 7,
+          cycleConditional: [],
+          iReg: "A",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+
+
+      0x80: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "INXR",
+          z80OPCode: "ADD",
+          cycleCost: 4,
+          cycleConditional: [],
+          iReg: "B",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x81: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "INXR",
+          z80OPCode: "ADD",
+          cycleCost: 4,
+          cycleConditional: [],
+          iReg: "C",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x82: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "INXR",
+          z80OPCode: "ADD",
+          cycleCost: 4,
+          cycleConditional: [],
+          iReg: "D",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x83: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "INXR",
+          z80OPCode: "ADD",
+          cycleCost: 4,
+          cycleConditional: [],
+          iReg: "E",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x84: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "INXR",
+          z80OPCode: "ADD",
+          cycleCost: 4,
+          cycleConditional: [],
+          iReg: "H",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x85: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "INXR",
+          z80OPCode: "ADD",
+          cycleCost: 4,
+          cycleConditional: [],
+          iReg: "L",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x86: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "INXR",
+          z80OPCode: "ADD",
+          cycleCost: 7,
+          cycleConditional: [],
+          iReg:  idxReg ? idxReg : "HL",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: "$",
+          indexRegisters: idxReg
+        };
+      },
+      0x87: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "INXR",
+          z80OPCode: "ADD",
+          cycleCost: 4,
+          cycleConditional: [],
+          iReg: "A",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x88: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "ICXR",
+          z80OPCode: "ADD",
+          cycleCost: 4,
+          cycleConditional: [],
+          iReg: "B",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x89: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "ICXR",
+          z80OPCode: "ADD",
+          cycleCost: 4,
+          cycleConditional: [],
+          iReg: "C",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x8a: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "ICXR",
+          z80OPCode: "ADD",
+          cycleCost: 4,
+          cycleConditional: [],
+          iReg: "D",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x8b: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "ICXR",
+          z80OPCode: "ADD",
+          cycleCost: 4,
+          cycleConditional: [],
+          iReg: "E",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x8c: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "ICXR",
+          z80OPCode: "ADD",
+          cycleCost: 4,
+          cycleConditional: [],
+          iReg: "H",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x8d: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "ICXR",
+          z80OPCode: "ADD",
+          cycleCost: 4,
+          cycleConditional: [],
+          iReg: "L",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x8e: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "ICXR",
+          z80OPCode: "ADD",
+          cycleCost: 7,
+          cycleConditional: [],
+          iReg:  idxReg ? idxReg : "HL",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: "$",
+          indexRegisters: idxReg
+        };
+      },
+      0x8f: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "ICXR",
+          z80OPCode: "ADD",
+          cycleCost: 4,
+          cycleConditional: [],
+          iReg: "A",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+
+
+      0x90: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "DCXR",
+          z80OPCode: "ADD",
+          cycleCost: 4,
+          cycleConditional: [],
+          iReg: "B",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x91: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "DCXR",
+          z80OPCode: "ADD",
+          cycleCost: 4,
+          cycleConditional: [],
+          iReg: "C",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x92: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "DCXR",
+          z80OPCode: "ADD",
+          cycleCost: 4,
+          cycleConditional: [],
+          iReg: "D",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x93: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "DCXR",
+          z80OPCode: "ADD",
+          cycleCost: 4,
+          cycleConditional: [],
+          iReg: "E",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x94: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "DCXR",
+          z80OPCode: "ADD",
+          cycleCost: 4,
+          cycleConditional: [],
+          iReg: "H",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x95: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "DCXR",
+          z80OPCode: "ADD",
+          cycleCost: 4,
+          cycleConditional: [],
+          iReg: "L",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x96: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "DCXR",
+          z80OPCode: "ADD",
+          cycleCost: 7,
+          cycleConditional: [],
+          iReg:  idxReg ? idxReg : "HL",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: "$",
+          indexRegisters: idxReg
+        };
+      },
+      0x97: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "DCXR",
+          z80OPCode: "ADD",
+          cycleCost: 4,
+          cycleConditional: [],
+          iReg: "A",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x98: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "DEXR",
+          z80OPCode: "ADD",
+          cycleCost: 4,
+          cycleConditional: [],
+          iReg: "B",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x99: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "DEXR",
+          z80OPCode: "ADD",
+          cycleCost: 4,
+          cycleConditional: [],
+          iReg: "C",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x9a: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "DEXR",
+          z80OPCode: "ADD",
+          cycleCost: 4,
+          cycleConditional: [],
+          iReg: "D",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x9b: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "DEXR",
+          z80OPCode: "ADD",
+          cycleCost: 4,
+          cycleConditional: [],
+          iReg: "E",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x9c: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "DEXR",
+          z80OPCode: "ADD",
+          cycleCost: 4,
+          cycleConditional: [],
+          iReg: "H",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x9d: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "DEXR",
+          z80OPCode: "ADD",
+          cycleCost: 4,
+          cycleConditional: [],
+          iReg: "L",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0x9e: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "DEXR",
+          z80OPCode: "ADD",
+          cycleCost: 7,
+          cycleConditional: [],
+          iReg:  idxReg ? idxReg : "HL",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: "$",
+          indexRegisters: idxReg
+        };
+      },
+      0x9f: function(s, p1, p2, idxReg) {
+        return {
+          opCode: "DEXR",
+          z80OPCode: "ADD",
+          cycleCost: 4,
+          cycleConditional: [],
+          iReg: "A",
+          oReg: "A",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      }
 
 
 

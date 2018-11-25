@@ -509,7 +509,6 @@ cpuCore.push(function() {
       case 0x8d: output.opCode = "ICXR"; output.z80OPCode = "ADD"; output.cycles = 4; output.oreg = "A"; output.ireg = "L"; break;
       case 0x8e: output.opCode = "ICXR"; output.z80OPCode = "ADD"; output.cycles = 7; output.ptr = "$"; output.oreg = "A"; output.ireg = "HL"; break;
       case 0x8f: output.opCode = "ICXR"; output.z80OPCode = "ADD"; output.cycles = 4; output.oreg = "A"; output.ireg = "A"; break;
-      case 0x8f: output.opCode = "ICXR"; output.z80OPCode = "ADD"; output.cycles = 4; output.oreg = "A"; output.ireg = "A"; break;
 
       case 0x90: output.opCode = "DCXR"; output.z80OPCode = "SUB"; output.cycles = 4; output.oreg = "A"; output.ireg = "B"; break;
       case 0x91: output.opCode = "DCXR"; output.z80OPCode = "SUB"; output.cycles = 4; output.oreg = "A"; output.ireg = "C"; break;
