@@ -3923,8 +3923,27 @@ if (!objEmulatorFactory) {
           indexRegisters: undefined
         };
       },
-
-
+      0xfc: function(s, opParams, idxReg) {
+        return {
+          opCode: "CALLS",
+          z80OPCode: "CALL",
+          cycleCost: s.alu.checkAluFlags(s.cpu.getRegister(s, 'f'), 'S') ? 18 : 11,
+          cycleConditional: [11, 18],
+          cycleCondition: "",
+          iReg: undefined,
+          oReg: undefined,
+          param1: opParams[0].toString(16),
+          param2: opParams[1].toString(16),
+          opBytes: 3,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0xfd: function(s, opParams, idxReg) {
+        var ret = disRet.disOp[opParams[0]](s, opParams[1], opParams[2], 'IY');
+        ret.opBytes += 1;
+        return ret;
+      },
       0xfe: function(s, opParams, idxReg) {
         return {
           opCode: "XORR",
@@ -3940,10 +3959,23 @@ if (!objEmulatorFactory) {
           pointer: undefined,
           indexRegisters: undefined
         };
+      },
+      0xff: function(s, opParams, idxReg) {
+        return {
+          opCode: "RST38",
+          z80OPCode: "RST 38",
+          cycleCost: 11,
+          cycleConditional: [],
+          cycleCondition: undefined,
+          iReg: undefined,
+          oReg: "SP",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
       }
-
-
-
     }
 
     return disRet;
