@@ -595,17 +595,17 @@ cpuCore.push(function() {
       case 0xde: output.opCode = "DEXR"; output.z80OPCode = "SBC"; output.cycles = 7; output.para1 = opCode[1].toString(16); output.oreg = "A"; output.ireg = "A"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
       case 0xdf: output.opCode = "RST18"; output.z80OPCode = "RST 18"; output.cycles = 11; output.oreg = "SP"; break;
 
-      case 0xe0: output.opCode = "RETNP"; output.z80OPCode = "RET"; (state.flags.f & fFlags.zero) ? output.cycles = 5 : output.cycles = 11; output.cycleConditional = true; break;
+      case 0xe0: output.opCode = "RETNP"; output.z80OPCode = "RET"; (state.flags.f & fFlags.parity) ? output.cycles = 5 : output.cycles = 11; output.cycleConditional = true; break;
       case 0xe1: output.opCode = "POPR"; output.z80OPCode = "POP"; output.cycles = 10; output.oreg = "HL"; output.ireg = "SP"; output.ptr = "$"; break;
-      case 0xe2: output.opCode = "JMPNP"; output.z80OPCode = "JP PO"; (state.flags.f & fFlags.zero) ? output.cycles = 10 : output.cycles = 15; output.cycleConditional = true;  output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
+      case 0xe2: output.opCode = "JMPNP"; output.z80OPCode = "JP PO"; (state.flags.f & fFlags.parity) ? output.cycles = 10 : output.cycles = 15; output.cycleConditional = true;  output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
       case 0xe3: output.opCode = "XCHM"; output.z80OPCode = "EX"; output.ptr = "$"; output.ireg = "SP"; output.oreg = "HL"; output.cycles = 4; break;
       case 0xe4: output.opCode = "UKNOP"; output.z80OPCode = "CALL"; output.ptr = "!"; output.cycles = 18; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break; // TODO: Update cycle count with F flag condition
       case 0xe5: output.opCode = "PUSH"; output.z80OPCode = "PUSH"; output.cycles = 11; output.ireg = "HL"; output.oreg = "SP"; output.ptr = "#"; break;
       case 0xe6: output.opCode = "ANDR"; output.z80OPCode = "AND"; output.cycles = 11; output.ireg = "A"; output.oreg = "A"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
       case 0xe7: output.opCode = "RST20"; output.z80OPCode = "RST 20"; output.cycles = 11; output.oreg = "SP"; break;
-      case 0xe8: output.opCode = "RETP"; output.z80OPCode = "RET"; (state.flags.f & fFlags.zero) ? output.cycles = 11 : output.cycles = 5; output.cycleConditional = true; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); break;
+      case 0xe8: output.opCode = "RETP"; output.z80OPCode = "RET"; (state.flags.f & fFlags.parity) ? output.cycles = 11 : output.cycles = 5; output.cycleConditional = true; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); break;
       case 0xe9: output.opCode = "JMP"; output.z80OPCode = "JP"; output.ireg = "HL"; output.cycles = 4; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); break;
-      case 0xea: output.opCode = "JMPP"; output.z80OPCode = "JP"; (state.flags.f & fFlags.carry) ? output.cycles = 15 : output.cycles = 10; output.cycleConditional = true; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
+      case 0xea: output.opCode = "JMPP"; output.z80OPCode = "JP"; (state.flags.f & fFlags.parity) ? output.cycles = 15 : output.cycles = 10; output.cycleConditional = true; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
       case 0xeb: output.opCode = "XCHR"; output.z80OPCode = "EX"; output.cycles = 4; output.ireg = "DE"; output.oreg = "HL"; break;
       case 0xec: output.opCode = "UKNOP"; output.z80OPCode = "CALL"; output.ptr = "!"; output.cycles = 18; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break; // TODO: Update cycle count with F flag condition
       case 0xed: output.opCode = "NOP"; output.z80OPCode = "UKNOP"; output.ptr = "!"; output.cycles = 4; output.opBytes = 3; break; // Not sure if this is correct
@@ -614,7 +614,7 @@ cpuCore.push(function() {
 
       case 0xf0: output.opCode = "UKNOP"; output.z80OPCode = "RET"; output.ptr = "!"; output.cycles = 11; break; // TODO: Update cycle count with F flag condition
       case 0xf1: output.opCode = "POPR"; output.z80OPCode = "POP"; output.cycles = 10; output.oreg = "AF"; output.ireg = "SP"; output.ptr = "$"; break;
-      case 0xf2: output.opCode = "JMPNS"; output.z80OPCode = "JP"; (state.flags.f & fFlags.sign) ? output.cycles = 10 : output.cycles = 15; output.cycleConditional = true;  output.cycles = 11; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break; // TODO: Update cycle count with F flag condition
+      case 0xf2: output.opCode = "JMPNS"; output.z80OPCode = "JP"; (state.flags.f & fFlags.sign) ? output.cycles = 10 : output.cycles = 15; output.cycleConditional = true; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break; // TODO: Update cycle count with F flag condition
       case 0xf3: output.opCode = "DIF"; output.z80OPCode = "DI"; output.cycles = 4; break;
       case 0xf4: output.opCode = "CALLS"; output.z80OPCode = "CALL"; (state.flags.f & fFlags.sign) ? output.cycles = 18 : output.cycles = 11; output.cycleConditional = true; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
       case 0xf5: output.opCode = "PUSH"; output.z80OPCode = "PUSH"; output.cycles = 11; output.ireg = "AF"; output.oreg = "SP"; output.ptr = "#"; break;

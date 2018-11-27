@@ -3464,7 +3464,7 @@ if (!objEmulatorFactory) {
           param1: opParams[0].toString(16),
           param2: undefined,
           opBytes: 2,
-          pointer: "#",
+          pointer: undefined,
           indexRegisters: undefined
         };
       },
@@ -3480,6 +3480,463 @@ if (!objEmulatorFactory) {
           param1: undefined,
           param2: undefined,
           opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+
+
+      0xe0: function(s, opParams, idxReg) {
+        return {
+          opCode: "RETNP",
+          z80OPCode: "RET",
+          cycleCost: s.alu.checkAluFlags(s.cpu.getRegister(s, 'f'), 'NP') ? 11 : 5,
+          cycleConditional: [5, 11],
+          cycleCondition: 'NP',
+          iReg: undefined,
+          oReg: undefined,
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0xe1: function(s, opParams, idxReg) {
+        return {
+          opCode: "POPR",
+          z80OPCode: "POP",
+          cycleCost: 10,
+          cycleConditional: [],
+          cycleCondition: undefined,
+          iReg: "SP",
+          oReg: idxReg ? idxReg : "HL",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: "$",
+          indexRegisters: idxReg
+        };
+      },
+      0xe2: function(s, opParams, idxReg) {
+        return {
+          opCode: "JMPNP",
+          z80OPCode: "JP PO",
+          cycleCost: s.alu.checkAluFlags(s.cpu.getRegister(s, 'f'), 'NP') ? 15 : 10,
+          cycleConditional: [10, 15],
+          cycleCondition: 'NP',
+          iReg: undefined,
+          oReg: undefined,
+          param1: opParams[0].toString(16),
+          param2: opParams[1].toString(16),
+          opBytes: 3,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0xe3: function(s, opParams, idxReg) {
+        return {
+          opCode: "XCHM",
+          z80OPCode: "EX",
+          cycleCost: 4,
+          cycleConditional: [10, 15],
+          cycleCondition: 'NP',
+          iReg: "SP",
+          oReg: idxReg ? idxReg : "HL",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: "$",
+          indexRegisters: idxReg
+        };
+      },
+      0xe4: function(s, opParams, idxReg) {
+        return {
+          opCode: "CALLNP",
+          z80OPCode: "CALL",
+          cycleCost: s.alu.checkAluFlags(s.cpu.getRegister(s, 'f'), 'NP') ? 18 : 11,
+          cycleConditional: [11, 18],
+          cycleCondition: 'NP',
+          iReg: undefined,
+          oReg: undefined,
+          param1: opParams[0].toString(16),
+          param2: opParams[1].toString(16),
+          opBytes: 3,
+          pointer: "$",
+          indexRegisters: undefined
+        };
+      },
+      0xe5: function(s, opParams, idxReg) {
+        return {
+          opCode: "PUSH",
+          z80OPCode: "PUSH",
+          cycleCost: 11,
+          cycleConditional: [],
+          cycleCondition: undefined,
+          iReg: idxReg ? idxReg : "HL",
+          oReg: "SP",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 3,
+          pointer: "#",
+          indexRegisters: idxReg
+        };
+      },
+      0xe6: function(s, opParams, idxReg) {
+        return {
+          opCode: "ANDR",
+          z80OPCode: "AND",
+          cycleCost: 11,
+          cycleConditional: [],
+          cycleCondition: undefined,
+          iReg: "A",
+          oReg: "A",
+          param1: opParams[0].toString(16),
+          param2: undefined,
+          opBytes: 2,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0xe7: function(s, opParams, idxReg) {
+        return {
+          opCode: "RST20",
+          z80OPCode: "RST 20",
+          cycleCost: 11,
+          cycleConditional: [],
+          cycleCondition: undefined,
+          iReg: undefined,
+          oReg: "SP",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0xe8: function(s, opParams, idxReg) {
+        return {
+          opCode: "RETP",
+          z80OPCode: "RET",
+          cycleCost: s.alu.checkAluFlags(s.cpu.getRegister(s, 'f'), 'P') ? 11 : 5,
+          cycleConditional: [5, 11],
+          cycleCondition: "P",
+          iReg: undefined,
+          oReg: undefined,
+          param1: opParams[0].toString(16),
+          param2: opParams[1].toString(16),
+          opBytes: 3,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0xe9: function(s, opParams, idxReg) {
+        return {
+          opCode: "JMP",
+          z80OPCode: "JP",
+          cycleCost: 4,
+          cycleConditional: [],
+          cycleCondition: undefined,
+          iReg: idxReg ? idxReg : "HL",
+          oReg: undefined,
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: idxReg
+        };
+      },
+      0xea: function(s, opParams, idxReg) {
+        return {
+          opCode: "JMPP",
+          z80OPCode: "JP",
+          cycleCost: s.alu.checkAluFlags(s.cpu.getRegister(s, 'f'), 'P') ? 15 : 10,
+          cycleConditional: [10, 15],
+          cycleCondition: "P",
+          iReg: undefined,
+          oReg: undefined,
+          param1: opParams[0].toString(16),
+          param2: opParams[1].toString(16),
+          opBytes: 3,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0xeb: function(s, opParams, idxReg) {
+        return {
+          opCode: "XCHR",
+          z80OPCode: "EX",
+          cycleCost: 4,
+          cycleConditional: [],
+          cycleCondition: undefined,
+          iReg: "DE",
+          oReg: idxReg ? idxReg : "HL",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: idxReg
+        };
+      },
+      0xec: function(s, opParams, idxReg) {
+        return {
+          opCode: "CALLP",
+          z80OPCode: "CALL",
+          cycleCost: s.alu.checkAluFlags(s.cpu.getRegister(s, 'f'), 'P') ? 18 : 10,
+          cycleConditional: [10, 18],
+          cycleCondition: "S",
+          iReg: undefined,
+          oReg: "SP",
+          param1: opParams[0].toString(16),
+          param2: opParams[1].toString(16),
+          opBytes: 3,
+          pointer: "#",
+          indexRegisters: undefined
+        };
+      },
+      0xed: function(s, opParams, idxReg) {
+        return defaultNOP;
+      },
+      0xee: function(s, opParams, idxReg) {
+        return {
+          opCode: "XORR",
+          z80OPCode: "XOR",
+          cycleCost: 7,
+          cycleConditional: undefined,
+          cycleCondition: undefined,
+          iReg: "A",
+          oReg: "A",
+          param1: opParams[0].toString(16),
+          param2: undefined,
+          opBytes: 2,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0xef: function(s, opParams, idxReg) {
+        return {
+          opCode: "RST28",
+          z80OPCode: "RST 28",
+          cycleCost: 11,
+          cycleConditional: [],
+          cycleCondition: undefined,
+          iReg: undefined,
+          oReg: "SP",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+
+
+      0xf0: function(s, opParams, idxReg) {
+        return {
+          opCode: "RETNS",
+          z80OPCode: "RET",
+          cycleCost: s.alu.checkAluFlags(s.cpu.getRegister(s, 'f'), 'NS') ? 11 : 5,
+          cycleConditional: [5, 11],
+          cycleCondition: 'NS',
+          iReg: undefined,
+          oReg: undefined,
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0xf1: function(s, opParams, idxReg) {
+        return {
+          opCode: "POPR",
+          z80OPCode: "POP",
+          cycleCost: 10,
+          cycleConditional: [],
+          cycleCondition: undefined,
+          iReg: "SP",
+          oReg: "AF",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: "$",
+          indexRegisters: undefined
+        };
+      },
+      0xf2: function(s, opParams, idxReg) {
+        return {
+          opCode: "JMPNP",
+          z80OPCode: "JP PO",
+          cycleCost: s.alu.checkAluFlags(s.cpu.getRegister(s, 'f'), 'NS') ? 15 : 10,
+          cycleConditional: [10, 15],
+          cycleCondition: 'NS',
+          iReg: undefined,
+          oReg: undefined,
+          param1: opParams[0].toString(16),
+          param2: opParams[1].toString(16),
+          opBytes: 3,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0xf3: function(s, opParams, idxReg) {
+        return {
+          opCode: "DIF",
+          z80OPCode: "DI",
+          cycleCost: 4,
+          cycleConditional: [],
+          cycleCondition: undefined,
+          iReg: undefined,
+          oReg: undefined,
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0xf4: function(s, opParams, idxReg) {
+        return {
+          opCode: "CALLS",
+          z80OPCode: "CALL",
+          cycleCost: s.alu.checkAluFlags(s.cpu.getRegister(s, 'f'), 'S') ? 18 : 11,
+          cycleConditional: [11, 18],
+          cycleCondition: 'S',
+          iReg: undefined,
+          oReg: undefined,
+          param1: opParams[0].toString(16),
+          param2: opParams[1].toString(16),
+          opBytes: 3,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0xf5: function(s, opParams, idxReg) {
+        return {
+          opCode: "PUSH",
+          z80OPCode: "PUSH",
+          cycleCost: 11,
+          cycleConditional: [],
+          cycleCondition: undefined,
+          iReg: "AF",
+          oReg: "SP",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: "#",
+          indexRegisters: undefined
+        };
+      },
+      0xf6: function(s, opParams, idxReg) {
+        return {
+          opCode: "ORR",
+          z80OPCode: "OR",
+          cycleCost: 7,
+          cycleConditional: [],
+          cycleCondition: undefined,
+          iReg: "A",
+          oReg: "A",
+          param1: opParams[0].toString(16),
+          param2: undefined,
+          opBytes: 2,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0xf7: function(s, opParams, idxReg) {
+        return {
+          opCode: "RST30",
+          z80OPCode: "RST 30",
+          cycleCost: 11,
+          cycleConditional: [],
+          cycleCondition: undefined,
+          iReg: undefined,
+          oReg: "SP",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0xf8: function(s, opParams, idxReg) {
+        return {
+          opCode: "RETS",
+          z80OPCode: "RET",
+          cycleCost: s.alu.checkAluFlags(s.cpu.getRegister(s, 'f'), 'S') ? 11 : 5,
+          cycleConditional: [5, 11],
+          cycleCondition: "S",
+          iReg: undefined,
+          oReg: undefined,
+          param1: opParams[0].toString(16),
+          param2: opParams[1].toString(16),
+          opBytes: 3,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0xf9: function(s, opParams, idxReg) {
+        return {
+          opCode: "LD2R",
+          z80OPCode: "LD",
+          cycleCost: 6,
+          cycleConditional: [],
+          cycleCondition: undefined,
+          iReg: idxReg ? idxReg : "HL",
+          oReg: "SP",
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: idxReg
+        };
+      },
+      0xfa: function(s, opParams, idxReg) {
+        return {
+          opCode: "JMPS",
+          z80OPCode: "JS",
+          cycleCost: s.alu.checkAluFlags(s.cpu.getRegister(s, 'f'), 'S') ? 15 : 10,
+          cycleConditional: [10, 15],
+          cycleCondition: "S",
+          iReg: undefined,
+          oReg: undefined,
+          param1: opParams[0].toString(16),
+          param2: opParams[1].toString(16),
+          opBytes: 3,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+      0xfb: function(s, opParams, idxReg) {
+        return {
+          opCode: "SIF",
+          z80OPCode: "EI",
+          cycleCost: 4,
+          cycleConditional: [],
+          cycleCondition: undefined,
+          iReg: undefined,
+          oReg: undefined,
+          param1: undefined,
+          param2: undefined,
+          opBytes: 1,
+          pointer: undefined,
+          indexRegisters: undefined
+        };
+      },
+
+
+      0xfe: function(s, opParams, idxReg) {
+        return {
+          opCode: "XORR",
+          z80OPCode: "XOR",
+          cycleCost: 7,
+          cycleConditional: undefined,
+          cycleCondition: undefined,
+          iReg: "A",
+          oReg: "A",
+          param1: opParams[0].toString(16),
+          param2: undefined,
+          opBytes: 2,
           pointer: undefined,
           indexRegisters: undefined
         };
