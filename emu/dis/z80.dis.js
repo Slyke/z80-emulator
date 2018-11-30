@@ -13,23 +13,44 @@ if (!objEmulatorFactory) {
       type: "dis"
     };
 
-    var defaultNOP = Object.freeze({
-      opCode: "NOP",
-      z80OPCode: "NOP",
-      cycleCost: 4,
-      cycleConditional: [],
-      oReg: undefined,
-      iReg: undefined,
-      param1: undefined,
-      param2: undefined,
-      opBytes: 1,
-      pointer: undefined,
-      indexRegisters: undefined
-    });
+    var defaultNOP = function() {
+      return {
+        opCode: "NOP",
+        z80OPCode: "NOP",
+        cycleCost: 4,
+        cycleConditional: [],
+        oReg: undefined,
+        iReg: undefined,
+        param1: undefined,
+        param2: undefined,
+        opBytes: 1,
+        pointer: undefined,
+        indexRegisters: undefined
+      };
+    };
+
+    disRet.disassembleInstruction = function(s, opCodes = null) {
+      var ret;
+      if (opCodes) {
+        ret = disRet.disOp[opCodes[0]](s, [opCodes[1], opCodes[2], opCodes[3]]);
+        ret.binCode = opCodes[0];
+      } else {
+        ret = disRet.disOp[s.cpu.getRegister(s, 'pc')](s, [
+          (s.cpu.getRegister(s, 'pc') + 1),
+          (s.cpu.getRegister(s, 'pc') + 2),
+          (s.cpu.getRegister(s, 'pc') + 3)
+        ]);
+        ret.binCode = s.cpu.getRegister(s, 'pc');
+      }
+
+      ret.programCounter = (s.cpu && s.cpu.getRegister(s, 'pc') ? s.cpu.getRegister(s, 'pc') : 0);
+
+      return ret;
+    };
 
     disRet.disOp = {
       0x00: function(s, opParams, idxReg) {
-        return defaultNOP;
+        return defaultNOP();
       },
       0x01: function(s, opParams, idxReg) {
         return {
@@ -144,7 +165,7 @@ if (!objEmulatorFactory) {
         };
       },
       0x08: function(s, opParams, idxReg) {
-        return defaultNOP;
+        return defaultNOP();
       },
       0x09: function(s, opParams, idxReg) {
         return {
@@ -261,7 +282,7 @@ if (!objEmulatorFactory) {
 
 
       0x10: function(s, opParams, idxReg) {
-        return defaultNOP;
+        return defaultNOP();
       },
       0x11: function(s, opParams, idxReg) {
         return {
@@ -376,7 +397,7 @@ if (!objEmulatorFactory) {
         };
       },
       0x18: function(s, opParams, idxReg) {
-        return defaultNOP;
+        return defaultNOP();
       },
       0x19: function(s, opParams, idxReg) {
         return {
@@ -493,7 +514,7 @@ if (!objEmulatorFactory) {
 
 
       0x20: function(s, opParams, idxReg) {
-        return defaultNOP;
+        return defaultNOP();
       },
       0x21: function(s, opParams, idxReg) {
         return {
@@ -592,10 +613,10 @@ if (!objEmulatorFactory) {
         };
       },
       0x27: function(s, opParams, idxReg) {
-        return defaultNOP;
+        return defaultNOP();
       },
       0x28: function(s, opParams, idxReg) {
-        return defaultNOP;
+        return defaultNOP();
       },
       0x29: function(s, opParams, idxReg) {
         return {
@@ -712,7 +733,7 @@ if (!objEmulatorFactory) {
 
 
       0x30: function(s, opParams, idxReg) {
-        return defaultNOP;
+        return defaultNOP();
       },
       0x31: function(s, opParams, idxReg) {
         return {
@@ -827,7 +848,7 @@ if (!objEmulatorFactory) {
         };
       },
       0x38: function(s, opParams, idxReg) {
-        return defaultNOP;
+        return defaultNOP();
       },
       0x39: function(s, opParams, idxReg) {
         return {
@@ -3184,7 +3205,7 @@ if (!objEmulatorFactory) {
         };
       },
       0xcb: function(s, opParams, idxReg) {
-        return defaultNOP;
+        return defaultNOP();
       },
       0xcc: function(s, opParams, idxReg) {
         return {
@@ -3397,7 +3418,7 @@ if (!objEmulatorFactory) {
         };
       },
       0xd9: function(s, opParams, idxReg) {
-        return defaultNOP;
+        return defaultNOP();
       },
       0xda: function(s, opParams, idxReg) {
         return {
@@ -3695,7 +3716,7 @@ if (!objEmulatorFactory) {
         };
       },
       0xed: function(s, opParams, idxReg) {
-        return defaultNOP;
+        return defaultNOP();
       },
       0xee: function(s, opParams, idxReg) {
         return {

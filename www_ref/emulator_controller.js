@@ -130,44 +130,6 @@ function animateLoop() {
     
     requestAnimationFrame(() => { animateLoop(); });
   }
-
-}
-
-function setupCPUCallbacks() {
-
-  // Looks like the game is communicating with some external hardware. This function mocks that hardware. Game crashes without it.
-  runningCPU.hwPortHook = function(event, state, portCh, value) {
-    if (event === 'postwrite' && portCh === 0x04) {
-      state.hwIntPorts[0x03] = value;
-      // console.log("Port 3 written   PC: ", state.flags.pc.toString(16), "  Value: ", value);
-    } else if (event === 'preread' && portCh === 0x02) {
-      state.hwIntPorts[0x02] = 0;
-      // console.log("Port 2 written   PC: ", state.flags.pc.toString(16), "  Value: ", value);
-    }
-  };
-
-  // Show warning messages if something goes wrong.
-  runningCPU.warningCb = function(event, state, msgWarning) {
-    if (consoleOutWarnings) {
-      console.warn("Warning message asserted from event: ", event);
-      msgWarning.forEach(function(messageItem) {
-        console.log('    ', messageItem);
-      });
-      console.warn('State: ', state);
-      console.log("-------------------------------");
-    }
-  };
-
-  // This lets the video renderer, and memory map renderer know when something has changed in memory.
-  runningCPU.memoryUpdateCb = function(address, value) {
-    if (typeof(usingVideoDriver.memoryUpdate) === "function") {
-      usingVideoDriver.memoryUpdate(runningCPU, runningCPU.memory, address, value, false);
-    }
-
-    if (anyMemoryUpdated.indexOf(address) === -1) {
-      anyMemoryUpdated.push(address);
-    }
-  };
 }
 
 function setupCanvas() {
