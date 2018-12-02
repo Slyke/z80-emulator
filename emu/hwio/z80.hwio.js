@@ -24,26 +24,34 @@ if (!objEmulatorFactory) {
       interruptClockCycle: 16667
     });
 
-    hwioRet.writePort = function(emuState, address, value) {
+    hwioRet.writePort = function(emuState, address, value, throwError = true) {
       emuState.cpu.pins.wr = true;
       emuState.cpu.pins.iorq = true;
 
-      if (typeof(emuState.mmu.cbs.readPort) === "function") {
-        emuState.mmu.cbs.writePort(emuState, address, value);
+      if (typeof(emuState.hwio.cbs.writePort) === "function") {
+        emuState.hwio.cbs.writePort(emuState, address, value);
+      } else {
+        if (throwError) {
+          throw { type: "Error", moduleName: hwioRet.type, functionName: "writePort", reason: "No writePort callback function specified. Add one with: emuState.hwio.cbs.writePort = function(emuState, address, value, throwError){...} ", args: arguments };
+        }
       }
 
       emuState.cpu.pins.wr = false;
       emuState.cpu.pins.iorq = false;
     };
 
-    hwioRet.readPort = function(emuState, address) {
+    hwioRet.readPort = function(emuState, address, throwError = true) {
       emuState.cpu.pins.rd = true;
       emuState.cpu.pins.iorq = true;
 
       var tmpRead = 0x00;
 
-      if (typeof(emuState.mmu.cbs.readPort) === "function") {
-        tmpRead = emuState.mmu.cbs.readPort(emuState, address);
+      if (typeof(emuState.hwio.cbs.readPort) === "function") {
+        tmpRead = emuState.hwio.cbs.readPort(emuState, address);
+      } else {
+        if (throwError) {
+          throw { type: "Error", moduleName: hwioRet.type, functionName: "readPort", reason: "No readPort callback function specified. Add one with: emuState.hwio.cbs.readPort = function(emuState, address, throwError){...} ", args: arguments };
+        }
       }
 
       emuState.cpu.pins.rd = false;

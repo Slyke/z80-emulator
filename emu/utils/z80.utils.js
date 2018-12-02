@@ -38,6 +38,62 @@ if (!objEmulatorFactory) {
       ];
     };
 
+    utilsRet.getCpuCheckSum = function(emu) {
+      return utilsRet.calculateChecksum([
+        emu.cpu.registers.pc,
+        Math.round(emu.cpu.registers.pc / 2),
+        emu.cpu.registers.sp,
+        Math.round(emu.cpu.registers.sp / 2),
+        emu.cpu.registers.ix,
+        emu.cpu.registers.iy,
+        emu.cpu.registers.a,
+        emu.cpu.registers.f,
+        emu.cpu.registers.b,
+        emu.cpu.registers.c,
+        emu.cpu.registers.d,
+        emu.cpu.registers.e,
+        emu.cpu.registers.h,
+        emu.cpu.registers.l
+      ]);
+    };
+
+    utilsRet.calculateChecksum = function(numberList) {
+      var output = "";
+
+      if (!numberList || numberList.length === 0) {
+        throw { type: "Error", moduleName: utilsRet.type, functionName: "getCpuCheckSum", reason: "No data to checksum. Check if CPU is initialised", args: arguments };
+      }
+
+      for (var i = 0; i < numberList.length; i++) {
+        output += utilsRet.luhn(numberList[i]).toString();
+      }
+
+      output += utilsRet.luhn(output).toString();
+      output += utilsRet.luhn(output).toString();
+
+      return parseInt(output).toString(16);
+    };
+
+    utilsRet.luhn = function(originalStr) {
+      var sum = 0;
+      var delta = [0, 1, 2, 3, 4, -4, -3, -2, -1, 0];
+
+      originalStr = originalStr.toString();
+
+      for (var i = 0; i < originalStr.length; i++) {
+        sum += parseInt(originalStr.substring(i, i + 1));
+      }
+    
+      for (var i = (originalStr.length - 1); i >= 0; i -= 2) {
+        sum += delta[parseInt(originalStr.substring(i, i + 1))];
+      }
+    
+      if (10 - (sum % 10) === 10) {
+        return 0;
+      }
+      return (10 - (sum % 10));
+    };
+
     return utilsRet;
   });
 

@@ -72,7 +72,7 @@ if (!objEmulatorFactory) {
     };
 
     mmuRet.readWord = function(emuState, address) {
-      return ((emuState.mmu.readByte(emuState, (address + 1) & 0xffff) << 8) | emuState.mmu.readByte.readByte(emuState, address) & 0xffff);
+      return ((emuState.mmu.readByte(emuState, (address + 1) & 0xffff) << 8) | emuState.mmu.readByte(emuState, address) & 0xffff);
     };
 
     mmuRet.writeWord = function(emuState, address, value) {

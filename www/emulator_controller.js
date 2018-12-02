@@ -45,7 +45,8 @@ var persistantObjects = {
   screenBox: {},
   portInfo: {},
   mm: {},
-  gameFiles: {}
+  gameFiles: {},
+  cpuChecksum: {}
 };
 
 function getLocalStorage(key, defaultValue) {
@@ -354,3 +355,59 @@ function pad(str, size, withChar = "0") {
   while (s.length < size) s = withChar + s;
   return s;
 }
+
+getCpuCheckSum = function() {
+  return calculateChecksum([
+    runningCPU.flags.pc,
+    Math.round(runningCPU.flags.pc / 2),
+    runningCPU.flags.sp,
+    Math.round(runningCPU.flags.sp / 2),
+    runningCPU.flags.ix,
+    runningCPU.flags.iy,
+    runningCPU.flags.a,
+    runningCPU.flags.f,
+    runningCPU.flags.b,
+    runningCPU.flags.c,
+    runningCPU.flags.d,
+    runningCPU.flags.e,
+    runningCPU.flags.h,
+    runningCPU.flags.l
+  ]);
+};
+
+calculateChecksum = function(numberList) {
+  var output = "";
+
+  if (!numberList || numberList.length === 0) {
+    return 0
+  }
+
+  for (var i = 0; i < numberList.length; i++) {
+    output += luhn(numberList[i]).toString();
+  }
+
+  output += luhn(output).toString();
+  output += luhn(output).toString();
+
+  return parseInt(output).toString(16);
+};
+
+luhn = function(originalStr) {
+  var sum = 0;
+  var delta = [0, 1, 2, 3, 4, -4, -3, -2, -1, 0];
+
+  originalStr = originalStr.toString();
+
+  for (var i = 0; i < originalStr.length; i++) {
+    sum += parseInt(originalStr.substring(i, i + 1));
+  }
+
+  for (var i = (originalStr.length - 1); i >= 0; i -= 2) {
+    sum += delta[parseInt(originalStr.substring(i, i + 1))];
+  }
+
+  if (10 - (sum % 10) === 10) {
+    return 0;
+  }
+  return (10 - (sum % 10));
+};

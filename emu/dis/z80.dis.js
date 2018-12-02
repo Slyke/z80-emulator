@@ -10,7 +10,8 @@ if (!objEmulatorFactory) {
   objEmulatorFactory.disList.push(function() {
     var disRet = {
       name: "z80",
-      type: "dis"
+      type: "dis",
+      previouslyExecutedInstructions: []
     };
 
     var defaultNOP = function() {
@@ -292,7 +293,7 @@ if (!objEmulatorFactory) {
           cycleConditional: [],
           cycleCondition: undefined,
           oReg: "DE",
-          iReg: "A",
+          iReg: undefined,
           param1: opParams[0].toString(16),
           param2: opParams[1].toString(16),
           opBytes: 3,
@@ -1852,7 +1853,7 @@ if (!objEmulatorFactory) {
       },
       0x77: function(s, opParams, idxReg) {
         return {
-          opCode: "LD2R",
+          opCode: "LD2M",
           z80OPCode: "LD",
           cycleCost: 7,
           cycleConditional: [],
@@ -3967,8 +3968,8 @@ if (!objEmulatorFactory) {
       },
       0xfe: function(s, opParams, idxReg) {
         return {
-          opCode: "XORR",
-          z80OPCode: "XOR",
+          opCode: "DCXR",
+          z80OPCode: "CP",
           cycleCost: 7,
           cycleConditional: undefined,
           cycleCondition: undefined,

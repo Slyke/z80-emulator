@@ -869,4 +869,31 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
     canvasControl.canvasObjects.push(newFile);
   }
 
+  persistantObjects.cpuChecksum.info = {
+    "x": relToAbs(0.5, 0),
+    "y": relToAbs(0.94, 1),
+    "name":"lblCPUChecksumLabel",
+    "text":"CPU Checksum",
+    "shape":"text",
+    "render":function(self) {
+      canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#99FF00"});
+    },
+    "visible": true
+  };
+
+  persistantObjects.cpuChecksum.textValue = {
+    "x": relToAbs(0.5, 0),
+    "y": relToAbs(0.96, 1),
+    "name":"lblCPUChecksumValue",
+    "text": getCpuCheckSum(),
+    "shape":"text",
+    "render":function(self) {
+      canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#0066FF"});
+    },
+    "visible": true
+  };
+
+  canvasControl.canvasObjects.push(persistantObjects.cpuChecksum.info);
+  canvasControl.canvasObjects.push(persistantObjects.cpuChecksum.textValue);
+
 }

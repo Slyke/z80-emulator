@@ -2788,7 +2788,7 @@ cpuCore.push(function() {
     } else {
       state.flags.f |= fFlags.parity;
     }
-
+    
     if (valueChange & 0x80) {
       state.flags.f |= fFlags.sign;
     } else {

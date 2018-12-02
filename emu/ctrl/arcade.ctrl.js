@@ -20,7 +20,9 @@ if (!objEmulatorFactory) {
       mmu: {},    // Memory Management Unit
       utils: {},  // Util functions
       gpu: {},    // Graphical Processing Unit
-      dis: {}     // Byte Code Disassembler
+      dis: {},    // Byte Code Disassembler
+      hwPortData: [],
+      maxInstructionHistory: 10
     };
 
     ctrlRet.ctrl = ctrlRet;
@@ -60,10 +62,9 @@ if (!objEmulatorFactory) {
       ctrlRet.setupCheck(ctrlRet, subsystem, ctrlRet.systemType);
     };
 
-    ctrlRet.resetSystem = function(systemsList, memory = false, cpu = false, hwio = false) {
+    ctrlRet.resetSystem = function(systemsList, memory = false, cpu = false, hwio = false, gpu = false) {
       ctrlRet.resetSubsystem('alu', systemsList.aluList);
       ctrlRet.resetSubsystem('utils', systemsList.utilsList);
-      ctrlRet.resetSubsystem('gpu', systemsList.gpuList);
       ctrlRet.resetSubsystem('dis', systemsList.disList);
 
       if (memory) {
@@ -74,6 +75,10 @@ if (!objEmulatorFactory) {
         ctrlRet.resetSubsystem('cpu', systemsList.cpuList);
       }
       
+      if (gpu) {
+        ctrlRet.resetSubsystem('gpu', systemsList.gpuList);
+      }
+
       if (hwio) {
         ctrlRet.resetSubsystem('hwio', systemsList.hwioList);
       }
@@ -84,6 +89,23 @@ if (!objEmulatorFactory) {
         throw { type: "Error", moduleName: ctrlRet.type, functionName: "setupCheck", reason: "Could not find subsystem", args: arguments };
       }
     };
+
+    ctrlRet.setupExternalVirtualHardware = function(emu) {
+      // Looks like the game is communicating with some external hardware. This function mocks that hardware. Game crashes without it.
+      emu.hwio.cbs.readPort = function(emu, portCh) {
+        if (portCh === 0x03) {
+          return ctrlRet.hwPortData[0x04];
+        } else if (portCh === 0x02) {
+          return 0;
+        }
+
+        return ctrlRet.hwPortData[portCh];
+      };
+
+      emu.hwio.cbs.writePort = function(emu, portCh, value) {
+        emu.hwio.hwPortData[portCh] = value;
+      };
+    }
 
     ctrlRet.cpuRunUntilInterruptCheck = function(emu) {
       while (!ctrlRet.cpuEval(emu)) {
@@ -119,19 +141,32 @@ if (!objEmulatorFactory) {
         };
       }
 
+      if (emu.dis) {
+        var disObj = emu.dis.disassembleInstruction(emu, emu.mmu.memory.slice((emu.cpu.registers.pc), (emu.cpu.registers.pc + 4)));
+
+        if (disObj) {
+          emu.dis.previouslyExecutedInstructions.push(disObj);
+        }
+
+        if (emu.dis.previouslyExecutedInstructions.length > ctrlRet.maxInstructionHistory) {
+          emu.dis.previouslyExecutedInstructions.shift();
+        }
+      }
+
       emu.cpu.pcInc(emu, emu.dec.decoderParams[currentInstruction[0]]);
 
       var execRet = emu.dec.decode[currentInstruction[0]](
         emu,
-        emu.dec.decoderParams[currentInstruction[0]] > 1 ? currentInstruction[1] : undefined,
-        emu.dec.decoderParams[currentInstruction[0]] > 2 ? currentInstruction[2] : undefined
-        );
+        emu.dec.decoderParams[currentInstruction[0]] > 1 ? [
+          emu.dec.decoderParams[currentInstruction[0]] > 1 ? currentInstruction[1] : undefined,
+          emu.dec.decoderParams[currentInstruction[0]] > 2 ? currentInstruction[2] : undefined
+        ] : undefined
+      );
 
       if (opCost === 0) { // For special IX and IY registers
         emu.cpu.pcInc(emu, execRet + 1);
       }
 
-      emu.cpu.counts.tCycles += (emu.cpu.counts.cycles - preCycleChange);
       emu.cpu.counts.modeClock = ((emu.cpu.counts.modeClock + 1) & 0xffff);
       emu.cpu.counts.exec++;
 

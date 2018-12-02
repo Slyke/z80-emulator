@@ -85,7 +85,6 @@ if (!objEmulatorFactory) {
         newLocation = ((location[1] << 8) | location[0]) & 0xffff;
       }
 
-      emuState.cpu.pcInc(emuState, 2);
       emuState.alu.push(emuState, emuState.cpu.registers[pcReg]);
 
       emuState.cpu.registers[pcReg] = newLocation & 0xffff;
@@ -101,15 +100,14 @@ if (!objEmulatorFactory) {
     };
 
     aluRet.push = function(emuState, value, spReg = 'sp') {
-      emuState.cpu.registers[spReg] -= 2;
-      emuState.cpu.registers[spReg] &= 0xffff;
+      emuState.cpu.setRegister(emuState, spReg, emuState.cpu.getRegister(emuState, spReg) - 2);
       emuState.mmu.writeWord(emuState, emuState.cpu.registers[spReg], value);
       return emuState.cpu.registers[spReg];
     };
 
     aluRet.pop = function(emuState, jumpPc = false, spReg = 'sp', pcReg = 'pc') {
-      var ret = emuState.mmu.readWord(state, emuState.cpu.registers[spReg]);
-      emuState.cpu.pcInc(emuState, 2);
+      var ret = emuState.mmu.readWord(emuState, emuState.cpu.registers[spReg]);
+      emuState.cpu.setRegister(emuState, spReg, emuState.cpu.getRegister(emuState, spReg) + 2);
 
       if (jumpPc) {
         emuState.cpu.registers[pcReg] = ret;
@@ -203,19 +201,15 @@ if (!objEmulatorFactory) {
       if (operand === "&") {
         if (((lhv & 8) >> 3) | ((rhv & 8) >> 3)) {
           emuState.cpu.setRegister(emuState, fReg, (emuState.cpu.getRegister(emuState, fReg) & ~aluRet.fFlags.halfcarry & 0xff));
-          // emuState.cpu.registers[fReg] &= ~aluRet.fFlags.halfcarry & 0xff;
         } else {
           emuState.cpu.setRegister(emuState, fReg, (emuState.cpu.getRegister(emuState, fReg) | aluRet.fFlags.halfcarry & 0xff));
-          // emuState.cpu.registers[fReg] |= aluRet.fFlags.halfcarry;
         }
       }
 
       emuState.cpu.setRegister(emuState, fReg, (emuState.cpu.getRegister(emuState, fReg) & ~aluRet.fFlags.carry & 0xff));
-      // emuState.cpu.registers[fReg] &= ~aluRet.fFlags.carry & 0xff;
 
       if (operand === "^" || operand === "|") {
         emuState.cpu.setRegister(emuState, fReg, (emuState.cpu.getRegister(emuState, fReg) & ~aluRet.fFlags.halfcarry & 0xff));
-        // emuState.cpu.registers[fReg] &= ~aluRet.fFlags.halfcarry & 0xff;
       }
 
       return res;
@@ -248,9 +242,9 @@ if (!objEmulatorFactory) {
         valueChange--;
       }
 
-      emuState.cpu.setRegister(emuState, fReg, aluRet.mod2ParityAluCheck(value, emuState.cpu.getRegister(emuState, fReg), aluRet.fFlags));
-      emuState.cpu.setRegister(emuState, fReg, aluRet.signedValueAluCheck(value, emuState.cpu.getRegister(emuState, fReg), aluRet.fFlags));
-      emuState.cpu.setRegister(emuState, fReg, aluRet.zeroValueAluCheck(value, emuState.cpu.getRegister(emuState, fReg), aluRet.fFlags));
+      emuState.cpu.setRegister(emuState, fReg, aluRet.mod2ParityAluCheck(valueChange, emuState.cpu.getRegister(emuState, fReg), aluRet.fFlags));
+      emuState.cpu.setRegister(emuState, fReg, aluRet.signedValueAluCheck(valueChange, emuState.cpu.getRegister(emuState, fReg), aluRet.fFlags));
+      emuState.cpu.setRegister(emuState, fReg, aluRet.zeroValueAluCheck(valueChange, emuState.cpu.getRegister(emuState, fReg), aluRet.fFlags));
       emuState.cpu.setRegister(emuState, fReg, aluRet.halfCarryValueAluCheck(value, 1, valueChange, emuState.cpu.getRegister(emuState, fReg), aluRet.fFlags));
 
       return (valueChange & 0xff);

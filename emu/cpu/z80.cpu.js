@@ -41,7 +41,7 @@ if (!objEmulatorFactory) {
       }
     };
 
-    cpuRet.getRegister = function(emuState, cpuRegister) {
+    cpuRet.getRegister = function(emuState, cpuRegister, endian = 0x01) {
       cpuRegister = cpuRegister.toLowerCase();
 
       switch (cpuRegister) {
@@ -86,19 +86,31 @@ if (!objEmulatorFactory) {
         }
 
         case 'af': {
-          return ((cpuRet.getRegister(emuState, 'a') << 8) | (cpuRet.getRegister(emuState, 'f'))) & 0xffff
+          if (endian === 0x01) {
+            return ((cpuRet.getRegister(emuState, 'a') << 8) | (cpuRet.getRegister(emuState, 'f'))) & 0xffff
+          }
+          return ((cpuRet.getRegister(emuState, 'f') << 8) | (cpuRet.getRegister(emuState, 'a'))) & 0xffff
         }
 
         case 'bc': {
-          return ((cpuRet.getRegister(emuState, 'b') << 8) | (cpuRet.getRegister(emuState, 'c'))) & 0xffff
+          if (endian === 0x01) {
+            return ((cpuRet.getRegister(emuState, 'b') << 8) | (cpuRet.getRegister(emuState, 'c'))) & 0xffff
+          }
+          return ((cpuRet.getRegister(emuState, 'c') << 8) | (cpuRet.getRegister(emuState, 'b'))) & 0xffff
         }
 
         case 'de': {
-          return ((cpuRet.getRegister(emuState, 'd') << 8) | (cpuRet.getRegister(emuState, 'e'))) & 0xffff
+          if (endian === 0x01) {
+            return ((cpuRet.getRegister(emuState, 'd') << 8) | (cpuRet.getRegister(emuState, 'e'))) & 0xffff
+          }
+          return ((cpuRet.getRegister(emuState, 'e') << 8) | (cpuRet.getRegister(emuState, 'd'))) & 0xffff
         }
 
         case 'hl': {
-          return ((cpuRet.getRegister(emuState, 'h') << 8) | (cpuRet.getRegister(emuState, 'l'))) & 0xffff
+          if (endian === 0x01) {
+            return ((cpuRet.getRegister(emuState, 'h') << 8) | (cpuRet.getRegister(emuState, 'l'))) & 0xffff
+          }
+          return ((cpuRet.getRegister(emuState, 'l') << 8) | (cpuRet.getRegister(emuState, 'h'))) & 0xffff
         }
 
         case 'ix': {
@@ -127,7 +139,7 @@ if (!objEmulatorFactory) {
       cpuRet.setRegister(emuState, 'pc', cpuRet.getRegister(emuState, 'pc') + count);
     }
 
-    cpuRet.setRegister = function(emuState, cpuRegister, value) {
+    cpuRet.setRegister = function(emuState, cpuRegister, value, endian = 0x02) {
       cpuRegister = cpuRegister.toLowerCase();
       
       if (typeof(value) === 'object') {
@@ -135,6 +147,16 @@ if (!objEmulatorFactory) {
       }
 
       var newValue0xff = (value & 0xff);
+      var newValue0xXXff;
+      var newValue0xffXX;
+
+      if (endian === 0x01) { // 0x01 = Big endian
+        newValue0xXXff = (value & 0xff);
+        newValue0xffXX = (((value & 0xff00) >> 8) & 0xff);
+      } else {
+        newValue0xXXff = (((value & 0xff00) >> 8) & 0xff);
+        newValue0xffXX = (value & 0xff);
+      }
 
       switch (cpuRegister) {
         case 'pc': {
@@ -198,26 +220,26 @@ if (!objEmulatorFactory) {
         }
 
         case 'af': {
-          cpuRet.setRegister(emuState, 'a', ((value & 0xff00) >> 8) & 0xff);
-          cpuRet.setRegister(emuState, 'f', newValue0xff);
+          cpuRet.setRegister(emuState, 'f', newValue0xffXX);
+          cpuRet.setRegister(emuState, 'a', newValue0xXXff);
           break;
         }
 
         case 'bc': {
-          cpuRet.setRegister(emuState, 'b', ((value & 0xff00) >> 8) & 0xff);
-          cpuRet.setRegister(emuState, 'c', newValue0xff);
+          cpuRet.setRegister(emuState, 'c', newValue0xffXX);
+          cpuRet.setRegister(emuState, 'b', newValue0xXXff);
           break;
         }
 
         case 'de': {
-          cpuRet.setRegister(emuState, 'd', ((value & 0xff00) >> 8) & 0xff);
-          cpuRet.setRegister(emuState, 'e', newValue0xff);
+          cpuRet.setRegister(emuState, 'e', newValue0xffXX);
+          cpuRet.setRegister(emuState, 'd', newValue0xXXff);
           break;
         }
 
         case 'hl': {
-          cpuRet.setRegister(emuState, 'h', ((value & 0xff00) >> 8) & 0xff);
-          cpuRet.setRegister(emuState, 'l', newValue0xff);
+          cpuRet.setRegister(emuState, 'l', newValue0xffXX);
+          cpuRet.setRegister(emuState, 'h', newValue0xXXff);
           break;
         }
 
@@ -240,7 +262,7 @@ if (!objEmulatorFactory) {
         emuState.cpu.setRegister(emuState, reg, value);
       },
       setRegFromReg: function(emuState, reg1, reg2) {
-        emuState.cpu.setRegister(emuState, reg1, emuState.cpu.setRegister(emuState, reg2));
+        emuState.cpu.setRegister(emuState, reg1, emuState.cpu.getRegister(emuState, reg2));
       },
       setRegFromMem: function(emuState, reg, addr) {
         if (reg.length === 2) {
@@ -276,8 +298,8 @@ if (!objEmulatorFactory) {
       deIncFromRegAndParamWithCarry: function(emuState, reg1, value = 1) {
         emuState.cpu.setRegister(emuState, reg1, emuState.alu.addSubWithCarryByte(emuState, emuState.cpu.getRegister(emuState, reg1), value, value));
       },
-      deIncFromRegAndParam: function(emuState, reg1, value = 1) {
-        emuState.cpu.setRegister(emuState, reg1, emuState.alu.addSubByte(emuState, emuState.cpu.getRegister(emuState, reg1), value));
+      deIncFromRegAndParam: function(emuState, reg1, value = 1, upDown = 1) {
+        emuState.cpu.setRegister(emuState, reg1, emuState.alu.addSubByte(emuState, emuState.cpu.getRegister(emuState, reg1), value, upDown));
       },
       deIncRegFromRegWithCarry: function(emuState, reg1, reg2, value = 1) {
         emuState.cpu.setRegister(emuState, reg1, emuState.alu.addSubWithCarryByte(emuState, emuState.cpu.getRegister(emuState, reg1), emuState.cpu.getRegister(emuState, reg2), value));
@@ -338,7 +360,7 @@ if (!objEmulatorFactory) {
       },
       pop: function(emuState, condition) {
         if (condition) {
-          if (emuState.alu.checkAluFlags(emuState, condition)) {
+          if (emuState.alu.checkAluFlags(emuState.cpu.getRegister(emuState, 'f'), condition)) {
             return emuState.alu.pop(emuState, true);
           }
           return false;
@@ -348,7 +370,7 @@ if (!objEmulatorFactory) {
       },
       jump: function(emuState, location, condition) {
         if (condition) {
-          if (emuState.alu.checkAluFlags(emuState, condition)) {
+          if (emuState.alu.checkAluFlags(emuState.cpu.getRegister(emuState, 'f'), condition)) {
             return emuState.alu.jump(emuState, location);
           }
           return false;
@@ -358,7 +380,7 @@ if (!objEmulatorFactory) {
       },
       push: function(emuState, location, condition) {
         if (condition) {
-          if (emuState.alu.checkAluFlags(emuState, condition)) {
+          if (emuState.alu.checkAluFlags(emuState.cpu.getRegister(emuState, 'f'), condition)) {
             return emuState.alu.push(emuState, location);
           }
           return false;
@@ -368,7 +390,7 @@ if (!objEmulatorFactory) {
       },
       call: function(emuState, location, condition) {
         if (condition) {
-          if (emuState.alu.checkAluFlags(emuState, condition)) {
+          if (emuState.alu.checkAluFlags(emuState.cpu.getRegister(emuState, 'f'), condition)) {
             return emuState.alu.call(emuState, location);
           }
           return false;

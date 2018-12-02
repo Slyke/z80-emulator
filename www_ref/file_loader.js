@@ -111,34 +111,34 @@ function injectBinaryDataIntoMemory(emu, filename, memoryOffset = 0, cb) {
 }
 
 function loadSpaceInvadersGame() {
-  objEmu.ctrl.resetSystem(objEmulatorFactory, true, true, true);
+  objEmu.ctrl.resetSystem(objEmulatorFactory, true, true, true, true);
   
   injectBinaryDataIntoMemory(objEmu, "../rom/invaders/invaders1.h.bin", 0, () => {
     loadedMemoryFilesList.push("invaders1.h.bin");
     romLoaded++;
     if (romLoaded === 4) {
-      objEmu.ctrl.resetSystem(objEmulatorFactory, false, true, true);
+      objEmu.ctrl.resetSystem(objEmulatorFactory, false, true, true, false);
     }
   });
   injectBinaryDataIntoMemory(objEmu, "../rom/invaders/invaders2.g.bin", 0x800, () => {
     loadedMemoryFilesList.push("invaders2.g.bin");
     romLoaded++;
     if (romLoaded === 4) {
-      objEmu.ctrl.resetSystem(objEmulatorFactory, false, true, true);
+      objEmu.ctrl.resetSystem(objEmulatorFactory, false, true, true, false);
     }
   });
   injectBinaryDataIntoMemory(objEmu, "../rom/invaders/invaders3.f.bin", 0x1000, () => {
     loadedMemoryFilesList.push("invaders3.f.bin");
     romLoaded++;
     if (romLoaded === 4) {
-      objEmu.ctrl.resetSystem(objEmulatorFactory, false, true, true);
+      objEmu.ctrl.resetSystem(objEmulatorFactory, false, true, true, false);
     }
   });
   injectBinaryDataIntoMemory(objEmu, "../rom/invaders/invaders4.e.bin", 0x1800, () => {
     loadedMemoryFilesList.push("invaders4.e.bin");
     romLoaded++;
     if (romLoaded === 4) {
-      objEmu.ctrl.resetSystem(objEmulatorFactory, false, true, true);
+      objEmu.ctrl.resetSystem(objEmulatorFactory, false, true, true, false);
     }
   });
 }

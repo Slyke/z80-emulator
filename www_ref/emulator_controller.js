@@ -47,7 +47,10 @@ var persistantObjects = {
   memoryInspect: {},
   stackPointer: {},
   screenBox: {},
-  portInfo: {},
+  portInfo: {
+    ports: []
+  },
+  cpuChecksum: {},
   mm: {},
   gameFiles: {}
 };
@@ -94,7 +97,7 @@ function animateLoop() {
   uiPreframeSetup(canvasControl, objEmu, persistantObjects, showMemoryInspector);
 
   if (cpuRunning && objEmu.gpu.memoryMapDiffFrameBuffer.length > 1) {
-    objEmu.gpu.renderMemoryMap(objEmu, memoryMapImageData);
+    objEmu.gpu.renderMemoryMap(objEmu, memoryMapImageData, true);
   }
   
   if (showFPS) {
@@ -151,8 +154,7 @@ function setupCanvas() {
   for (var i = 0; i < memoryMapImageData.data.length; i++) {
     memoryMapImageData.data[i] = ((i % 4) !== 3 ? 0 : 255);
   }
-
-  objEmu.gpu.renderMemoryMap(objEmu, memoryMapImageData);
+  objEmu.gpu.renderMemoryMap(objEmu, memoryMapImageData, true);
 
   animateLoop();
 }
@@ -171,7 +173,7 @@ function createHardwareEmulation(controllerName) {
 }
 
 function initialiseHardwareEmulation(emu) {
-  objEmu.ctrl.setup(objEmulatorFactory);
+  emu.ctrl.setup(objEmulatorFactory);
 }
 
 function init() {

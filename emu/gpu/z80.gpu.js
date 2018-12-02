@@ -15,15 +15,49 @@ if (!objEmulatorFactory) {
       memoryMapDiffFrameBuffer: []
     };
 
-    gpuRet.renderMemoryMap = function(emu, memoryMapImageData) {
+    gpuRet.renderMemoryMap = function(emu, memoryMapImageData, fullRender = false) {
+      var memoryMapColors = {
+        default: [0x00, 0x00, 0x00],
+        rom: [0x22, 0x22, 0x00],
+        video: [0x00, 0x55, 0x55]
+      }
+
+      if (fullRender) {
+        var memoryIndex = 0;
+        while((memoryMapDiffFrameBufferPixel = memoryIndex) != null && memoryIndex < emu.mmu.memorySegments.totalMemory) {
+          memoryIndex++;
+          var color = memoryMapColors.default;
+
+          if ((memoryMapDiffFrameBufferPixel * 4) < 0x2000) {
+            color = memoryMapColors.rom;
+          }
+
+          if ((memoryMapDiffFrameBufferPixel * 4) > 0x2400) {
+            color = memoryMapColors.video;
+          }
+
+          memoryMapImageData.data[memoryMapDiffFrameBufferPixel * 4] = emu.mmu.memory[memoryMapDiffFrameBufferPixel] | color[0];
+          memoryMapImageData.data[(memoryMapDiffFrameBufferPixel * 4) + 1] = emu.mmu.memory[memoryMapDiffFrameBufferPixel] ? color[1] : 0;
+          memoryMapImageData.data[(memoryMapDiffFrameBufferPixel * 4) + 2] = emu.mmu.memory[memoryMapDiffFrameBufferPixel] ? color[2] : 0;
+          memoryMapImageData.data[(memoryMapDiffFrameBufferPixel * 4) + 3] = 255;
+          memoryMapImageData.data[(emu.cpu.registers.pc * 4) + 1] = 255;
+          memoryMapImageData.data[(emu.cpu.registers.sp * 4) + 2] = 255;
+        }
+
+        return;
+      }
+
       while((memoryMapDiffFrameBufferPixel = gpuRet.memoryMapDiffFrameBuffer.pop()) != null) {
-        var color = 0x00;
-        if ((memoryMapDiffFrameBufferPixel * 4) < 0x2000) { // ROM
-          color = 0x22;
+        var color = memoryMapColors.default;
+
+        if ((memoryMapDiffFrameBufferPixel * 4) < 0x2000) {
+          color = memoryMapColors.rom;
         }
-        if ((memoryMapDiffFrameBufferPixel * 4) > 0x2400) { // Video
-          color = 0x55;
+
+        if ((memoryMapDiffFrameBufferPixel * 4) > 0x2400) {
+          color = memoryMapColors.video;
         }
+
         memoryMapImageData.data[memoryMapDiffFrameBufferPixel * 4] = emu.mmu.memory[memoryMapDiffFrameBufferPixel];
         memoryMapImageData.data[(memoryMapDiffFrameBufferPixel * 4) + 1] = emu.mmu.memory[memoryMapDiffFrameBufferPixel] ? color : 0;
         memoryMapImageData.data[(memoryMapDiffFrameBufferPixel * 4) + 2] = emu.mmu.memory[memoryMapDiffFrameBufferPixel] ? color : 0;
