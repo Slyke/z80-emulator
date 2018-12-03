@@ -3974,7 +3974,7 @@ if (!objEmulatorFactory) {
           cycleConditional: undefined,
           cycleCondition: undefined,
           iReg: "A",
-          oReg: "A",
+          oReg: undefined,
           param1: opParams[0].toString(16),
           param2: undefined,
           opBytes: 2,

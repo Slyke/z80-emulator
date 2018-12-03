@@ -21,7 +21,7 @@ if (!objEmulatorFactory) {
       utils: {},  // Util functions
       gpu: {},    // Graphical Processing Unit
       dis: {},    // Byte Code Disassembler
-      hwPortData: [],
+      hwPortData: {},
       maxInstructionHistory: 10
     };
 
@@ -81,6 +81,7 @@ if (!objEmulatorFactory) {
 
       if (hwio) {
         ctrlRet.resetSubsystem('hwio', systemsList.hwioList);
+        ctrlRet.ctrl.setupExternalVirtualHardware(ctrlRet);
       }
     };
 
@@ -94,7 +95,7 @@ if (!objEmulatorFactory) {
       // Looks like the game is communicating with some external hardware. This function mocks that hardware. Game crashes without it.
       emu.hwio.cbs.readPort = function(emu, portCh) {
         if (portCh === 0x03) {
-          return ctrlRet.hwPortData[0x04];
+          return emu.ctrl.hwPortData[0x04] | 0;
         } else if (portCh === 0x02) {
           return 0;
         }
@@ -103,7 +104,7 @@ if (!objEmulatorFactory) {
       };
 
       emu.hwio.cbs.writePort = function(emu, portCh, value) {
-        emu.hwio.hwPortData[portCh] = value;
+        emu.ctrl.hwPortData[portCh] = value;
       };
     }
 

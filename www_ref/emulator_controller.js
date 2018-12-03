@@ -174,6 +174,7 @@ function createHardwareEmulation(controllerName) {
 
 function initialiseHardwareEmulation(emu) {
   emu.ctrl.setup(objEmulatorFactory);
+  emu.ctrl.setupExternalVirtualHardware(emu);
 }
 
 function init() {
@@ -195,6 +196,7 @@ function setupCpu() {
   }
 
   initialiseHardwareEmulation(objEmu);
+  console.log(111, "done", objEmu.hwio.cbs.writePort);
 }
 
 function relToAbs(relCoord, dimension) {

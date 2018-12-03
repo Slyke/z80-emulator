@@ -301,6 +301,9 @@ if (!objEmulatorFactory) {
       deIncFromRegAndParam: function(emuState, reg1, value = 1, upDown = 1) {
         emuState.cpu.setRegister(emuState, reg1, emuState.alu.addSubByte(emuState, emuState.cpu.getRegister(emuState, reg1), value, upDown));
       },
+      deIncFromRegAndParamNoOutput: function(emuState, reg1, value = 1, upDown = 1) {
+        emuState.alu.addSubByte(emuState, emuState.cpu.getRegister(emuState, reg1), value, upDown);
+      },
       deIncRegFromRegWithCarry: function(emuState, reg1, reg2, value = 1) {
         emuState.cpu.setRegister(emuState, reg1, emuState.alu.addSubWithCarryByte(emuState, emuState.cpu.getRegister(emuState, reg1), emuState.cpu.getRegister(emuState, reg2), value));
       },
@@ -358,14 +361,14 @@ if (!objEmulatorFactory) {
         emuState.cpu.setRegister(emuState, reg1, emuState.mmu.readWord(emuState, emuState.cpu.getRegister(emuState, 'sp')));
         emuState.mmu.writeWord(emuState, emuState.cpu.getRegister(emuState, 'sp'), tmp);
       },
-      pop: function(emuState, condition) {
+      pop: function(emuState, condition, jpUpdate = true) {
         if (condition) {
           if (emuState.alu.checkAluFlags(emuState.cpu.getRegister(emuState, 'f'), condition)) {
-            return emuState.alu.pop(emuState, true);
+            return emuState.alu.pop(emuState, jpUpdate);
           }
           return false;
         } else {
-          return emuState.alu.pop(emuState, true);
+          return emuState.alu.pop(emuState, jpUpdate);
         }
       },
       jump: function(emuState, location, condition) {

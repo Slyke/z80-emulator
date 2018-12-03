@@ -97,7 +97,7 @@ if (!objEmulatorFactory) {
       },
 
       0x0e: function(s, params) {
-        s.cpu.intst.setReg(s, 'b', params[0]);
+        s.cpu.intst.setReg(s, 'c', params[0]);
         s.cpu.addCycles(s, 7);
         return decRet.decoderParams[arguments.name];
       },
@@ -1384,7 +1384,7 @@ if (!objEmulatorFactory) {
       },
 
       0xe1: function(s, idxReg = 'hl') {
-        s.cpu.setRegister(s, idxReg, s.cpu.intst.pop(s));
+        s.cpu.setRegister(s, idxReg, s.cpu.intst.pop(s, null, false));
         s.cpu.addCycles(s, 10);
         return decRet.decoderParams[arguments.name];
       },
@@ -1576,7 +1576,7 @@ if (!objEmulatorFactory) {
       },
 
       0xfe: function(s, params) {
-        s.cpu.intst.deIncFromRegAndParam(s, 'a', params[0], -1);
+        s.cpu.intst.deIncFromRegAndParamNoOutput(s, 'a', params[0], -1);
         s.cpu.addCycles(s, 7);
         return decRet.decoderParams[arguments.name];
       },

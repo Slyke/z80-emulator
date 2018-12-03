@@ -217,7 +217,6 @@ if (!objEmulatorFactory) {
 
     aluRet.addSubByte = function(emuState, lhv, rhv, addSub = 1, fReg = 'f') {
       var byteRes;
-
       if (addSub === 1) {
         byteRes = lhv + rhv;
       } else {

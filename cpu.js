@@ -626,7 +626,7 @@ cpuCore.push(function() {
       case 0xfb: output.opCode = "SIF"; output.z80OPCode = "EI"; output.cycles = 4; break;
       case 0xfc: output.opCode = "CALLS"; output.z80OPCode = "CALL"; (state.flags.f & fFlags.sign) ? output.cycles = 18 : output.cycles = 11; output.cycleConditional = true; output.para1 = opCode[1].toString(16); output.para2 = opCode[2].toString(16); output.opBytes = 3; break;
       case 0xfd: output = state.disassemble8080OP(state, pc + 1); output.opBytes += 1; output.indexRegUsed = "IY"; output.z80OPCode = "**"; output.cycles += 10; break;
-      case 0xfe: output.opCode = "DCXR"; output.z80OPCode = "CP"; output.cycles = 7; output.oreg = "A"; output.ireg = "A"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
+      case 0xfe: output.opCode = "DCXR"; output.z80OPCode = "CP"; output.cycles = 7; output.ireg = "A"; output.para1 = opCode[1].toString(16); output.opBytes = 2; break;
       case 0xff: output.opCode = "RST38"; output.z80OPCode = "RST 38"; output.cycles = 7; output.oreg = "SP"; break;
     }
 
@@ -2788,7 +2788,7 @@ cpuCore.push(function() {
     } else {
       state.flags.f |= fFlags.parity;
     }
-    
+
     if (valueChange & 0x80) {
       state.flags.f |= fFlags.sign;
     } else {
