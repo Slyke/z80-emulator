@@ -44,7 +44,6 @@ if (!objEmulatorFactory) {
           emuState.mmu.cbs.memoryWarningCb(emuState, address, value, 'OOB_WRITE');
         }
       }
-
       emuState.mmu.memory[address] = value & 0xff;
       emuState.gpu.memoryMapDiffFrameBuffer.push(value & 0xff);
       emuState.cpu.pins.mreq = false;

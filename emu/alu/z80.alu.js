@@ -212,7 +212,7 @@ if (!objEmulatorFactory) {
         emuState.cpu.setRegister(emuState, fReg, (emuState.cpu.getRegister(emuState, fReg) & ~aluRet.fFlags.halfcarry & 0xff));
       }
 
-      return res;
+      return operandRes;
     };
 
     aluRet.addSubByte = function(emuState, lhv, rhv, addSub = 1, fReg = 'f') {

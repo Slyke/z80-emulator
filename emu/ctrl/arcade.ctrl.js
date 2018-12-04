@@ -125,7 +125,7 @@ if (!objEmulatorFactory) {
       var preCycleChange = emu.cpu.counts.cycles;
 
       if (emu.cpu.pins.hlt) {
-        currentInstruction = 0x00; // NOP
+        currentInstruction = [0x00, 0x00, 0x00, 0x00]; // Single NOP
       }
 
       var opCost = emu.dec.decoderParams[currentInstruction[0]];

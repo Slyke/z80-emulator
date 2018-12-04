@@ -490,7 +490,7 @@ cpuCore.push(function() {
       case 0x7b: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "A"; output.ireg = "E"; break;
       case 0x7c: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "A"; output.ireg = "H"; break;
       case 0x7d: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "A"; output.ireg = "L"; break;
-      case 0x7e: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "$"; output.ireg = "A"; output.ireg = "HL"; break;
+      case 0x7e: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 7; output.ptr = "$"; output.oreg = "A"; output.ireg = "HL"; break;
       case 0x7f: output.opCode = "LD2R"; output.z80OPCode = "LD"; output.cycles = 5; output.oreg = "A"; output.ireg = "A"; break;
 
       case 0x80: output.opCode = "INXR"; output.z80OPCode = "ADD"; output.cycles = 4; output.oreg = "A"; output.ireg = "B"; break;

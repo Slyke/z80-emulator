@@ -361,7 +361,7 @@ if (!objEmulatorFactory) {
         emuState.cpu.setRegister(emuState, reg1, emuState.mmu.readWord(emuState, emuState.cpu.getRegister(emuState, 'sp')));
         emuState.mmu.writeWord(emuState, emuState.cpu.getRegister(emuState, 'sp'), tmp);
       },
-      pop: function(emuState, condition, jpUpdate = true) {
+      pop: function(emuState, condition, jpUpdate = false) {
         if (condition) {
           if (emuState.alu.checkAluFlags(emuState.cpu.getRegister(emuState, 'f'), condition)) {
             return emuState.alu.pop(emuState, jpUpdate);

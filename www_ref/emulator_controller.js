@@ -196,7 +196,6 @@ function setupCpu() {
   }
 
   initialiseHardwareEmulation(objEmu);
-  console.log(111, "done", objEmu.hwio.cbs.writePort);
 }
 
 function relToAbs(relCoord, dimension) {
