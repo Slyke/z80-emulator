@@ -1,3 +1,11 @@
+/*
+  ALU - Arithmatic Logic Unit
+    This module is the ALU for the Z80 processor. The ALU does all the math and calculations for the CPU.
+    
+    The ALU only communicates with the CPU, and in the Z80 processor, mainly uses the A and F flags to do so.
+
+// */
+
 if (!objEmulatorFactory) {
   var objEmulatorFactory = {};
 }

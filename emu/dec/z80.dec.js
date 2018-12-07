@@ -1,3 +1,10 @@
+/*
+  DEC - Decoder
+    This module is the decoder for the Z80 CPU. Its job is to figure out how many bits each command takes, and which circuit
+    each command should activate. In the emulator, the command's timing is done here to simulate a crystal clock.
+
+// */
+
 if (!objEmulatorFactory) {
   var objEmulatorFactory = {};
 }
@@ -51,7 +58,7 @@ if (!objEmulatorFactory) {
 
       0x06: function(s, params) {
         s.cpu.intst.setReg(s, 'b', params[0]);
-        s.cpu.addCycles(s, 6);
+        s.cpu.addCycles(s, 7);
         return decRet.decoderParams[arguments.name];
       },
 
@@ -343,7 +350,6 @@ if (!objEmulatorFactory) {
       },
 
       0x36: function(s, params, idxReg = 'hl') {
-        console.log(111, params);
         s.cpu.intst.setMemByte(s, s.cpu.getRegister(s, idxReg), params[0]);
         s.cpu.addCycles(s, 10);
         return decRet.decoderParams[arguments.name];
@@ -368,7 +374,7 @@ if (!objEmulatorFactory) {
 
       0x3a: function(s, params) {
         s.cpu.intst.setRegFromMem(s, 'a', s.utils.combineBytes(params[0], params[1]));
-        s.cpu.addCycles(s, 11);
+        s.cpu.addCycles(s, 13);
         return decRet.decoderParams[arguments.name];
       },
 
@@ -392,7 +398,7 @@ if (!objEmulatorFactory) {
 
       0x3e: function(s, params) {
         s.cpu.intst.setReg(s, 'a', params[0]);
-        s.cpu.addCycles(s, 6);
+        s.cpu.addCycles(s, 7);
         return decRet.decoderParams[arguments.name];
       },
 
@@ -1184,7 +1190,7 @@ if (!objEmulatorFactory) {
 
       0xc2: function(s, params) {
         var pcJump = s.cpu.intst.jump(s, s.utils.combineBytes(params[0], params[1]), 'NZ');
-        s.cpu.addCycles(s, pcJump ? 10 : 15);
+        s.cpu.addCycles(s, pcJump ? 15 : 10);
         return decRet.decoderParams[arguments.name];
       },
 

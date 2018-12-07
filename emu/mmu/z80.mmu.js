@@ -1,3 +1,11 @@
+/*
+  MMU - Memory Management Unit
+    This module is the MMU module for the Z80 emulator. It emulates connecting the address bus on the CPU chip to RAM and ROM.
+    The memory itself is contained in this module and is just an array. Callbacks can be used to hook into the memory read and
+    write events.
+
+// */
+
 if (!objEmulatorFactory) {
   var objEmulatorFactory = {};
 }

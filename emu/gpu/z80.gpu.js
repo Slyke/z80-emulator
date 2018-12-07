@@ -1,3 +1,11 @@
+/*
+  GPU - Graphical Processing Unit
+    This module is the GPU for the Z80 emulator. This specific module is for the arcade machines. It is not the same
+    GPU that home computers, such as the Sinclair used. This GPU maps memory in RAM directly to screen pixels.
+
+// */
+
+
 if (!objEmulatorFactory) {
   var objEmulatorFactory = {};
 }

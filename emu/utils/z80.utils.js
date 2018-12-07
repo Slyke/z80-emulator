@@ -1,3 +1,10 @@
+/*
+  UTILS - Utils
+    This module is the utils module for the Z80 emulator. It's where handy functions that the emulator needs to run go,
+    that may not fix into another module exactly.
+
+// */
+
 if (!objEmulatorFactory) {
   var objEmulatorFactory = {};
 }
@@ -46,6 +53,7 @@ if (!objEmulatorFactory) {
         Math.round(emu.cpu.registers.sp / 2),
         emu.cpu.registers.ix,
         emu.cpu.registers.iy,
+        emu.cpu.counts.cycles,
         emu.cpu.registers.a,
         emu.cpu.registers.f,
         emu.cpu.registers.b,

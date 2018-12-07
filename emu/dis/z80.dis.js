@@ -1,3 +1,10 @@
+/*
+  DIS - Disassembler
+    This module is the disassembler for the Z80 instruction set. It's not needed for the emulator, but it makes debugging
+    and seeing what's going on much easier. It can also be used to decompile byte code into assembly language.
+
+// */
+
 if (!objEmulatorFactory) {
   var objEmulatorFactory = {};
 }

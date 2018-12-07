@@ -1,3 +1,9 @@
+/*
+  CTRL - Controller
+    This module is the controller for the Z80 emulator. Its job is to setup the environment and virtual hardware.
+
+// */
+
 if (!objEmulatorFactory) {
   var objEmulatorFactory = {};
 }

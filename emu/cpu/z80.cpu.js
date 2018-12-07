@@ -1,3 +1,9 @@
+/*
+  CPU - Central Processing Unit.
+    This module is the CPU for the Z80 processor. The CPU does all the orchestration between the different components.
+
+// */
+
 if (!objEmulatorFactory) {
   var objEmulatorFactory = {};
 }
