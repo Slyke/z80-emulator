@@ -327,7 +327,7 @@ if (!objEmulatorFactory) {
 
       0x32: function(s, params) {
         s.cpu.intst.setMemByte(s, s.utils.combineBytes(params[0], params[1]), s.cpu.getRegister(s, 'a'));
-        s.cpu.addCycles(s, 10);
+        s.cpu.addCycles(s, 13);
         return decRet.decoderParams[arguments.name];
       },
 
@@ -1225,8 +1225,7 @@ if (!objEmulatorFactory) {
       },
 
       0xc8: function(s) {
-        var pcPop = s.cpu.intst.pop(s, 'Z');
-        s.cpu.setRegister(s, 'pc', pcPop);
+        var pcPop = s.cpu.intst.pop(s, 'Z', true);
         s.cpu.addCycles(s, pcPop ? 11 : 5);
         return decRet.decoderParams[arguments.name];
       },
@@ -1240,7 +1239,6 @@ if (!objEmulatorFactory) {
 
       0xca: function(s, params) {
         var pcJump = s.cpu.intst.jump(s, s.utils.combineBytes(params[0], params[1]), 'Z');
-        s.cpu.setRegister(s, 'pc', pcJump);
         s.cpu.addCycles(s, pcJump ? 10 : 15);
         return decRet.decoderParams[arguments.name];
       },
@@ -1291,7 +1289,6 @@ if (!objEmulatorFactory) {
 
       0xd2: function(s, params) {
         var pcJump = s.cpu.intst.jump(s, s.utils.combineBytes(params[0], params[1]), 'NC');
-        s.cpu.setRegister(s, 'pc', pcJump);
         s.cpu.addCycles(s, pcJump ? 10 : 15);
         return decRet.decoderParams[arguments.name];
       },
@@ -1328,8 +1325,7 @@ if (!objEmulatorFactory) {
       },
 
       0xd8: function(s) {
-        var pcPop = s.cpu.intst.pop(s, 'C');
-        s.cpu.setRegister(s, 'pc', pcPop);
+        var pcPop = s.cpu.intst.pop(s, 'C', true);
         s.cpu.addCycles(s, pcPop ? 11 : 5);
         return decRet.decoderParams[arguments.name];
       },
@@ -1341,8 +1337,7 @@ if (!objEmulatorFactory) {
 
       0xda: function(s, params) {
         var pcJump = s.cpu.intst.jump(s, s.utils.combineBytes(params[0], params[1]), 'C');
-        s.cpu.setRegister(s, 'pc', pcJump);
-        s.cpu.addCycles(s, pcJump ? 10 : 15);
+        s.cpu.addCycles(s, pcJump ? 15 : 10);
         return decRet.decoderParams[arguments.name];
       },
 
@@ -1398,7 +1393,6 @@ if (!objEmulatorFactory) {
 
       0xe2: function(s, params) {
         var pcJump = s.cpu.intst.jump(s, s.utils.combineBytes(params[0], params[1]), 'NP');
-        s.cpu.setRegister(s, 'pc', pcJump);
         s.cpu.addCycles(s, pcJump ? 10 : 15);
         return decRet.decoderParams[arguments.name];
       },
@@ -1434,22 +1428,19 @@ if (!objEmulatorFactory) {
       },
 
       0xe8: function(s) {
-        var pcPop = s.cpu.intst.pop(s, 'P');
-        s.cpu.setRegister(s, 'pc', pcPop);
+        var pcPop = s.cpu.intst.pop(s, 'P', true);
         s.cpu.addCycles(s, pcPop ? 11 : 5);
         return decRet.decoderParams[arguments.name];
       },
 
       0xe9: function(s, idxReg = 'hl') {
         var pcJump = s.cpu.intst.jump(s, s.cpu.getRegister(s, idxReg));
-        s.cpu.setRegister(s, 'pc', pcJump);
         s.cpu.addCycles(s, 4);
         return decRet.decoderParams[arguments.name];
       },
 
       0xea: function(s, params) {
         var pcJump = s.cpu.intst.jump(s, s.utils.combineBytes(params[0], params[1]), 'P');
-        s.cpu.setRegister(s, 'pc', pcJump);
         s.cpu.addCycles(s, pcJump ? 10 : 15);
         return decRet.decoderParams[arguments.name];
       },
@@ -1501,7 +1492,6 @@ if (!objEmulatorFactory) {
 
       0xf2: function(s, params) {
         var pcJump = s.cpu.intst.jump(s, s.utils.combineBytes(params[0], params[1]), 'NS');
-        s.cpu.setRegister(s, 'pc', pcJump);
         s.cpu.addCycles(s, pcJump ? 10 : 15);
         return decRet.decoderParams[arguments.name];
       },
@@ -1538,8 +1528,7 @@ if (!objEmulatorFactory) {
       },
 
       0xf8: function(s) {
-        var pcPop = s.cpu.intst.pop(s, 'S');
-        s.cpu.setRegister(s, 'pc', pcPop);
+        var pcPop = s.cpu.intst.pop(s, 'S', true);
         s.cpu.addCycles(s, pcPop ? 11 : 5);
         return decRet.decoderParams[arguments.name];
       },
@@ -1552,7 +1541,6 @@ if (!objEmulatorFactory) {
 
       0xfa: function(s, params) {
         var pcJump = s.cpu.intst.jump(s, s.cpu.getRegister(s, s.utils.combineBytes(params[0], params[1]), 'S'));
-        s.cpu.setRegister(s, 'pc', pcJump);
         s.cpu.addCycles(s, pcJump ? 15 : 10);
         return decRet.decoderParams[arguments.name];
       },
@@ -1619,7 +1607,7 @@ if (!objEmulatorFactory) {
       0x3a: 3,
       0x3b: 1,
       0x3c: 1,
-      0x3d: 2,
+      0x3d: 1,
       0x3e: 2,
       0x3f: 1,
       0x04: 1,
@@ -1784,7 +1772,7 @@ if (!objEmulatorFactory) {
       0xd8: 1,
       0xd9: 1,
       0xda: 3,
-      0xdb: 1,
+      0xdb: 2,
       0xdc: 3,
       0xdd: 0, // Special IX
       0xde: 2,

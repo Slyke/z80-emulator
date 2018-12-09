@@ -54,6 +54,7 @@ if (!objEmulatorFactory) {
         emu.cpu.registers.ix,
         emu.cpu.registers.iy,
         emu.cpu.counts.cycles,
+        Math.round(emu.cpu.counts.cycles / 2),
         emu.cpu.registers.a,
         emu.cpu.registers.f,
         emu.cpu.registers.b,

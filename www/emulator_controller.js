@@ -365,6 +365,7 @@ getCpuCheckSum = function() {
     runningCPU.flags.ix,
     runningCPU.flags.iy,
     runningCPU.cycles,
+    Math.round(runningCPU.cycles / 2),
     runningCPU.flags.a,
     runningCPU.flags.f,
     runningCPU.flags.b,

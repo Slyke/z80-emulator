@@ -22,14 +22,13 @@ if (!objEmulatorFactory) {
         cInterrupt: undefined,
         readPort: undefined,
         writePort: undefined
+      },
+      interrupt: {
+        interruptsList: [0x10, 0x08],
+        currentInterrupt: 0x10,
+        interruptClockCycle: 16667
       }
     };
-
-    hwioRet.interrupt = Object.freeze({
-      interruptsList: [0x10, 0x08],
-      interrupt: 0x10,
-      interruptClockCycle: 16667
-    });
 
     hwioRet.writePort = function(emuState, address, value, throwError = true) {
       emuState.cpu.pins.wr = true;
@@ -72,21 +71,21 @@ if (!objEmulatorFactory) {
         return false;
       }
   
-      emuState.cpu.counts.cycles -= hwioRet.interrupt.interruptClockCycle;
+      emuState.cpu.counts.cycles -= emuState.hwio.interrupt.interruptClockCycle;
   
-      if (hwioRet.interrupt.interrupt === hwioRet.interrupt.interruptsList[0]) {
-        hwioRet.interrupt.interrupt = hwioRet.interrupt.interruptsList[1];
+      if (emuState.hwio.interrupt.currentInterrupt === emuState.hwio.interrupt.interruptsList[0]) {
+        emuState.hwio.interrupt.currentInterrupt = emuState.hwio.interrupt.interruptsList[1];
       } else {
-        hwioRet.interrupt.interrupt = hwioRet.interrupt.interruptsList[0];
+        emuState.hwio.interrupt.currentInterrupt = emuState.hwio.interrupt.interruptsList[0];
       }
   
       if (emuState.alu.checkAluFlags(emuState.cpu.getRegister(emuState, 'f'), "I")) {
         // We need to push the current PC to (SP) so we can return after executing the interrupt.
         emuState.alu.push(emuState, emuState.cpu.getRegister(emuState, 'pc'));
   
-        emuState.cpu.setRegister(emuState, 'f', hwioRet.interrupt);
-        if (typeof(hwioRet.cbs.cInterrupt) === "function") {
-          hwioRet.cbs.cInterrupt(emuState, hwioRet.interrupt);
+        emuState.cpu.setRegister(emuState, 'pc', emuState.hwio.interrupt.currentInterrupt);
+        if (typeof(emuState.hwio.cbs.cInterrupt) === "function") {
+          emuState.hwio.cbs.cInterrupt(emuState, emuState.hwio.interrupt.currentInterrupt);
         }
       }
 
