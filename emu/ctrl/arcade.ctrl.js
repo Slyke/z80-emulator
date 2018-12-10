@@ -135,6 +135,7 @@ if (!objEmulatorFactory) {
       }
 
       var opCost = emu.dec.decoderParams[currentInstruction[0]];
+      var disObj;
 
       if (opCost < 0 || opCost === undefined) {
         throw {
@@ -149,7 +150,7 @@ if (!objEmulatorFactory) {
       }
 
       if (emu.dis) {
-        var disObj = emu.dis.disassembleInstruction(emu, emu.mmu.memory.slice((emu.cpu.registers.pc), (emu.cpu.registers.pc + 4)));
+        disObj = emu.dis.disassembleInstruction(emu, emu.mmu.memory.slice((emu.cpu.registers.pc), (emu.cpu.registers.pc + 4)));
 
         if (disObj) {
           emu.dis.previouslyExecutedInstructions.push(disObj);
@@ -211,6 +212,22 @@ if (!objEmulatorFactory) {
           emulatorState: emu,
           opCodes: currentInstruction
         };
+      }
+
+      if (disObj) {
+        if (disObj.cycleCost !== (emu.cpu.counts.cycles - preCycleChange)) {
+          throw {
+            type: "Error",
+            moduleName: ctrlRet.type,
+            functionName: "cpuEval",
+            reason: "CPU Cycle change did not match Disessembler Cycle change.",
+            disassemblerCycleChange: disObj.cycleCost,
+            cpuCycleChange: (emu.cpu.counts.cycles - preCycleChange),
+            args: arguments,
+            emulatorState: emu,
+            opCodes: currentInstruction
+          };
+        }
       }
 
       return emu.hwio.interruptCheck(emu);

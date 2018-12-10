@@ -40,10 +40,18 @@ if (!objEmulatorFactory) {
     disRet.disassembleInstruction = function(s, opCodes = null) {
       var ret;
       if (opCodes) {
-        ret = disRet.disOp[opCodes[0]](s, [opCodes[1], opCodes[2], opCodes[3]]);
+        var opExec = s.dis.disOp[opCodes[0]];
+        if (!opExec) {
+          throw { type: "Error", moduleName: disRet.type, functionName: "disassembleInstruction", reason: "OP Code not known", args: arguments, emulatorState: s };
+        }
+        ret = opExec(s, [opCodes[1], opCodes[2], opCodes[3]]);
         ret.binCode = opCodes[0];
       } else {
-        ret = disRet.disOp[s.cpu.getRegister(s, 'pc')](s, [
+        var opExec = s.dis.disOp[s.cpu.getRegister(s, 'pc')]
+        if (!opExec) {
+          throw { type: "Error", moduleName: disRet.type, functionName: "disassembleInstruction", reason: "OP Code not known", args: arguments, emulatorState: s };
+        }
+        ret = opExec(s, [
           (s.cpu.getRegister(s, 'pc') + 1),
           (s.cpu.getRegister(s, 'pc') + 2),
           (s.cpu.getRegister(s, 'pc') + 3)
@@ -503,7 +511,7 @@ if (!objEmulatorFactory) {
           indexRegisters: undefined
         };
       },
-      0x1e: function(s, opParams, idxReg) {
+      0x1f: function(s, opParams, idxReg) {
         return {
           opCode: "RRC",
           z80OPCode: "RRA",
@@ -646,7 +654,7 @@ if (!objEmulatorFactory) {
         return {
           opCode: "LD2R",
           z80OPCode: "LD",
-          cycleCost: 11,
+          cycleCost: 16,
           cycleConditional: [],
           cycleCondition: undefined,
           iReg: undefined,
@@ -910,7 +918,7 @@ if (!objEmulatorFactory) {
         return {
           opCode: "INCR",
           z80OPCode: "INC",
-          cycleCost: 6,
+          cycleCost: 5,
           cycleConditional: [],
           cycleCondition: undefined,
           iReg: "A",
@@ -1878,7 +1886,7 @@ if (!objEmulatorFactory) {
         return {
           opCode: "LD2R",
           z80OPCode: "LD",
-          cycleCost: 7,
+          cycleCost: 5,
           cycleConditional: [],
           cycleCondition: undefined,
           iReg: "B",
@@ -1894,7 +1902,7 @@ if (!objEmulatorFactory) {
         return {
           opCode: "LD2R",
           z80OPCode: "LD",
-          cycleCost: 7,
+          cycleCost: 5,
           cycleConditional: [],
           cycleCondition: undefined,
           iReg: "C",
@@ -1910,7 +1918,7 @@ if (!objEmulatorFactory) {
         return {
           opCode: "LD2R",
           z80OPCode: "LD",
-          cycleCost: 7,
+          cycleCost: 5,
           cycleConditional: [],
           cycleCondition: undefined,
           iReg: "D",
@@ -1926,7 +1934,7 @@ if (!objEmulatorFactory) {
         return {
           opCode: "LD2R",
           z80OPCode: "LD",
-          cycleCost: 7,
+          cycleCost: 5,
           cycleConditional: [],
           cycleCondition: undefined,
           iReg: "E",
@@ -1942,7 +1950,7 @@ if (!objEmulatorFactory) {
         return {
           opCode: "LD2R",
           z80OPCode: "LD",
-          cycleCost: 7,
+          cycleCost: 5,
           cycleConditional: [],
           cycleCondition: undefined,
           iReg: "H",
@@ -1958,7 +1966,7 @@ if (!objEmulatorFactory) {
         return {
           opCode: "LD2R",
           z80OPCode: "LD",
-          cycleCost: 7,
+          cycleCost: 5,
           cycleConditional: [],
           cycleCondition: undefined,
           iReg: "L",
@@ -1990,7 +1998,7 @@ if (!objEmulatorFactory) {
         return {
           opCode: "LD2R",
           z80OPCode: "LD",
-          cycleCost: 7,
+          cycleCost: 5,
           cycleConditional: [],
           cycleCondition: undefined,
           iReg: "A",
@@ -3040,8 +3048,8 @@ if (!objEmulatorFactory) {
         return {
           opCode: "RETNZ",
           z80OPCode: "RET NZ",
-          cycleCost: s.alu.checkAluFlags(s.cpu.getRegister(s, 'f'), 'NZ') ? 11 : 4,
-          cycleConditional: [4, 11],
+          cycleCost: s.alu.checkAluFlags(s.cpu.getRegister(s, 'f'), 'NZ') ? 11 : 5,
+          cycleConditional: [5, 11],
           cycleCondition: 'NZ',
           iReg: undefined,
           oReg: undefined,
@@ -3615,7 +3623,7 @@ if (!objEmulatorFactory) {
         return {
           opCode: "ANDR",
           z80OPCode: "AND",
-          cycleCost: 11,
+          cycleCost: 7,
           cycleConditional: [],
           cycleCondition: undefined,
           iReg: "A",

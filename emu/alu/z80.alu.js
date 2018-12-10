@@ -96,6 +96,7 @@ if (!objEmulatorFactory) {
       emuState.alu.push(emuState, emuState.cpu.registers[pcReg]);
 
       emuState.cpu.registers[pcReg] = newLocation & 0xffff;
+      return emuState.cpu.registers[pcReg];
     };
 
     aluRet.jump = function(emuState, location, pcReg = 'pc') {
