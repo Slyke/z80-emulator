@@ -659,7 +659,7 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
       "x": relToAbs(uiFragments.portInfoBase[0], 0),
       "y": relToAbs(uiFragments.portInfoBase[1] + 0.02 + (0.02 * i), 1),
       "name":"lblCPUPIPort" + i,
-      "text":"    Port " + i + ":   " + pad(objEmu.ctrl.hwPortData[0x00] ? objEmu.ctrl.hwPortData[0x00].toString(2) : "", 8),
+      "text":"    Port " + i + ":   " + pad(objEmu.ctrl.hwPortData[i] ? objEmu.ctrl.hwPortData[i].toString(2) : "", 8),
       "shape":"text",
       "render":function(self) {
         canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#00FFFF"});

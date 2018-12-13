@@ -93,10 +93,10 @@ if (!objEmulatorFactory) {
         newLocation = ((location[1] << 8) | location[0]) & 0xffff;
       }
 
-      emuState.alu.push(emuState, emuState.cpu.registers[pcReg]);
+      emuState.alu.push(emuState, emuState.cpu.getRegister(emuState, pcReg));
 
       emuState.cpu.registers[pcReg] = newLocation & 0xffff;
-      return emuState.cpu.registers[pcReg];
+      return emuState.cpu.getRegister(emuState, pcReg);
     };
 
     aluRet.jump = function(emuState, location, pcReg = 'pc') {
@@ -110,12 +110,12 @@ if (!objEmulatorFactory) {
 
     aluRet.push = function(emuState, value, spReg = 'sp') {
       emuState.cpu.setRegister(emuState, spReg, emuState.cpu.getRegister(emuState, spReg) - 2);
-      emuState.mmu.writeWord(emuState, emuState.cpu.registers[spReg], value);
+      emuState.mmu.writeWord(emuState, emuState.cpu.getRegister(emuState, spReg), value);
       return emuState.cpu.registers[spReg];
     };
 
     aluRet.pop = function(emuState, jumpPc = false, spReg = 'sp', pcReg = 'pc') {
-      var ret = emuState.mmu.readWord(emuState, emuState.cpu.registers[spReg]);
+      var ret = emuState.mmu.readWord(emuState, emuState.cpu.getRegister(emuState, spReg));
       emuState.cpu.setRegister(emuState, spReg, emuState.cpu.getRegister(emuState, spReg) + 2);
 
       if (jumpPc) {
@@ -323,7 +323,7 @@ if (!objEmulatorFactory) {
     };
 
     aluRet.rlc9 = function(emuState, aFlag = 'a', fFlag = 'f', aluFlags = aluRet.fFlags, flagCheck = 'carry') {
-      var res = emuState.alu.checkAluFlags(emuState, 'C') ? 1 : 0;
+      var res = emuState.alu.checkAluFlags(emuState.cpu.getRegister(emuState, fFlag), 'C') ? 1 : 0;
 
       if (emuState.cpu.getRegister(emuState, aFlag) & 0x80) {
         emuState.cpu.setRegister(emuState, fFlag, emuState.cpu.getRegister(emuState, fFlag) | aluFlags[flagCheck]);
@@ -343,11 +343,11 @@ if (!objEmulatorFactory) {
         emuState.cpu.setRegister(emuState, fFlag, (emuState.cpu.getRegister(emuState, fFlag) & ~aluFlags[flagCheck] & 0xff));
       }
 
-      emuState.cpu.setRegister(emuState, aFlag, (((emuState.cpu.getRegister(emuState, aFlag) >> 1) & 0xfe) | res));
+      emuState.cpu.setRegister(emuState, aFlag, (((emuState.cpu.getRegister(emuState, aFlag) & 0xfe) >> 1) | res));
     };
 
     aluRet.rrcc = function(emuState, aFlag = 'a', fFlag = 'f', aluFlags = aluRet.fFlags, flagCheck = 'carry') {
-      var res = emuState.alu.checkAluFlags(emuState, 'C') ? 0x80 : 0;
+      var res = emuState.alu.checkAluFlags(emuState.cpu.getRegister(emuState, fFlag), 'C') ? 0x80 : 0;
 
       if (emuState.cpu.getRegister(emuState, aFlag) & 0x01) {
         emuState.cpu.setRegister(emuState, fFlag, emuState.cpu.getRegister(emuState, fFlag) | aluFlags[flagCheck]);
@@ -355,7 +355,7 @@ if (!objEmulatorFactory) {
         emuState.cpu.setRegister(emuState, fFlag, (emuState.cpu.getRegister(emuState, fFlag) & ~aluFlags[flagCheck] & 0xff));
       }
 
-      emuState.cpu.setRegister(emuState, aFlag, (((emuState.cpu.getRegister(emuState, aFlag) >> 1) & 0xfe) | res));
+      emuState.cpu.setRegister(emuState, aFlag, (((emuState.cpu.getRegister(emuState, aFlag) & 0xfe) >> 1) | res));
     };
 
     aluRet.cpl = function(emuState, aFlag = 'a') {

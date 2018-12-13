@@ -144,7 +144,7 @@ if (!objEmulatorFactory) {
           functionName: "cpuEval",
           reason: "CPU failed to decode OP Code Parameters",
           args: arguments,
-          emulatorState: emuState,
+          emulatorState: emu,
           opCodes: currentInstruction
         };
       }

@@ -3110,7 +3110,7 @@ if (!objEmulatorFactory) {
       },
       0xc4: function(s, opParams, idxReg) {
         return {
-          opCode: "PUSHNZ",
+          opCode: "CALLNZ",
           z80OPCode: "CALL NZ",
           cycleCost: s.alu.checkAluFlags(s.cpu.getRegister(s, 'f'), 'NZ') ? 18 : 11,
           cycleConditional: [11, 18],

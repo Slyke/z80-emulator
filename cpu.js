@@ -880,7 +880,6 @@ cpuCore.push(function() {
         }
 
         state.flags.a = ((state.flags.a & 0xfe) >> 1) | carry;
-
         state.cycles += 4;
         break;
 

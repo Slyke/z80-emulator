@@ -387,14 +387,14 @@ if (!objEmulatorFactory) {
           return emuState.alu.jump(emuState, location);
         }
       },
-      push: function(emuState, location, condition) {
+      push: function(emuState, value, condition) {
         if (condition) {
           if (emuState.alu.checkAluFlags(emuState.cpu.getRegister(emuState, 'f'), condition)) {
-            return emuState.alu.push(emuState, location);
+            return emuState.alu.push(emuState, value);
           }
           return false;
         } else {
-          return emuState.alu.push(emuState, location);
+          return emuState.alu.push(emuState, value);
         }
       },
       call: function(emuState, location, condition) {
