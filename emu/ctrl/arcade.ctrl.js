@@ -28,10 +28,34 @@ if (!objEmulatorFactory) {
       gpu: {},    // Graphical Processing Unit
       dis: {},    // Byte Code Disassembler
       hwPortData: {},
-      maxInstructionHistory: 10
+      maxInstructionHistory: 10,
+      emulationRunning: false
     };
 
     ctrlRet.ctrl = ctrlRet;
+
+    ctrlRet.start = function(emu, runType = 'i', timer = 1) {
+      emu.ctrl.emulationRunning = true;
+      emu.ctrl.runCycle(emu, runType, timer);
+    };
+
+    ctrlRet.pause = function(emu) {
+      emu.ctrl.emulationRunning = false;
+    };
+
+    ctrlRet.runCycle = function(emu, runType = 'i', timer = 1) {
+      if (emu.ctrl.emulationRunning === true) {
+        if (runType === 'i') {
+          emu.ctrl.cpuRunUntilInterruptCheck(emu);
+        } else if(runType === 'e') {
+          emu.ctrl.cpuEval(emu);
+        }
+
+        setTimeout(function() {
+          emu.ctrl.runCycle(emu, runType, timer);
+        }, timer);
+      }
+    };
 
     ctrlRet.getSys = function(systemList, systemName) {
       for (var i = 0; i < systemList.length; i++) {
@@ -98,8 +122,19 @@ if (!objEmulatorFactory) {
     };
 
     ctrlRet.setupExternalVirtualHardware = function(emu) {
+      // Video processor.
+      emu.mmu.cbsr.memoryUpdateCb(function(emuState, address, value, event) {
+        if (event === emu.mmu.cbEvents.write) {
+          if (address >= 0x2400) {
+            if (emuState.gpu.videoArrayDiffFrameBuffer.indexOf(address) === -1) {
+              emuState.gpu.videoArrayDiffFrameBuffer.push(address);
+            }
+          }
+        }
+      });
+
       // Looks like the game is communicating with some external hardware. This function mocks that hardware. Game crashes without it.
-      emu.hwio.cbs.readPort = function(emu, portCh) {
+      emu.hwio.cbsr.readPortCb(function(emu, portCh) {
         if (portCh === 0x03) {
           return emu.ctrl.hwPortData[0x04] | 0;
         } else if (portCh === 0x02) {
@@ -107,11 +142,11 @@ if (!objEmulatorFactory) {
         }
 
         return ctrlRet.hwPortData[portCh];
-      };
+      });
 
-      emu.hwio.cbs.writePort = function(emu, portCh, value) {
+      emu.hwio.cbsr.writePortCb(function(emu, portCh, value) {
         emu.ctrl.hwPortData[portCh] = value;
-      };
+      });
     }
 
     ctrlRet.cpuRunUntilInterruptCheck = function(emu) {

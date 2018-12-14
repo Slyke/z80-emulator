@@ -335,7 +335,7 @@ if (!objEmulatorFactory) {
     };
 
     aluRet.rrc = function(emuState, aFlag = 'a', fFlag = 'f', aluFlags = aluRet.fFlags, flagCheck = 'carry') {
-      var res = emuState.cpu.getRegister(emuState, aFlag) << 7;
+      var res = (emuState.cpu.getRegister(emuState, aFlag) & 1) << 7;
 
       if (res) {
         emuState.cpu.setRegister(emuState, fFlag, emuState.cpu.getRegister(emuState, fFlag) | aluFlags[flagCheck]);

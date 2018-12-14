@@ -15,15 +15,41 @@ if (!objEmulatorFactory) {
     objEmulatorFactory.mmuList = [];
   }
 
+  var callbacks = {
+    memoryWarningCbArr: [],
+    memoryUpdateCbArr: []
+  }
+
   objEmulatorFactory.mmuList.push(function() {
     var mmuRet = {
       name: "z80",
       type: "mmu",
-      cbs: {
-        memoryWarningCb: undefined,
-        memoryUpdateCb: undefined
+      cbsr: {},
+      registeredCallbackList: {
+        memoryWarningCbArr: [],
+        memoryUpdateCbArr: [],
+        memoryReadCbArr: []
       },
-      memory: new Array(0x10000).fill(0)
+      memory: new Array(0x10000).fill(0),
+      cbEvents: Object.freeze({
+        read: 'READ',
+        outOfBoundsRead: 'OOB_READ',
+        outOfBoundsWrite: 'OOB_WRITE',
+        write: 'WRITE',
+        romWrite: 'ROM_WRITE'
+      })
+    };
+
+    mmuRet.cbsr.memoryUpdateCb = function(cbFunction) {
+      mmuRet.registeredCallbackList.memoryUpdateCbArr.push(cbFunction);
+    };
+
+    mmuRet.cbsr.memoryWarningCb = function(cbFunction) {
+      mmuRet.registeredCallbackList.memoryWarningCbArr.push(cbFunction);
+    };
+
+    mmuRet.cbsr.memoryReadCb = function(cbFunction) {
+      mmuRet.registeredCallbackList.memoryReadCbArr.push(cbFunction);
     };
 
     mmuRet.memorySegments = Object.freeze({
@@ -37,21 +63,29 @@ if (!objEmulatorFactory) {
     mmuRet.writeByte = function(emuState, address, value) {
       emuState.cpu.pins.mreq = true;
       emuState.cpu.pins.wr = true;
-      if (typeof(emuState.mmu.cbs.memoryUpdateCb) === "function") {
-        emuState.mmu.cbs.memoryUpdateCb(emuState, address, value);
-      }
+
+      emuState.mmu.registeredCallbackList.memoryUpdateCbArr.forEach(cbFunction => {
+        if (typeof(cbFunction) === "function") {
+          cbFunction(emuState, address, value, emuState.mmu.cbEvents.write);
+        }
+      });
 
       if (address < (emuState.mmu.memorySegments.romLength - emuState.mmu.memorySegments.romStart)) {
-        if (typeof(emuState.mmu.cbs.memoryWarningCb) === "function") {
-          emuState.mmu.cbs.memoryWarningCb(emuState, address, value, 'ROM_WRITE');
-        }
+        emuState.mmu.registeredCallbackList.memoryWarningCbArr.forEach(cbFunction => {
+          if (typeof(cbFunction) === "function") {
+            cbFunction(emuState, address, value, emuState.mmu.cbEvents.romWrite);
+          }
+        });
       }
 
       if (address > emuState.mmu.memorySegments.totalMemory) {
-        if (typeof(emuState.mmu.cbs.memoryWarningCb) === "function") {
-          emuState.mmu.cbs.memoryWarningCb(emuState, address, value, 'OOB_WRITE');
-        }
+        emuState.mmu.registeredCallbackList.memoryWarningCbArr.forEach(cbFunction => {
+          if (typeof(cbFunction) === "function") {
+            cbFunction(emuState, address, value, emuState.mmu.cbEvents.outOfBoundsWrite);
+          }
+        });
       }
+
       emuState.mmu.memory[address] = value & 0xff;
       emuState.gpu.memoryMapDiffFrameBuffer.push(value & 0xff);
       emuState.cpu.pins.mreq = false;
@@ -61,15 +95,19 @@ if (!objEmulatorFactory) {
     mmuRet.readByte = function(emuState, address) {
       emuState.cpu.pins.mreq = true;
       emuState.cpu.pins.rd = true;
-      
-      if (typeof(emuState.mmu.cbs.memoryUpdateCb) === "function") {
-        emuState.mmu.cbs.memoryReadCb(emuState, address);
-      }
+
+      emuState.mmu.registeredCallbackList.memoryReadCbArr.forEach(cbFunction => {
+        if (typeof(cbFunction) === "function") {
+          cbFunction(emuState, address, emuState.mmu.cbEvents.read);
+        }
+      });
 
       if (address > emuState.mmu.memorySegments.totalMemory || address < 0) {
-        if (typeof(emuState.mmu.cbs.memoryWarningCb) === "function") {
-          emuState.mmu.cbs.memoryWarningCb(emuState, address, value, 'OOB_READ');
-        }
+        emuState.mmu.registeredCallbackList.memoryReadCbArr.forEach(cbFunction => {
+          if (typeof(cbFunction) === "function") {
+            cbFunction(emuState, address, null, emuState.mmu.cbEvents.outOfBoundsRead);
+          }
+        });
       }
 
       emuState.cpu.pins.mreq = false;

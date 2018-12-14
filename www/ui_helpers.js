@@ -524,7 +524,7 @@ function uiPreframeSetup(canvasControl, runningCPU, persistantObjects, cpuCanSta
 
     if (runningCPU.flags.sp + k >= 0x2400) { // This is video memory. We don't want to display garbage.
       break;
-    } 
+    }
 
     var mem1 = memSliceSP[k];
     var mem2 = memSliceSP[k + 1];

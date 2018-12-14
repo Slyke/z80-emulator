@@ -78,8 +78,12 @@ function keyEvents(event, eventType) {
     }
 
     if (event.key === 'p') {
-      cpuRunning = !cpuRunning;
-      runCPU();
+      objEmu.ctrl.emulationRunning = !objEmu.ctrl.emulationRunning;
+      if (objEmu.ctrl.emulationRunning) {
+        objEmu.ctrl.start(objEmu);
+      } else {
+        objEmu.ctrl.pause(objEmu);
+      }
     }
     if (event.key === 'm') {
       showMemoryInspector = !showMemoryInspector;
@@ -90,11 +94,6 @@ function keyEvents(event, eventType) {
       }
     }
   } else {
-  if (runningCPUOverride) {
-    runningCPUOverride.getKeyBoardKeysHooks(event, eventType, runningCPU);
-  } else {
-    // runningCPU.getKeyBoardKeysHooks(event, eventType, runningCPU);
-  }
-
+    objEmu.hwio.getKeyBoardKeysHooks(objEmu, event, eventType);
   }
 }

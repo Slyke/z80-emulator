@@ -23,6 +23,12 @@ if (!objEmulatorFactory) {
         readPort: undefined,
         writePort: undefined
       },
+      registeredCallbackList: {
+        writePortCbArr: [],
+        readPortCbArr: [],
+        interruptCbArr: []
+      },
+      cbsr: {},
       interrupt: {
         interruptsList: [0x10, 0x08],
         currentInterrupt: 0x10,
@@ -30,17 +36,81 @@ if (!objEmulatorFactory) {
       }
     };
 
+    hwioRet.cbsr.writePortCb = function(cbFunction) {
+      hwioRet.registeredCallbackList.writePortCbArr.push(cbFunction);
+    };
+
+    hwioRet.cbsr.readPortCb = function(cbFunction) {
+      hwioRet.registeredCallbackList.readPortCbArr.push(cbFunction);
+    };
+
+    hwioRet.cbsr.currentInterruptCb = function(cbFunction) {
+      hwioRet.registeredCallbackList.interruptCbArr.push(cbFunction);
+    };
+
+    hwioRet.getKeyBoardKeysHooks = function(emuState, event, eventType) {
+      if (eventType === "down") {
+        if (emuState.ctrl.emulationRunning) {
+          if (event.key === 'a') {
+            emuState.ctrl.hwPortData[0x01] |= 0x20;
+          }
+    
+          if (event.key === 'd') {
+            emuState.ctrl.hwPortData[0x01] |= 0x40;
+          }
+    
+          if (event.key === ' ') {
+            emuState.ctrl.hwPortData[0x01] |= 0x10;;
+          }
+    
+          if (event.key === '1') {
+            emuState.ctrl.hwPortData[0x01] |= 0x04;;
+          }
+    
+          if (event.key === 'c') {
+            emuState.ctrl.hwPortData[0x01] |= 0x01;;
+          }
+        }
+      } else if (eventType === "up") {
+        if (emuState.ctrl.emulationRunning) {
+          if (event.key === 'a') {
+            emuState.ctrl.hwPortData[0x01] &= 0xff - 0x20;
+          }
+    
+          if (event.key === 'd') {
+            emuState.ctrl.hwPortData[0x01] &= 0xff - 0x40;
+          }
+    
+          if (event.key === ' ') {
+            emuState.ctrl.hwPortData[0x01] &= 0xff - 0x10;;
+          }
+    
+          if (event.key === '1') {
+            emuState.ctrl.hwPortData[0x01] &= 0xff - 0x04;;
+          }
+    
+          if (event.key === 'c') {
+            emuState.ctrl.hwPortData[0x01] &= 0xff - 0x01;;
+          }
+        }
+      }
+    }
+
     hwioRet.writePort = function(emuState, address, value, throwError = true) {
       emuState.cpu.pins.wr = true;
       emuState.cpu.pins.iorq = true;
 
-      if (typeof(emuState.hwio.cbs.writePort) === "function") {
-        emuState.hwio.cbs.writePort(emuState, address, value);
-      } else {
+      if (emuState.hwio.registeredCallbackList.writePortCbArr.length === 0) {
         if (throwError) {
-          throw { type: "Error", moduleName: hwioRet.type, functionName: "writePort", reason: "No writePort callback function specified. Add one with: emuState.hwio.cbs.writePort = function(emuState, address, value, throwError){...} ", args: arguments };
+          throw { type: "Error", moduleName: hwioRet.type, functionName: "writePort", reason: "No writePort callback function specified. Add one with: emuState.hwio.cbsr.writePortCb(function(emuState, address, value, throwError){...}); ", args: arguments };
         }
       }
+
+      emuState.hwio.registeredCallbackList.writePortCbArr.forEach(cbFunction => {
+        if (typeof(cbFunction) === "function") {
+          cbFunction(emuState, address, value);
+        }
+      });
 
       emuState.cpu.pins.wr = false;
       emuState.cpu.pins.iorq = false;
@@ -50,15 +120,19 @@ if (!objEmulatorFactory) {
       emuState.cpu.pins.rd = true;
       emuState.cpu.pins.iorq = true;
 
-      var tmpRead = 0x00;
-
-      if (typeof(emuState.hwio.cbs.readPort) === "function") {
-        tmpRead = emuState.hwio.cbs.readPort(emuState, address);
-      } else {
+      if (emuState.hwio.registeredCallbackList.readPortCbArr.length === 0) {
         if (throwError) {
-          throw { type: "Error", moduleName: hwioRet.type, functionName: "readPort", reason: "No readPort callback function specified. Add one with: emuState.hwio.cbs.readPort = function(emuState, address, throwError){...} ", args: arguments };
+          throw { type: "Error", moduleName: hwioRet.type, functionName: "readPort", reason: "No readPort callback function specified. Add one with: emuState.hwio.cbsr.readPortCb(function(emuState, address, throwError){...}); ", args: arguments };
         }
       }
+
+      var tmpRead = 0x00;
+
+      emuState.hwio.registeredCallbackList.readPortCbArr.forEach(cbFunction => {
+        if (typeof(cbFunction) === "function") {
+          tmpRead = cbFunction(emuState, address);
+        }
+      });
 
       emuState.cpu.pins.rd = false;
       emuState.cpu.pins.iorq = false;
@@ -84,9 +158,12 @@ if (!objEmulatorFactory) {
         emuState.alu.push(emuState, emuState.cpu.getRegister(emuState, 'pc'));
   
         emuState.cpu.setRegister(emuState, 'pc', emuState.hwio.interrupt.currentInterrupt);
-        if (typeof(emuState.hwio.cbs.cInterrupt) === "function") {
-          emuState.hwio.cbs.cInterrupt(emuState, emuState.hwio.interrupt.currentInterrupt);
-        }
+
+        emuState.hwio.registeredCallbackList.interruptCbArr.forEach(cbFunction => {
+          if (typeof(cbFunction) === "function") {
+            cbFunction(emuState, emuState.hwio.interrupt.currentInterrupt);
+          }
+        });
       }
 
       return true

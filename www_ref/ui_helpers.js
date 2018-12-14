@@ -523,6 +523,7 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   var memSliceSP = emu.mmu.memory.slice(emu.cpu.registers.sp, emu.cpu.registers.sp + 8);
 
   for (var k = 0; k < memSliceSP.length; k++) {
+
     var mem1 = memSliceSP[k];
     var mem2 = memSliceSP[k + 1];
 
@@ -532,6 +533,10 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
 
     if (!mem2) {
       mem2 = 0;
+    }
+
+    if (mem1 === 0 && mem2 === 0) {
+      break;
     }
 
     var newSPPrint = {

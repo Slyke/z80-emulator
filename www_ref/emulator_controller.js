@@ -6,6 +6,7 @@ var loadSpaceInvadersByDefault = getLocalStorage('loadSpaceInvadersByDefault', t
 var emuCoreName = getLocalStorage('emulatorCore', "Z80_Arcade");
 var gameScale = getLocalStorage('gameScale', 1.5);
 var settingsVersion = getLocalStorage('settingsVersion', "0.201809112326.0");
+var internalResolution = getLocalStorage('resolution', '{"w":1080,"h":720}');
 var fontStyle = "monospace"; // "Megrim";
 
 // Video transcoder and vars
@@ -29,7 +30,6 @@ var previouslyExecInstructions = [];
 
 var usingVideoDriver;
 var usingCPUCore;
-var usingCPUCoreOverload;
 
 var frameCount = 0;
 var fpsNumber = 0;
@@ -96,10 +96,15 @@ function animateLoop() {
 
   uiPreframeSetup(canvasControl, objEmu, persistantObjects, showMemoryInspector);
 
-  if (cpuRunning && objEmu.gpu.memoryMapDiffFrameBuffer.length > 1) {
-    objEmu.gpu.renderMemoryMap(objEmu, memoryMapImageData, true);
+  if (objEmu.ctrl.emulationRunning) {
+    if (objEmu.gpu.memoryMapDiffFrameBuffer.length > 1) {
+      objEmu.gpu.renderMemoryMap(objEmu, memoryMapImageData, true);
+    }
+    if (objEmu.gpu.videoArrayDiffFrameBuffer.length > 1) {
+      objEmu.gpu.renderVideo(objEmu, gameScreenImageData);
+    }
   }
-  
+
   if (showFPS) {
     var lblFPS = {
       "x": 0,
@@ -141,12 +146,19 @@ function setupCanvas() {
 
   objCanvas.imageSmoothingEnabled = true;
   canvasControl = new CanvasControl();
+  var screenRes;
+  try {
+    screenRes = JSON.parse(internalResolution);
+  } catch {
+    screenRes = { "w": 1080, "h": 720 };
+  }
   // This is the canvas resolution, NOT the size.
-  objCanvas.width = 1080;
-  objCanvas.height = 720;
+  objCanvas.width = screenRes.w;
+  objCanvas.height = screenRes.h;
   objContext = canvasControl.setupCanvas(objCanvas, null, {backgroundColor: "#000000"});
   objContext.font = "12px " + fontStyle;
   setupEventHandlers(objCanvas, canvasControl);
+
   screenDimensions = [objCanvas.width, objCanvas.height];
   gameScreenImageData = objContext.createImageData(objEmu.gpu.resolution[0], objEmu.gpu.resolution[1]);
   memoryMapImageData = objContext.createImageData(0xff, 0xff);

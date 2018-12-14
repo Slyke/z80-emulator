@@ -111,7 +111,7 @@ function injectBinaryDataIntoMemory(emu, filename, memoryOffset = 0, cb) {
 }
 
 function loadSpaceInvadersGame() {
-  objEmu.ctrl.resetSystem(objEmulatorFactory, true, true, true, true);
+  objEmu.ctrl.resetSystem(objEmulatorFactory, true, true, false, true);
   
   injectBinaryDataIntoMemory(objEmu, "../rom/invaders/invaders1.h.bin", 0, () => {
     loadedMemoryFilesList.push("invaders1.h.bin");
