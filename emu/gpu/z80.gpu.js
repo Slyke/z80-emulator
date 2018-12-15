@@ -21,10 +21,19 @@ if (!objEmulatorFactory) {
       type: "gpu",
       resolution: [224, 256],
       memoryMapDiffFrameBuffer: [],
-      videoArrayDiffFrameBuffer: []
+      videoArrayDiffFrameBuffer: [],
+      videoRawData: null
     };
 
-    gpuRet.renderVideo = function(emu, videoArrayImageData, renderStateChangeCb) {
+    gpuRet.initialise = function(emu, initialVideo) {
+      emu.gpu.videoRawData = initialVideo;
+    };
+
+    gpuRet.getVideoDisplay = function(emu) {
+      return emu.gpu.videoRawData;
+    }
+
+    gpuRet.renderVideo = function(emu, renderStateChangeCb) {
       if (typeof(renderStateChangeCb) === "function") {
         renderStateChangeCb(true);
       }
@@ -35,7 +44,7 @@ if (!objEmulatorFactory) {
         var y = ~(((normalizedPixelIndex & 0x1f) * 8) & 0xff) & 0xff;
   
         for(var k = 0; k < 8; ++k) {
-          emu.gpu.writeGamePixel(videoArrayImageData, x, y, emu.mmu.memory[memoryIndex], k);
+          emu.gpu.writeGamePixel(emu.gpu.videoRawData, x, y, emu.mmu.memory[memoryIndex], k);
         }
       }
 

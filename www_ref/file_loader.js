@@ -118,6 +118,7 @@ function loadSpaceInvadersGame() {
     romLoaded++;
     if (romLoaded === 4) {
       objEmu.ctrl.resetSystem(objEmulatorFactory, false, true, true, false);
+      objEmu.gpu.initialise(objEmu, objContext.createImageData(objEmu.gpu.resolution[0], objEmu.gpu.resolution[1]));
     }
   });
   injectBinaryDataIntoMemory(objEmu, "../rom/invaders/invaders2.g.bin", 0x800, () => {
@@ -125,6 +126,7 @@ function loadSpaceInvadersGame() {
     romLoaded++;
     if (romLoaded === 4) {
       objEmu.ctrl.resetSystem(objEmulatorFactory, false, true, true, false);
+      objEmu.gpu.initialise(objEmu, objContext.createImageData(objEmu.gpu.resolution[0], objEmu.gpu.resolution[1]));
     }
   });
   injectBinaryDataIntoMemory(objEmu, "../rom/invaders/invaders3.f.bin", 0x1000, () => {
@@ -132,6 +134,7 @@ function loadSpaceInvadersGame() {
     romLoaded++;
     if (romLoaded === 4) {
       objEmu.ctrl.resetSystem(objEmulatorFactory, false, true, true, false);
+      objEmu.gpu.initialise(objEmu, objContext.createImageData(objEmu.gpu.resolution[0], objEmu.gpu.resolution[1]));
     }
   });
   injectBinaryDataIntoMemory(objEmu, "../rom/invaders/invaders4.e.bin", 0x1800, () => {
@@ -139,6 +142,7 @@ function loadSpaceInvadersGame() {
     romLoaded++;
     if (romLoaded === 4) {
       objEmu.ctrl.resetSystem(objEmulatorFactory, false, true, true, false);
+      objEmu.gpu.initialise(objEmu, objContext.createImageData(objEmu.gpu.resolution[0], objEmu.gpu.resolution[1]));
     }
   });
 }

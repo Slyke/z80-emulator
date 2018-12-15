@@ -18,11 +18,6 @@ if (!objEmulatorFactory) {
     var hwioRet = {
       name: "z80",
       type: "hwio",
-      cbs: {
-        cInterrupt: undefined,
-        readPort: undefined,
-        writePort: undefined
-      },
       registeredCallbackList: {
         writePortCbArr: [],
         readPortCbArr: [],

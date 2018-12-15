@@ -36,7 +36,7 @@ if (!objEmulatorFactory) {
 
     utilsRet.getKeyBoardKeysText = function() {
       return [
-        "Z80 Game Keys:",
+        "Z80 Arcade Game Keys:",
         "     A - Left        D - Right",
         "     Spacebar - Shoot",
         "     1 - Player 1    2 - Player 2",

@@ -5,9 +5,10 @@ var consoleOutWarnings = getLocalStorage('consoleOutWarnings', true) !== "false"
 var loadSpaceInvadersByDefault = getLocalStorage('loadSpaceInvadersByDefault', true) !== "false";
 var emuCoreName = getLocalStorage('emulatorCore', "Z80_Arcade");
 var gameScale = getLocalStorage('gameScale', 1.5);
-var settingsVersion = getLocalStorage('settingsVersion', "0.201809112326.0");
 var internalResolution = getLocalStorage('resolution', '{"w":1080,"h":720}');
-var fontStyle = "monospace"; // "Megrim";
+var memoryMapResolution = getLocalStorage('memoryMapResolution', '{ "w": "0xff", "h": "0xff", "scale": "1.1" }');
+var fontStyle = getLocalStorage('canvasfontStyle', '12px monospace');// "Megrim";
+var settingsVersion = getLocalStorage('settingsVersion', "0.201809112326.0");
 
 // Video transcoder and vars
 var gameScreenRenderData = new Image();
@@ -25,8 +26,8 @@ var emuCtrlList = [];
 var objEmu;
 var loadedMemoryFilesList = [];
 var romLoaded = 0;
-var cpuRunning = false;
 var previouslyExecInstructions = [];
+var memoryMapResolutionRes;
 
 var usingVideoDriver;
 var usingCPUCore;
@@ -100,9 +101,10 @@ function animateLoop() {
     if (objEmu.gpu.memoryMapDiffFrameBuffer.length > 1) {
       objEmu.gpu.renderMemoryMap(objEmu, memoryMapImageData, true);
     }
-    if (objEmu.gpu.videoArrayDiffFrameBuffer.length > 1) {
-      objEmu.gpu.renderVideo(objEmu, gameScreenImageData);
-    }
+  }
+
+  if (objEmu.gpu.getVideoDisplay(objEmu)) {
+    gameScreenImageData = objEmu.gpu.getVideoDisplay(objEmu);
   }
 
   if (showFPS) {
@@ -132,10 +134,12 @@ function animateLoop() {
       canvasControl.canvasContext.putImageData(gameScreenImageData, relToAbs(gameTopLeftCoord[0], 0), relToAbs(gameTopLeftCoord[1], 1));
     }
     
-    if (showMemoryInspector) {
-      canvasControl.canvasContext.putImageData(memoryMapImageData, relToAbs(0.75, 0), relToAbs(0.63, 1));
+    if (memoryMapResolutionRes.scale === 1) {
+      if (showMemoryInspector) {
+        canvasControl.canvasContext.putImageData(memoryMapImageData, relToAbs(0.75, 0), relToAbs(0.63, 1));
+      }
     }
-    
+
     requestAnimationFrame(() => { animateLoop(); });
   }
 }
@@ -149,19 +153,49 @@ function setupCanvas() {
   var screenRes;
   try {
     screenRes = JSON.parse(internalResolution);
-  } catch {
-    screenRes = { "w": 1080, "h": 720 };
+  } catch (err) {
+    localStorage.clear();
+    throw {
+      type: "Error",
+      moduleName: "[MAIN]",
+      functionName: "setupCanvas",
+      reason: "Failed to decode internal resolution localStorage settings.",
+      error: err,
+      args: arguments,
+      emulatorState: null,
+      opCodes: ""
+    };
   }
+
+  try {
+    memoryMapResolutionRes = JSON.parse(memoryMapResolution);
+    memoryMapResolutionRes.w = parseInt(memoryMapResolutionRes.w);
+    memoryMapResolutionRes.h = parseInt(memoryMapResolutionRes.h);
+    memoryMapResolutionRes.scale = parseFloat(memoryMapResolutionRes.scale);
+  } catch (err) {
+    localStorage.clear();
+    throw {
+      type: "Error",
+      moduleName: "[MAIN]",
+      functionName: "setupCanvas",
+      reason: "Failed to decode memory map localStorage settings.",
+      error: err,
+      args: arguments,
+      emulatorState: null,
+      opCodes: ""
+    };
+  }
+
   // This is the canvas resolution, NOT the size.
   objCanvas.width = screenRes.w;
   objCanvas.height = screenRes.h;
   objContext = canvasControl.setupCanvas(objCanvas, null, {backgroundColor: "#000000"});
-  objContext.font = "12px " + fontStyle;
+  objContext.font = fontStyle;
   setupEventHandlers(objCanvas, canvasControl);
 
   screenDimensions = [objCanvas.width, objCanvas.height];
   gameScreenImageData = objContext.createImageData(objEmu.gpu.resolution[0], objEmu.gpu.resolution[1]);
-  memoryMapImageData = objContext.createImageData(0xff, 0xff);
+  memoryMapImageData = objContext.createImageData(memoryMapResolutionRes.w, memoryMapResolutionRes.h);
 
   for (var i = 0; i < memoryMapImageData.data.length; i++) {
     memoryMapImageData.data[i] = ((i % 4) !== 3 ? 0 : 255);
@@ -192,6 +226,8 @@ function initialiseHardwareEmulation(emu) {
 function init() {
   setupCpu();
   setupCanvas();
+
+  objEmu.gpu.initialise(objEmu, gameScreenImageData);
 
   if (loadSpaceInvadersByDefault) {
     loadSpaceInvadersGame();

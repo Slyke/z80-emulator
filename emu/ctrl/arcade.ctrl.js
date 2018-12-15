@@ -133,6 +133,12 @@ if (!objEmulatorFactory) {
         }
       });
 
+      emu.hwio.cbsr.currentInterruptCb(function(emu, interrupt) {
+        if (emu.gpu.videoArrayDiffFrameBuffer.length > 1) {
+          emu.gpu.renderVideo(emu, emu.gpu.videoRawData);
+        }
+      });
+
       // Looks like the game is communicating with some external hardware. This function mocks that hardware. Game crashes without it.
       emu.hwio.cbsr.readPortCb(function(emu, portCh) {
         if (portCh === 0x03) {

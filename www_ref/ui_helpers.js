@@ -1,8 +1,8 @@
 
-function Uint8ClampedArrayImageToPNG(arrayImage, gameDimensions) {
+function Uint8ClampedArrayImageToPNG(arrayImage, pngDimensions) {
   var resizeCanvas = document.createElement("canvas");
-  resizeCanvas.height = gameDimensions[1];
-  resizeCanvas.width = gameDimensions[0];
+  resizeCanvas.height = pngDimensions[1];
+  resizeCanvas.width = pngDimensions[0];
   var resizeContext = resizeCanvas.getContext("2d");
 
   resizeContext.putImageData(arrayImage, 0, 0);
@@ -14,14 +14,23 @@ function Uint8ClampedArrayImageToPNG(arrayImage, gameDimensions) {
 
 function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspector) {
 
-  var uiFragments = {
-    disassemblerBase: [0.5, 0.26],
-    loadedRomFilesBase: [0.5, 0.8],
-    memoryMapBase: [0.75, 0.61],
-    portInfoBase: [0.5, 0.61],
-    stackPointerInfoBase: [0.5, 0.18],
-    instructionKeysText: [0.05, 0.5],
-    cpuChecksumBase: [0.5, 0.94]
+  var uiSettings = {
+    locations: {
+      flagsBase: [0.5, 0.01],
+      debugBase: [0.65, 0.01],
+      fRegisterBase: [0.82, 0.01],
+      disassemblerBase: [0.5, 0.26],
+      loadedRomFilesBase: [0.5, 0.8],
+      memoryMapBase: [0.75, 0.61],
+      portInfoBase: [0.5, 0.61],
+      stackPointerInfoBase: [0.5, 0.18],
+      instructionKeysText: [0.05, 0.5],
+      cpuChecksumBase: [0.5, 0.94]
+    },
+    separators: {
+      small: 0.015,
+      standard: 0.02
+    }
   };
 
   var helpText = [
@@ -44,8 +53,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
 
   helpText.forEach(function(helpIndex, i) {
     var objHelpText = {
-      "x": relToAbs(uiFragments.instructionKeysText[0], 0),
-      "y": ((emu.gpu.resolution[1] * gameScale) + relToAbs(0.02, 1) + relToAbs(gameTopLeftCoord[1], 1)) + (relToAbs(i * 0.02, 1)),
+      "x": relToAbs(uiSettings.locations.instructionKeysText[0], 0),
+      "y": ((emu.gpu.resolution[1] * gameScale) + relToAbs(uiSettings.separators.standard, 1) + relToAbs(gameTopLeftCoord[1], 1)) + (relToAbs(i * uiSettings.separators.standard, 1)),
       "name":"lblHelpText" + i,
       "text": helpIndex,
       "shape":"text",
@@ -60,22 +69,23 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
 
   if (gameScale !== 1) {
     gameScreenRenderData = Uint8ClampedArrayImageToPNG(gameScreenImageData, emu.gpu.resolution);
+
+    persistantObjects.gameScreen = {
+      "x": relToAbs(gameTopLeftCoord[0], 0),
+      "y": relToAbs(gameTopLeftCoord[1], 1),
+      "w": emu.gpu.resolution[0],
+      "h": emu.gpu.resolution[1],
+      "name":"gameScreen",
+      "sw": emu.gpu.resolution[0] * gameScale,
+      "sh": emu.gpu.resolution[1] * gameScale,
+      "src": {objImage: gameScreenRenderData},
+      "shape":"image",
+      "render":function(self) {
+        canvasControl.drawImage(self.src, self.x, self.y, self.sw, self.sh, null, null, self.w, self.h, canvasControl.canvasContext);
+      },
+      "visible":true
+    };
   }
-  persistantObjects.gameScreen = {
-    "x": relToAbs(gameTopLeftCoord[0], 0),
-    "y": relToAbs(gameTopLeftCoord[1], 1),
-    "w": emu.gpu.resolution[0],
-    "h": emu.gpu.resolution[1],
-    "name":"gameScreen",
-    "sw": emu.gpu.resolution[0] * gameScale,
-    "sh": emu.gpu.resolution[1] * gameScale,
-    "src": {objImage: gameScreenRenderData},
-    "shape":"image",
-    "render":function(self) {
-      canvasControl.drawImage(self.src, self.x, self.y, self.sw, self.sh, null, null, self.w, self.h, canvasControl.canvasContext);
-    },
-    "visible":true
-  };
 
   persistantObjects.screenBox = {
     "x": relToAbs(gameTopLeftCoord[0], 0),
@@ -92,8 +102,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   // var disObj = runningCPU.disassemble8080OP(runningCPU, emu.cpu.registers.pc);
 
   persistantObjects.debug.label = {
-    "x": relToAbs(0.65, 0),
-    "y": relToAbs(0.01, 1),
+    "x": relToAbs(uiSettings.locations.debugBase[0], 0),
+    "y": relToAbs(uiSettings.locations.debugBase[1], 1),
     "name":"lblCPUDebugLabel",
     "text":"Debug: ",
     "shape":"text",
@@ -115,8 +125,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   }
 
   persistantObjects.debug.execCount = {
-    "x": relToAbs(0.65, 0),
-    "y": relToAbs(0.025, 1),
+    "x": relToAbs(uiSettings.locations.debugBase[0], 0),
+    "y": relToAbs(uiSettings.locations.debugBase[1] + uiSettings.separators.small, 1),
     "name":"lblCPUDebugExecCount",
     "text":"  Exec Count: " + execCount,
     "shape":"text",
@@ -139,8 +149,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   }
 
   persistantObjects.debug.modeClock = {
-    "x": relToAbs(0.65, 0),
-    "y": relToAbs(0.04, 1),
+    "x": relToAbs(uiSettings.locations.debugBase[0], 0),
+    "y": relToAbs(uiSettings.locations.debugBase[1] + (uiSettings.separators.small * 2), 1),
     "name":"lblCPUDebugModeClock",
     "text":"  Mode Clock: " + pad(emu.cpu.counts.modeClock, 5),
     "shape":"text",
@@ -151,8 +161,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   };
 
   persistantObjects.debug.totalCycles = {
-    "x": relToAbs(0.65, 0),
-    "y": relToAbs(0.06, 1),
+    "x": relToAbs(uiSettings.locations.debugBase[0], 0),
+    "y": relToAbs(uiSettings.locations.debugBase[1] + (uiSettings.separators.small * 2) + uiSettings.separators.standard, 1),
     "name":"lblCPUDebugCyclesTotal",
     "text":"  CPU Cycles: " + cpuCount + " Total",
     "shape":"text",
@@ -163,8 +173,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   };
 
   persistantObjects.debug.cycles = {
-    "x": relToAbs(0.65, 0),
-    "y": relToAbs(0.075, 1),
+    "x": relToAbs(uiSettings.locations.debugBase[0], 0),
+    "y": relToAbs(uiSettings.locations.debugBase[1] + (uiSettings.separators.small * 3) + uiSettings.separators.standard, 1),
     "name":"lblCPUDebugCycles",
     "text":"  CPU Cycle : " + pad(emu.cpu.counts.cycles, 5),
     "shape":"text",
@@ -175,11 +185,10 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   };
 
   persistantObjects.debug.pendingScreenUpdates = {
-    "x": relToAbs(0.65, 0),
-    "y": relToAbs(0.095, 1),
+    "x": relToAbs(uiSettings.locations.debugBase[0], 0),
+    "y": relToAbs(uiSettings.locations.debugBase[1] + (uiSettings.separators.small * 3) + (uiSettings.separators.standard * 2), 1),
     "name":"lblCPUDebugCycles",
-    // "text":"  Penren    : " + pad(usingVideoDriver.videoMemory.length, 4),
-    "text":"  Penren    : " + pad(-1, 4),
+    "text":"  Penren    : " + pad(emu.gpu.videoArrayDiffFrameBuffer.length, 4),
     "shape":"text",
     "render":function(self) {
       canvasControl.drawText(self.x, self.y, self.text, self, null, null, {"fillStyle":"#00FFFF"});
@@ -188,8 +197,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   };
 
   persistantObjects.debug.cpuType = {
-    "x": relToAbs(0.65, 0),
-    "y": relToAbs(0.115, 1),
+    "x": relToAbs(uiSettings.locations.debugBase[0], 0),
+    "y": relToAbs(uiSettings.locations.debugBase[1] + (uiSettings.separators.small * 3) + (uiSettings.separators.standard * 3), 1),
     "name":"lblCPUDebugCpuType",
     "text":"  CPU Type  : " + emu.cpu.name,
     "shape":"text",
@@ -200,8 +209,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   };
 
   persistantObjects.debug.emuType = {
-    "x": relToAbs(0.65, 0),
-    "y": relToAbs(0.135, 1),
+    "x": relToAbs(uiSettings.locations.debugBase[0], 0),
+    "y": relToAbs(uiSettings.locations.debugBase[1] + (uiSettings.separators.small * 3) + (uiSettings.separators.standard * 4), 1),
     "name":"lblCPUDebugEmuType",
     "text":"  Emu Type  : " + emu.ctrl.name,
     "shape":"text",
@@ -212,8 +221,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   };
 
   persistantObjects.debug.displayDriver = {
-    "x": relToAbs(0.65, 0),
-    "y": relToAbs(0.155, 1),
+    "x": relToAbs(uiSettings.locations.debugBase[0], 0),
+    "y": relToAbs(uiSettings.locations.debugBase[1] + (uiSettings.separators.small * 3) + (uiSettings.separators.standard * 5), 1),
     "name":"lblCPUDebugDisplayDriverMode",
     "text":"  DispDriver: " + emu.gpu.name,
     "shape":"text",
@@ -222,10 +231,10 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
     },
     "visible": true
   };
-
+  
   persistantObjects.flags.label = {
-    "x": relToAbs(0.5, 0),
-    "y": relToAbs(0.01, 1),
+    "x": relToAbs(uiSettings.locations.flagsBase[0], 0),
+    "y": relToAbs(uiSettings.locations.flagsBase[1], 1),
     "name":"lblCPUFlagLabel",
     "text":"CPU Flags: ",
     "shape":"text",
@@ -236,8 +245,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   };
 
   persistantObjects.flags.pc = {
-    "x": relToAbs(0.5, 0),
-    "y": relToAbs(0.025, 1),
+    "x": relToAbs(uiSettings.locations.flagsBase[0], 0),
+    "y": relToAbs(uiSettings.locations.flagsBase[1] + uiSettings.separators.small, 1),
     "name":"lblCPUFlagPC",
     "text":"  PC (Address): " + pad(emu.cpu.registers.pc.toString(16), 4),
     "shape":"text",
@@ -248,8 +257,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   };
 
   persistantObjects.flags.sp = {
-    "x": relToAbs(0.5, 0),
-    "y": relToAbs(0.04, 1),
+    "x": relToAbs(uiSettings.locations.flagsBase[0], 0),
+    "y": relToAbs(uiSettings.locations.flagsBase[1] + (uiSettings.separators.small * 2), 1),
     "name":"lblCPUFlagSP",
     "text":"  SP (Address): " + pad(emu.cpu.registers.sp.toString(16), 4),
     "shape":"text",
@@ -260,8 +269,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   };
 
   persistantObjects.flags.ix = {
-    "x": relToAbs(0.5, 0),
-    "y": relToAbs(0.06, 1),
+    "x": relToAbs(uiSettings.locations.flagsBase[0], 0),
+    "y": relToAbs(uiSettings.locations.flagsBase[1] + (uiSettings.separators.small * 2) + uiSettings.separators.standard, 1),
     "name":"lblCPUFlagIX",
     "text":"  IX          : " + pad(emu.cpu.registers.ix.toString(16), 4),
     "shape":"text",
@@ -272,8 +281,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   };
 
   persistantObjects.flags.iy = {
-    "x": relToAbs(0.5, 0),
-    "y": relToAbs(0.075, 1),
+    "x": relToAbs(uiSettings.locations.flagsBase[0], 0),
+    "y": relToAbs(uiSettings.locations.flagsBase[1] + (uiSettings.separators.small * 3) + uiSettings.separators.standard, 1),
     "name":"lblCPUFlagIY",
     "text":"  IY          : " + pad(emu.cpu.registers.iy.toString(16), 4),
     "shape":"text",
@@ -284,8 +293,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   };
 
   persistantObjects.flags.af = {
-    "x": relToAbs(0.5, 0),
-    "y": relToAbs(0.095, 1),
+    "x": relToAbs(uiSettings.locations.flagsBase[0], 0),
+    "y": relToAbs(uiSettings.locations.flagsBase[1] + (uiSettings.separators.small * 3) + (uiSettings.separators.standard * 2), 1),
     "name":"lblCPUFlagA",
     "text":"  A F:         " + pad(emu.cpu.registers.a.toString(16), 2) + " " + pad(emu.cpu.registers.f.toString(16), 2),
     "shape":"text",
@@ -296,8 +305,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   };
 
   persistantObjects.flags.bc = {
-    "x": relToAbs(0.5, 0),
-    "y": relToAbs(0.115, 1),
+    "x": relToAbs(uiSettings.locations.flagsBase[0], 0),
+    "y": relToAbs(uiSettings.locations.flagsBase[1] + (uiSettings.separators.small * 3) + (uiSettings.separators.standard * 3), 1),
     "name":"lblCPUFlagB",
     "text":"  B C:         " + pad(emu.cpu.registers.b.toString(16), 2) + " " + pad(emu.cpu.registers.c.toString(16), 2),
     "shape":"text",
@@ -308,8 +317,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   };
 
   persistantObjects.flags.de = {
-    "x": relToAbs(0.5, 0),
-    "y": relToAbs(0.135, 1),
+    "x": relToAbs(uiSettings.locations.flagsBase[0], 0),
+    "y": relToAbs(uiSettings.locations.flagsBase[1] + (uiSettings.separators.small * 3) + (uiSettings.separators.standard * 4), 1),
     "name":"lblCPUFlagD",
     "text":"  D E:         " + pad(emu.cpu.registers.d.toString(16), 2) + " " + pad(emu.cpu.registers.e.toString(16), 2),
     "shape":"text",
@@ -320,8 +329,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   };
 
   persistantObjects.flags.hl = {
-    "x": relToAbs(0.5, 0),
-    "y": relToAbs(0.155, 1),
+    "x": relToAbs(uiSettings.locations.flagsBase[0], 0),
+    "y": relToAbs(uiSettings.locations.flagsBase[1] + (uiSettings.separators.small * 3) + (uiSettings.separators.standard * 5), 1),
     "name":"lblCPUFlagH",
     "text":"  H L:         " + pad(emu.cpu.registers.h.toString(16), 2) + " " + pad(emu.cpu.registers.l.toString(16), 2),
     "shape":"text",
@@ -332,8 +341,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   };
 
   persistantObjects.cc.label = {
-    "x": relToAbs(0.82, 0),
-    "y": relToAbs(0.01, 1),
+    "x": relToAbs(uiSettings.locations.fRegisterBase[0], 0),
+    "y": relToAbs(uiSettings.locations.fRegisterBase[1], 1),
     "name":"lblCPUCCLabel",
     "text":"F Register Flags: ",
     "shape":"text",
@@ -344,8 +353,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   };
 
   persistantObjects.cc.c = {
-    "x": relToAbs(0.82, 0),
-    "y": relToAbs(0.03, 1),
+    "x": relToAbs(uiSettings.locations.fRegisterBase[0], 0),
+    "y": relToAbs(uiSettings.locations.fRegisterBase[1] + uiSettings.separators.standard, 1),
     "name":"lblCPUCCC",
     "text":"  Carry (0x01):        " + ((emu.cpu.registers.f & 0x01) === 0x01).toString(),
     "shape":"text",
@@ -356,8 +365,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   };
 
   persistantObjects.cc.p = {
-    "x": relToAbs(0.82, 0),
-    "y": relToAbs(0.05, 1),
+    "x": relToAbs(uiSettings.locations.fRegisterBase[0], 0),
+    "y": relToAbs(uiSettings.locations.fRegisterBase[1] + (uiSettings.separators.standard * 2), 1),
     "name":"lblCPUCCHC",
     "text":"  Parity (0x04):       " + ((emu.cpu.registers.f & 0x04) === 0x04).toString(),
     "shape":"text",
@@ -368,8 +377,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   };
 
   persistantObjects.cc.hc = {
-    "x": relToAbs(0.82, 0),
-    "y": relToAbs(0.07, 1),
+    "x": relToAbs(uiSettings.locations.fRegisterBase[0], 0),
+    "y": relToAbs(uiSettings.locations.fRegisterBase[1] + (uiSettings.separators.standard * 3), 1),
     "name":"lblCPUCCHC",
     "text":"  Half Carry (0x10):   " + ((emu.cpu.registers.f & 0x10) === 0x10).toString(),
     "shape":"text",
@@ -380,8 +389,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   };
 
   persistantObjects.cc.interrupt = {
-    "x": relToAbs(0.82, 0),
-    "y": relToAbs(0.09, 1),
+    "x": relToAbs(uiSettings.locations.fRegisterBase[0], 0),
+    "y": relToAbs(uiSettings.locations.fRegisterBase[1] + (uiSettings.separators.standard * 4), 1),
     "name":"lblCPUCCInt",
     "text":"  Interupt (0x20):     " + ((emu.cpu.registers.f & 0x20) === 0x20).toString(),
     "shape":"text",
@@ -392,8 +401,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   };
 
   persistantObjects.cc.zero = {
-    "x": relToAbs(0.82, 0),
-    "y": relToAbs(0.11, 1),
+    "x": relToAbs(uiSettings.locations.fRegisterBase[0], 0),
+    "y": relToAbs(uiSettings.locations.fRegisterBase[1] + (uiSettings.separators.standard * 5), 1),
     "name":"lblCPUCCZero",
     "text":"  Zero (0x40):         " + ((emu.cpu.registers.f & 0x40) === 0x40).toString(),
     "shape":"text",
@@ -404,8 +413,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   };
 
   persistantObjects.cc.sign = {
-    "x": relToAbs(0.82, 0),
-    "y": relToAbs(0.13, 1),
+    "x": relToAbs(uiSettings.locations.fRegisterBase[0], 0),
+    "y": relToAbs(uiSettings.locations.fRegisterBase[1] + (uiSettings.separators.standard * 6), 1),
     "name":"lblCPUCCZero",
     "text":"  Sign (0x80):         " + ((emu.cpu.registers.f & 0x80) === 0x80).toString(),
     "shape":"text",
@@ -454,8 +463,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   }
 
   persistantObjects.stackPointer.label = {
-    "x": relToAbs(uiFragments.stackPointerInfoBase[0], 0),
-    "y": relToAbs(uiFragments.stackPointerInfoBase[1], 1),
+    "x": relToAbs(uiSettings.locations.stackPointerInfoBase[0], 0),
+    "y": relToAbs(uiSettings.locations.stackPointerInfoBase[1], 1),
     "name":"lblCPUSPHelper",
     "text":"Stack Pointer Values (SP+0 to SP+8)",
     "shape":"text",
@@ -466,8 +475,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   };
 
   persistantObjects.stackPointer.labelA = {
-    "x": relToAbs(uiFragments.stackPointerInfoBase[0] - 0.005, 0),
-    "y": relToAbs(uiFragments.stackPointerInfoBase[1] + 0.02, 1),
+    "x": relToAbs(uiSettings.locations.stackPointerInfoBase[0] - 0.005, 0),
+    "y": relToAbs(uiSettings.locations.stackPointerInfoBase[1] + uiSettings.separators.standard, 1),
     "name":"lblCPUSPA",
     "text":"  A",
     "shape":"text",
@@ -478,8 +487,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   };
 
   persistantObjects.stackPointer.labelV = {
-    "x": relToAbs(uiFragments.stackPointerInfoBase[0] - 0.005, 0),
-    "y": relToAbs(uiFragments.stackPointerInfoBase[1] + 0.04, 1),
+    "x": relToAbs(uiSettings.locations.stackPointerInfoBase[0] - 0.005, 0),
+    "y": relToAbs(uiSettings.locations.stackPointerInfoBase[1] + 0.04, 1),
     "name":"lblCPUSPV",
     "text":"  V",
     "shape":"text",
@@ -490,8 +499,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   };
 
   persistantObjects.memoryInspect.label = {
-    "x": relToAbs(uiFragments.disassemblerBase[0], 0),
-    "y": relToAbs(uiFragments.disassemblerBase[1], 1),
+    "x": relToAbs(uiSettings.locations.disassemblerBase[0], 0),
+    "y": relToAbs(uiSettings.locations.disassemblerBase[1], 1),
     "name":"lblCPUMEMInspect",
     "text":"Memory Inspector",
     "shape":"text",
@@ -502,8 +511,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   };
 
   persistantObjects.memoryInspect.helper = {
-    "x": relToAbs(uiFragments.disassemblerBase[0], 0),
-    "y": relToAbs(uiFragments.disassemblerBase[1] + 0.02, 1),
+    "x": relToAbs(uiSettings.locations.disassemblerBase[0], 0),
+    "y": relToAbs(uiSettings.locations.disassemblerBase[1] + uiSettings.separators.standard, 1),
     "name":"lblCPUMEMHelper",
     "text":"Address    |   OP Code   |   Mnem    | IREG  | OREG |   P1  |  P2   | PTR ",
     "shape":"text",
@@ -540,8 +549,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
     }
 
     var newSPPrint = {
-      "x": relToAbs(uiFragments.stackPointerInfoBase[0] + 0.03 + (k  * 0.045), 0),
-      "y": relToAbs(uiFragments.stackPointerInfoBase[1] + 0.02),
+      "x": relToAbs(uiSettings.locations.stackPointerInfoBase[0] + 0.03 + (k  * 0.045), 0),
+      "y": relToAbs(uiSettings.locations.stackPointerInfoBase[1] + uiSettings.separators.standard),
       "name":"lblCPUMEMSPADDR" + k,
       "text": "" + pad((emu.cpu.registers.sp + k).toString(16), 4) + "-" + pad((emu.cpu.registers.sp + k + 1).toString(16), 4),
       "shape":"text",
@@ -552,8 +561,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
     };
 
     var newSPMemPrint = {
-      "x": relToAbs(uiFragments.stackPointerInfoBase[0] + 0.03 + (k * 0.045), 0),
-      "y": relToAbs(uiFragments.stackPointerInfoBase[1] + 0.04),
+      "x": relToAbs(uiSettings.locations.stackPointerInfoBase[0] + 0.03 + (k * 0.045), 0),
+      "y": relToAbs(uiSettings.locations.stackPointerInfoBase[1] + 0.04),
       "name":"lblCPUMEMSPADDR" + k,
       "text": "0x" + pad(mem1.toString(16), 2) + " 0x" + pad(mem2.toString(16), 2),
       "shape":"text",
@@ -582,8 +591,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
       textOutput += (pei.pointer ? pad(pei.pointer, 1, " ") : ' ');
       
       var newMemPrint = {
-        "x": relToAbs(uiFragments.disassemblerBase[0], 0),
-        "y": relToAbs(uiFragments.disassemblerBase[1] + 0.04 + (index * 0.015), 1),
+        "x": relToAbs(uiSettings.locations.disassemblerBase[0], 0),
+        "y": relToAbs(uiSettings.locations.disassemblerBase[1] + 0.04 + (index * 0.015), 1),
         "name":"lblCPUMEMPrevPrint" + index,
         "text": textOutput,
         "shape":"text",
@@ -618,8 +627,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
     commandPCOffset += (disObj.opBytes - 1);
 
     var newMemPrint = {
-      "x": relToAbs(uiFragments.disassemblerBase[0], 0),
-      "y": relToAbs(uiFragments.disassemblerBase[1] + 0.04 + ((i + objEmu.dis.previouslyExecutedInstructions.length) * 0.015), 1),
+      "x": relToAbs(uiSettings.locations.disassemblerBase[0], 0),
+      "y": relToAbs(uiSettings.locations.disassemblerBase[1] + 0.04 + ((i + objEmu.dis.previouslyExecutedInstructions.length) * 0.015), 1),
       "name":"lblCPUMEMPrint" + i,
       "text": textOutput,
       "shape":"text",
@@ -631,8 +640,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
 
     if (i === 0) {
       var currentPos = {
-        "x": relToAbs(uiFragments.disassemblerBase[0] + 0.005, 0),
-        "y": relToAbs(uiFragments.disassemblerBase[1] + 0.04 + (objEmu.dis.previouslyExecutedInstructions.length * 0.015), 1),
+        "x": relToAbs(uiSettings.locations.disassemblerBase[0] + 0.005, 0),
+        "y": relToAbs(uiSettings.locations.disassemblerBase[1] + 0.04 + (objEmu.dis.previouslyExecutedInstructions.length * 0.015), 1),
         "name":"lblCPUMEMPointer",
         "text": "==>",
         "shape":"text",
@@ -648,8 +657,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   }
 
   persistantObjects.portInfo.label = {
-    "x": relToAbs(uiFragments.portInfoBase[0], 0),
-    "y": relToAbs(uiFragments.portInfoBase[1], 1),
+    "x": relToAbs(uiSettings.locations.portInfoBase[0], 0),
+    "y": relToAbs(uiSettings.locations.portInfoBase[1], 1),
     "name":"lblCPUPILabel",
     "text":"Port Info: ",
     "shape":"text",
@@ -661,8 +670,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
 
   for (var i = 0; i < 7; i++) {
     var newPort = {
-      "x": relToAbs(uiFragments.portInfoBase[0], 0),
-      "y": relToAbs(uiFragments.portInfoBase[1] + 0.02 + (0.02 * i), 1),
+      "x": relToAbs(uiSettings.locations.portInfoBase[0], 0),
+      "y": relToAbs(uiSettings.locations.portInfoBase[1] + uiSettings.separators.standard + (uiSettings.separators.standard * i), 1),
       "name":"lblCPUPIPort" + i,
       "text":"    Port " + i + ":   " + pad(objEmu.ctrl.hwPortData[i] ? objEmu.ctrl.hwPortData[i].toString(2) : "", 8),
       "shape":"text",
@@ -679,8 +688,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   canvasControl.canvasObjects.push(persistantObjects.portInfo.label);
   
   persistantObjects.mm.label = {
-    "x": relToAbs(uiFragments.memoryMapBase[0], 0),
-    "y": relToAbs(uiFragments.memoryMapBase[1], 1),
+    "x": relToAbs(uiSettings.locations.memoryMapBase[0], 0),
+    "y": relToAbs(uiSettings.locations.memoryMapBase[1], 1),
     "name":"lblCPUDebugLabel",
     "text":"Memory Map: ",
     "shape":"text",
@@ -691,23 +700,47 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   };
 
   persistantObjects.mm.box = {
-    "x": relToAbs(uiFragments.memoryMapBase[0], 0),
-    "y": relToAbs(uiFragments.memoryMapBase[1] + 0.02, 1),
-    "w": 256,
-    "h": 256,
+    "x": relToAbs(uiSettings.locations.memoryMapBase[0], 0),
+    "y": relToAbs(uiSettings.locations.memoryMapBase[1] + uiSettings.separators.standard, 1),
+    "w": memoryMapResolutionRes.w * memoryMapResolutionRes.scale,
+    "h": memoryMapResolutionRes.h * memoryMapResolutionRes.scale,
     "shape":"rect",
     "render":function(self) {
       canvasControl.drawRect(self.x, self.y, self.w, self.h, self.renderType, canvasControl.canvasContext, {"strokeStyle": "#FFAAAA", "lineWidth":"3"});
     },
     "visible": true
   };
+  
+  if (memoryMapResolutionRes.scale !== 1) {
+    if (showMemoryInspector) {
+      var memoryMapScreenRenderData = Uint8ClampedArrayImageToPNG(memoryMapImageData, [memoryMapResolutionRes.w, memoryMapResolutionRes.h]);
+
+      persistantObjects.mm.scaledMap = {
+        "x": relToAbs(uiSettings.locations.memoryMapBase[0], 0),
+        "y": relToAbs(uiSettings.locations.memoryMapBase[1] + uiSettings.separators.standard, 1),
+        "w": memoryMapResolutionRes.w,
+        "h": memoryMapResolutionRes.h,
+        "name":"gameScreen",
+        "sw": memoryMapResolutionRes.w * memoryMapResolutionRes.scale,
+        "sh": memoryMapResolutionRes.h * memoryMapResolutionRes.scale,
+        "src": {objImage: memoryMapScreenRenderData},
+        "shape":"image",
+        "render":function(self) {
+          canvasControl.drawImage(self.src, self.x, self.y, self.sw, self.sh, null, null, self.w, self.h, canvasControl.canvasContext);
+        },
+        "visible":true
+      };
+
+      canvasControl.canvasObjects.push(persistantObjects.mm.scaledMap);
+    }
+  }
 
   canvasControl.canvasObjects.push(persistantObjects.mm.box);
   canvasControl.canvasObjects.push(persistantObjects.mm.label);
 
   persistantObjects.gameFiles.label = {
-    "x": relToAbs(uiFragments.loadedRomFilesBase[0], 0),
-    "y": relToAbs(uiFragments.loadedRomFilesBase[1], 1),
+    "x": relToAbs(uiSettings.locations.loadedRomFilesBase[0], 0),
+    "y": relToAbs(uiSettings.locations.loadedRomFilesBase[1], 1),
     "name":"lblCPUGameFilesLabel",
     "text":"Loaded ROM Files: " + (loadedMemoryFilesList.length > 0 ? ("(MemOffset: " + pad(emu.mmu.memory.length.toString(16), 4) + ")") : ''),
     "shape":"text",
@@ -789,8 +822,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
 
   for (var i = 0; i < loadedMemoryFilesList.length; i++) {
     var newFile = {
-      "x": relToAbs(uiFragments.loadedRomFilesBase[0], 0),
-      "y": relToAbs(uiFragments.loadedRomFilesBase[1] + 0.02 + (i * 0.02), 1),
+      "x": relToAbs(uiSettings.locations.loadedRomFilesBase[0], 0),
+      "y": relToAbs(uiSettings.locations.loadedRomFilesBase[1] + uiSettings.separators.standard + (i * uiSettings.separators.standard), 1),
       "name":"lblCPUGameFilesLoaded" + i,
       "text": "    " + loadedMemoryFilesList[i],
       "shape":"text",
@@ -804,8 +837,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   }
 
   persistantObjects.cpuChecksum.info = {
-    "x": relToAbs(uiFragments.cpuChecksumBase[0], 0),
-    "y": relToAbs(uiFragments.cpuChecksumBase[1], 1),
+    "x": relToAbs(uiSettings.locations.cpuChecksumBase[0], 0),
+    "y": relToAbs(uiSettings.locations.cpuChecksumBase[1], 1),
     "name":"lblCPUChecksumLabel",
     "text":"CPU Checksum",
     "shape":"text",
@@ -816,8 +849,8 @@ function uiPreframeSetup(canvasControl, emu, persistantObjects, showMemoryInspec
   };
 
   persistantObjects.cpuChecksum.textValue = {
-    "x": relToAbs(uiFragments.cpuChecksumBase[0], 0),
-    "y": relToAbs(uiFragments.cpuChecksumBase[1] + 0.02, 1),
+    "x": relToAbs(uiSettings.locations.cpuChecksumBase[0], 0),
+    "y": relToAbs(uiSettings.locations.cpuChecksumBase[1] + uiSettings.separators.standard, 1),
     "name":"lblCPUChecksumValue",
     "text": objEmu.utils.getCpuCheckSum(objEmu),
     "shape":"text",
