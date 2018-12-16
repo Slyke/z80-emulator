@@ -79,18 +79,13 @@ function keyEvents(event, eventType) {
     if (event.key === 'p') {
       objEmu.ctrl.emulationRunning = !objEmu.ctrl.emulationRunning;
       if (objEmu.ctrl.emulationRunning) {
-        objEmu.ctrl.start(objEmu);
+        objEmu.ctrl.start(objEmu, gameRunClockMode, gameClockSpeed);
       } else {
         objEmu.ctrl.pause(objEmu);
       }
     }
     if (event.key === 'm') {
-      showMemoryInspector = !showMemoryInspector;
-      localStorage.setItem('showMemoryInspector', showMemoryInspector);
-
-      if (showMemoryInspector) {
-        usingVideoDriver.renderMemoryMap(runningCPU, anyMemoryUpdated, memoryMapImageData, null, true);
-      }
+      uiSettings.locations.memoryMapBase[2] = !uiSettings.locations.memoryMapBase[2];
     }
   } else {
     objEmu.hwio.getKeyBoardKeysHooks(objEmu, event, eventType);

@@ -29,32 +29,62 @@ if (!objEmulatorFactory) {
       dis: {},    // Byte Code Disassembler
       hwPortData: {},
       maxInstructionHistory: 10,
-      emulationRunning: false
+      emulationRunning: false,
+      gameTimerClock: null
     };
 
     ctrlRet.ctrl = ctrlRet;
 
     ctrlRet.start = function(emu, runType = 'i', timer = 1) {
       emu.ctrl.emulationRunning = true;
-      emu.ctrl.runCycle(emu, runType, timer);
+      var lastInstructionFinished = true;
+      emu.ctrl.gameTimerClock = setInterval(function() {
+        if (lastInstructionFinished) {
+          lastInstructionFinished = false;
+          lastInstructionFinished = emu.ctrl.runCycle(emu, runType);
+        } else {
+          emu.ctrl.pause(emu);
+          throw {
+            type: "Error",
+            moduleName: ctrlRet.type,
+            functionName: "(clocktick) start",
+            reason: "CPU started next instruction before finishing current. Slow down clock timer.",
+            runType: runType,
+            clockIntervalTime: timer,
+            args: arguments,
+            emulatorState: emu
+          };
+        }
+      }, timer);
     };
 
     ctrlRet.pause = function(emu) {
+      clearInterval(ctrlRet.gameTimerClock);
       emu.ctrl.emulationRunning = false;
     };
 
-    ctrlRet.runCycle = function(emu, runType = 'i', timer = 1) {
+    ctrlRet.runCycle = function(emu, runType = 'i') {
       if (emu.ctrl.emulationRunning === true) {
         if (runType === 'i') {
           emu.ctrl.cpuRunUntilInterruptCheck(emu);
         } else if(runType === 'e') {
           emu.ctrl.cpuEval(emu);
+        } else {
+          emu.ctrl.pause(emu);
+          throw {
+            type: "Error",
+            moduleName: ctrlRet.type,
+            functionName: "runCycle",
+            reason: "Unknown runType for CPU cycle. Run type is either 'i' for interrupt or 'e' for eval",
+            runType: runType,
+            args: arguments,
+            emulatorState: emu
+          };
         }
-
-        setTimeout(function() {
-          emu.ctrl.runCycle(emu, runType, timer);
-        }, timer);
+        return true;
       }
+
+      return false;
     };
 
     ctrlRet.getSys = function(systemList, systemName) {
