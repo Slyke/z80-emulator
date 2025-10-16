@@ -1,0 +1,26 @@
+{
+  "name": "writeall",
+  "description": "Overwrite all memory with an ever increasing value",
+  "chunks": [
+    {
+      "offset": "0",
+      "data": [
+        "0x01",
+        "0x0f",
+        "0x00",
+        "0x3e",
+        "0x66",
+        "0x31",
+        "0x0f",
+        "0x00",
+        "0x02",
+        "0x3c",
+        "0x03",
+        "0x33",
+        "0xc3",
+        "0x08",
+        "0x00"
+      ]
+    }
+  ]
+}
